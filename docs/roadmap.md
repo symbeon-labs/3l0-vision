@@ -44,6 +44,7 @@ CÂMERA / BARCODE
 - [ ] barcode/EAN extraction
 - [ ] manual code-entry fallback
 - [ ] observation normalization with source/evidence/context
+- [x] Phase 1 pipeline orchestration skeleton
 - [ ] real ORC service boundary or versioned adapter
 - [ ] deterministic matching against persistent catalog
 - [ ] OCR as a secondary observation path
