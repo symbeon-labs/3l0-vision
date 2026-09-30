@@ -178,3 +178,14 @@ The initial foundation now includes the ORC integration contract, design-token s
 - [Strategic Roadmap](docs/roadmap.md)
 
 The product is developed through evidence gates and coordinated workstreams rather than an unrestricted feature backlog.
+
+
+## Estado atual
+
+**Fase 0 — Fundação: concluída.**
+
+O repositório já possui um primeiro fluxo executável de ponta a ponta:
+
+`captura → observação → ORC → resolução determinística → estado operacional → interface`
+
+Próximo marco: **Fase 1 — Vertical Slice**, começando pela captura real com câmera/código de barras e substituindo o resolver de demonstração pela integração ORC real.
