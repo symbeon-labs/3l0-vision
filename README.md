@@ -162,3 +162,11 @@ It should not prematurely claim:
 ## Status
 
 **Experimental product — architecture in formation.**
+
+## Strategic organization
+
+- [Project Map](docs/project-map.md)
+- [Strategic Workstreams](docs/fronts.md)
+- [Strategic Roadmap](docs/roadmap.md)
+
+The product is developed through evidence gates and coordinated workstreams rather than an unrestricted feature backlog.
