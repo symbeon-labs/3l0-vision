@@ -8,7 +8,8 @@ export function createObservation(input = {}) {
     text = [],
     attributes = {},
     metadata = {},
-    evidence = []
+    evidence = [],
+    context = {}
   } = input;
 
   if (!observationId) throw new Error("observationId is required");
@@ -25,7 +26,8 @@ export function createObservation(input = {}) {
     text: [...text],
     attributes: { ...attributes },
     metadata: { ...metadata },
-    evidence: [...evidence]
+    evidence: [...evidence],
+    context: { ...context }
   };
 }
 
