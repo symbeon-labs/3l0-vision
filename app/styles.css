@@ -128,22 +128,6 @@ h1 strong { font-weight: 700; }
   font: 20px "JetBrains Mono", monospace;
 }
 
-.secondary-actions {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-top: 12px;
-  gap: 8px;
-}
-
-.secondary-actions button {
-  padding: 12px 8px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--muted);
-  font: 500 10px "JetBrains Mono", monospace;
-  letter-spacing: .08em;
-}
-
 .activity {
   border-top: 1px solid var(--line);
   padding: 16px 0 24px;
@@ -158,19 +142,6 @@ h1 strong { font-weight: 700; }
 }
 
 .activity strong { color: var(--text); font-weight: 500; }
-
-.progress {
-  height: 3px;
-  background: var(--line);
-}
-
-.progress i {
-  display: block;
-  width: 0;
-  height: 100%;
-  background: var(--green);
-  transition: width .4s ease;
-}
 
 .result-icon {
   width: 64px;
