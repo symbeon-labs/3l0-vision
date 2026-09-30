@@ -40,13 +40,13 @@ CÂMERA / BARCODE
 
 ### Build order
 
-- [ ] real camera capture + permission/recovery
+- [x] real camera capture + permission/recovery
 - [ ] barcode/EAN extraction
-- [ ] manual code-entry fallback
-- [ ] observation normalization with source/evidence/context
+- [x] manual code-entry fallback
+- [x] observation normalization with source/evidence/context
 - [x] Phase 1 pipeline orchestration skeleton
 - [ ] real ORC service boundary or versioned adapter
-- [ ] deterministic matching against persistent catalog
+- [x] deterministic matching against persistent catalog (local persistence adapter)
 - [ ] OCR as a secondary observation path
 - [ ] resolution/exception UI
 - [ ] human confirmation contract
