@@ -189,3 +189,9 @@ O repositório já possui um primeiro fluxo executável de ponta a ponta:
 `captura → observação → ORC → resolução determinística → estado operacional → interface`
 
 Próximo marco: **Fase 1 — Vertical Slice**, começando pela captura real com câmera/código de barras e substituindo o resolver de demonstração pela integração ORC real.
+
+
+## Project Memory
+
+- [3L0 Project Skill](skills/3l0-vision/SKILL.md) — regras para continuidade e desenvolvimento.
+- [Field Journal](docs/field-journal.md) — histórico, decisões, estado atual e próximos marcos.
