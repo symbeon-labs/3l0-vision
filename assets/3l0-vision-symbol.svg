@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">3L0 Vision symbol</title>
+<desc id="desc">Segmented circular resolution symbol with scan frame and confirmation mark.</desc>
+<defs>
+<linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#00D9FF"/>
+<stop offset=".48" stop-color="#8CFF24"/>
+<stop offset="1" stop-color="#FFD21F"/>
+</linearGradient>
+<linearGradient id="arc" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#FF304F"/>
+<stop offset=".52" stop-color="#FF8A22"/>
+<stop offset="1" stop-color="#8CFF24"/>
+</linearGradient>
+</defs>
+<rect width="512" height="512" rx="72" fill="#050708"/>
+<g fill="none" stroke-linecap="round">
+<path d="M112 166V126a24 24 0 0 1 24-24h40" stroke="#00D9FF" stroke-width="28"/>
+<path d="M336 102h40a24 24 0 0 1 24 24v40" stroke="#8CFF24" stroke-width="28"/>
+<path d="M400 336v40a24 24 0 0 1-24 24h-40" stroke="#8CFF24" stroke-width="28"/>
+<path d="M176 400h-40a24 24 0 0 1-24-24v-40" stroke="#FF304F" stroke-width="28"/>
+<path d="M190 168A126 126 0 0 1 276 142" stroke="#8CFF24" stroke-width="30"/>
+<path d="M144 254A126 126 0 0 1 164 202" stroke="#00D9FF" stroke-width="30"/>
+<path d="M338 198A126 126 0 0 1 362 250" stroke="#8CFF24" stroke-width="30"/>
+<path d="M250 358A126 126 0 0 1 198 338" stroke="#FF8A22" stroke-width="30"/>
+<path d="M202 298l34 34 76-82" stroke="#19E86C" stroke-width="30"/>
+<path d="M126 374A190 190 0 0 0 386 374" stroke="url(#arc)" stroke-width="28"/>
+</g>
+</svg>
