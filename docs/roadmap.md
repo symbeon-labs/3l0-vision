@@ -15,9 +15,10 @@ The roadmap is organized around evidence gates, not calendar promises.
 - [x] project structure
 - [x] design tokens
 - [x] ORC integration contract
-- [ ] application shell
+- [x] application shell
+- [x] executable vertical-slice foundation
 
-**Exit gate:** a normalized observation can enter the ORC boundary. Documentation and the first executable core are now in place; the application shell remains the final Phase 0 item.
+**Exit gate:** a normalized observation can enter the ORC boundary and the operator can execute the first capture → resolution → state loop. Phase 0 is complete.
 
 ## Phase 1 — Vertical Slice
 
