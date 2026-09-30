@@ -10,7 +10,7 @@ Product principle: **O operador deve trabalhar nas exceções, não redigitar aq
 ## Architecture
 MUNDO FÍSICO → OBSERVAÇÃO → INTERPRETAÇÃO → RESOLUÇÃO → IDENTIDADE → ESTADO OPERACIONAL → AÇÃO
 
-3L0 owns capture, vision/OCR, observations, UX, workflows, gamification, history and integrations.
+3L0 owns capture, vision/OCR, observations, UX, workflows, operational progress, history and integrations.
 
 ORC owns Entity, Relation, Assertion, Evidence, Context and Resolution.
 
@@ -43,7 +43,7 @@ INCOMPLETE
 REQUIRES_VERIFICATION
 REJECTED_FOR_AUTOMATION
 
-Technical errors remain separate.
+Technical errors remain separate and must never be mapped to semantic uncertainty.
 
 ## Intelligence boundary
 Prefer deterministic processing when identifiers, structured documents or explicit rules are sufficient.
@@ -57,14 +57,15 @@ The operator experiences resolution, not data entry.
 
 CAPTURE → EXTRACT → MATCH → RESOLVE → CONFIRM ONLY WHEN NECESSARY → OPERATE
 
-Ask only what cannot be safely resolved. Expose uncertainty and conflict.
+Ask only what cannot be safely resolved. Expose uncertainty and conflict. Do not expose controls for workflows that are not executable.
 
-## Gamification
-Gamification visualizes operational progress.
+## Operational progress
+Operational progress is not a game system.
 
-Reinforce resolution, correct confirmation, completed batches, reduced unresolved items, synchronization and useful exception handling.
+Track real events:
+processed, automatically resolved, confirmed, attention, conflict, corrected, rejected, rework, duplicate and synchronization failure.
 
-Avoid points, leaderboards, streak pressure, punitive scores and incentives for unsafe speed.
+Do not create points, leaderboards, streaks or incentives for speed.
 
 ## Visual language
 3L0 Vision. Verbal reading: Elo Vision.
@@ -80,10 +81,11 @@ Before changing code:
 3. Check the ORC repository when semantics are involved.
 4. Prefer existing primitives over parallel concepts.
 5. Preserve provenance and uncertainty.
-6. Add tests for semantic behavior.
+6. Add or update tests for semantic behavior.
 7. Update the field journal for meaningful milestones.
 8. Do not move ORC research into the product repo unless explicitly required.
 9. Do not turn research hypotheses into product facts without evidence.
+10. Do not expand the UI surface before the underlying workflow exists.
 
 ## Current state
 Phase 0 — Foundation: COMPLETE.
@@ -97,13 +99,13 @@ Implemented:
 - deterministic resolver
 - product-state mapping
 - confirmation contract
-- tests
+- semantic unit tests
 - ORC coverage checklist
 
-Phase 1 — Vertical Slice: OPEN.
+Phase 1 — Vertical Slice: READY TO START.
 
 Target:
-real camera/barcode → Observation → ORC request → resolution → resolved/conflict/uncertain → confirmation/exception → persistent operational entity
+real camera/barcode → Observation → ORC request → resolution → resolved/conflict/uncertain → confirmation/exception → persistent operational entity → evidence/history
 
 ## Strategic roadmap
 1. Foundation — complete
