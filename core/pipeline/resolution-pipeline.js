@@ -26,6 +26,7 @@ export class ResolutionPipeline {
     if (!entityRepository) throw new Error("entityRepository is required");
 
     this.orcClient = orcClient;
+    this.captureAdapter = captureAdapter;
     this.entityRepository = entityRepository;
     this.observationFactory = observationFactory;
     this.onStage = onStage;
