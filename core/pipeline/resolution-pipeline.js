@@ -15,12 +15,14 @@ import { mapResolutionToProductState } from "../state/product-state.js";
 export class ResolutionPipeline {
   constructor({
     orcClient,
+    captureAdapter,
     entityRepository,
     observationFactory = createObservation,
     onStage = () => {},
     idFactory = defaultId
   } = {}) {
     if (!orcClient) throw new Error("orcClient is required");
+    if (!captureAdapter) throw new Error("captureAdapter is required");
     if (!entityRepository) throw new Error("entityRepository is required");
 
     this.orcClient = orcClient;
@@ -38,7 +40,7 @@ export class ResolutionPipeline {
   } {
     this.stage("CAPTURING", { input });
 
-    const captured = await this.entityRepository.capture(input);
+    const captured = await this.captureAdapter.capture(input);
 
     this.stage("OBSERVING", { captured });
 
