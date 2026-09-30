@@ -72,3 +72,18 @@ Preserve:
 source → observation → evidence/context → resolution → operational state
 
 This document is the checklist for preventing product implementation from silently redefining ORC semantics.
+
+
+## Tax Ruleset Boundary
+
+The fiscal domain is downstream of ORC resolution and is represented as a versioned ruleset boundary.
+
+- Tax classification/treatment consumes resolved entity, operation and context.
+- Fiscal rules retain temporal validity, legal basis, source and version.
+- NCM/NBS and CST/cClassTrib are classification inputs, not identity truth.
+- Fiscal evaluation reuses ORC statuses and keeps technical failures separate.
+- Tax calculation must be reproducible from inputs, rule version and normative source.
+
+See docs/tax-ruleset-architecture.md and docs/tax-research.md.
+
+This closes the previously identified ruleset execution/versioning gap at the architectural/documentation level. Runtime execution remains future work.
