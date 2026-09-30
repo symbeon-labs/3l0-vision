@@ -248,7 +248,7 @@ Avaliar implantação, custo, confiabilidade, segurança, governança, ROI, esca
 | Fase 0 | CONCLUÍDA |
 | Núcleo executável | CONCLUÍDO |
 | Auditoria ORC ↔ 3L0 | CONCLUÍDA |
-| Fase 1 | PRONTA PARA INICIAR |
+| Fase 1 | EM ANDAMENTO |
 | Validação de campo | PENDENTE |
 | Validação comercial | PENDENTE |
 
@@ -269,16 +269,16 @@ Ao retomar:
 
 **Fase 1 — Vertical Slice.**
 
-Guardrails já fixados: não fazer `imagem → produto`, não converter confiança de modelo em certeza operacional, não mapear erro técnico para incerteza semântica, não pedir confirmação quando ela não é necessária e não mostrar métricas sem eventos reais.
+A percepção e a orquestração inicial já existem; o vertical slice ainda não está fechado. Guardrails já fixados: não fazer `imagem → produto`, não converter confiança de modelo em certeza operacional, não mapear erro técnico para incerteza semântica, não pedir confirmação quando ela não é necessária e não mostrar métricas sem eventos reais.
 
 O primeiro teste deve fazer um produto real passar por:
 captura → Observation → ORC → resolução → estado → ação do operador.
 
 O critério de avanço é funcionamento de ponta a ponta com dados reais, não quantidade de features.
 
-## 25. Início da Fase 1 — Captura real
+## 25. Fase 1 — Captura real e percepção
 
-A Fase 1 foi iniciada no repositório.
+A Fase 1 está em andamento no repositório.
 
 Primeiro incremento executável:
 - câmera do navegador via getUserMedia;
@@ -306,7 +306,7 @@ A primeira implementação não trata a imagem como identidade. O código captur
 | Evidence/history persistente | PENDENTE |
 | Teste físico em navegador/dispositivo | PENDENTE |
 
-Próximo checkpoint: executar a aplicação em dispositivo com câmera, capturar um EAN real e verificar o ciclo completo até RESOLVED ou UNCERTAIN.
+Próximo checkpoint: validar fisicamente a câmera e depois substituir o resolver local pelo boundary ORC versionado. O ciclo físico completo ainda não está comprovado.
 
 ## 26. Camada de percepção — providers substituíveis
 
@@ -322,8 +322,7 @@ Decisão:
 - Foi criada a interface VisionProvider, a fábrica createVisionObservation, o adapter de barcode e o registry de providers.
 - Testes semânticos foram adicionados para preservar proveniência, normalização e ausência de identidade automática.
 
-Próximo checkpoint:
-executar a suíte local e validar o fluxo físico da câmera em dispositivo real antes de adicionar dependências nativas ou OCR.
+Próximo checkpoint: executar a suíte local e validar o fluxo físico da câmera em dispositivo real antes de adicionar dependências nativas ou OCR.
 
 ## 27. Consolidação — Fiscal Resolution Layer
 
