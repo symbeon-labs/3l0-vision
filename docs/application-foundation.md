@@ -64,3 +64,7 @@ Nothing outside this slice should block the first working Phase 1 prototype.
 ## Readiness rule
 
 Phase 1 is not complete because the screens exist. It is complete when one physical product can be captured, represented as an observation, resolved through the intended ORC boundary, persisted, and recognized again without rebuilding its identity.
+
+## Phase 1 pipeline
+
+The executable orchestration lives in `core/pipeline/resolution-pipeline.js`. It sequences capture → observation → normalization → candidate retrieval → ORC resolution → state projection → persistence, while keeping capture, catalog storage and ORC behind replaceable boundaries. See [Phase 1 Pipeline](phase-1-pipeline.md).
