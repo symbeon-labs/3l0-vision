@@ -164,3 +164,32 @@ This is not a generic tax chatbot, autonomous legal-opinion engine, accountant/t
 ## Current decision
 
 Do not implement tax calculations inside the Phase 1 camera vertical slice. Establish the boundary now so the receiving workflow can consume it later without redefining ORC semantics.
+
+## Repository placement
+
+The fiscal capability is structurally downstream of ORC and is reserved under `core/fiscal/`:
+
+```
+core/
+├── orc/          # operational resolution
+├── state/        # operator-facing operational state
+└── fiscal/       # downstream fiscal resolution boundary
+    ├── context/
+    ├── classification/
+    ├── resolution/
+    ├── rules/
+    ├── sources/
+    └── contracts/
+```
+
+The initial `core/fiscal/README.md` records the boundary without introducing runtime tax calculation into Phase 1.
+
+## Architectural distinction
+
+ORC resolves the operational entity and context. Fiscal Resolution evaluates fiscal treatment for that already-resolved context. Tax calculation and fiscal-document compliance are downstream capabilities.
+
+Therefore the dependency direction is:
+
+`observation → ORC resolution → fiscal resolution → calculation/compliance`
+
+Never invert this into fiscal classification → product identity.
