@@ -130,7 +130,7 @@ It should not prematurely claim:
 - capture flow
 - ORC integration boundary
 
-### Phase 1 — Vertical Slice
+### Phase 1 — Vertical Slice (in progress)
 - real camera/barcode input
 - OCR as a secondary observation path
 - observation normalization with evidence/context
@@ -163,7 +163,7 @@ It should not prematurely claim:
 
 ## Status
 
-**Phase 0 — Foundation: complete. Phase 1 — Vertical Slice: ready to start.**
+**Phase 0 — Foundation: complete. Phase 1 — Vertical Slice: in progress.**
 
 The repository is intentionally not presenting the Phase 0 demo as a production vision system. The current shell proves the semantic loop; Phase 1 replaces simulated input and the local deterministic adapter with real physical-world capture and the intended ORC boundary.
 
@@ -188,15 +188,15 @@ The product is developed through evidence gates and coordinated workstreams rath
 
 **Fase 0 — Fundação: concluída.**
 
-**Fase 1 — Vertical Slice: pronta para iniciar.**
+**Fase 1 — Vertical Slice: em andamento.**
 
 O próximo passo não é adicionar telas ou gamificação. É fazer um produto físico real atravessar o caminho captura → observação → normalização → ORC → resolução → persistência → reutilização.
 
-O repositório já possui um primeiro fluxo executável de ponta a ponta:
+O repositório já possui a fundação executável da Fase 1:
 
-`captura → observação → ORC → resolução determinística → estado operacional → interface`
+`captura → observação → normalização → catálogo → ORC-shaped resolution → estado`
 
-Próximo marco: **Fase 1 — Vertical Slice**, começando pela captura real com câmera/código de barras e substituindo a entrada/resolver simulados pelo fluxo físico e pelo boundary ORC versionado.
+O próximo marco não é iniciar a Fase 1, mas fechar seu vertical slice: substituir o resolver local pelo boundary ORC versionado, completar exceção/confirmação/histórico e validar o fluxo em dispositivo físico.
 
 
 ## Project Memory
