@@ -130,13 +130,15 @@ It should not prematurely claim:
 - capture flow
 - ORC integration boundary
 
-### Phase 1 — Vision MVP
-- camera
-- OCR/barcode
-- observation model
-- deterministic matching
-- resolution UI
-- confirmation flow
+### Phase 1 — Vertical Slice
+- real camera/barcode input
+- OCR as a secondary observation path
+- observation normalization with evidence/context
+- deterministic matching against persistent data
+- intended ORC integration boundary
+- resolved/attention/conflict/uncertain UI
+- confirmation only when required
+- persistent entity and evidence/history
 
 ### Phase 2 — Operational MVP
 - product entity lifecycle
@@ -161,7 +163,9 @@ It should not prematurely claim:
 
 ## Status
 
-**Experimental product — architecture in formation.**
+**Phase 0 — Foundation: complete. Phase 1 — Vertical Slice: ready to start.**
+
+The repository is intentionally not presenting the Phase 0 demo as a production vision system. The current shell proves the semantic loop; Phase 1 replaces simulated input and the local deterministic adapter with real physical-world capture and the intended ORC boundary.
 
 ## Phase 0 foundation
 
@@ -184,14 +188,19 @@ The product is developed through evidence gates and coordinated workstreams rath
 
 **Fase 0 — Fundação: concluída.**
 
+**Fase 1 — Vertical Slice: pronta para iniciar.**
+
+O próximo passo não é adicionar telas ou gamificação. É fazer um produto físico real atravessar o caminho captura → observação → normalização → ORC → resolução → persistência → reutilização.
+
 O repositório já possui um primeiro fluxo executável de ponta a ponta:
 
 `captura → observação → ORC → resolução determinística → estado operacional → interface`
 
-Próximo marco: **Fase 1 — Vertical Slice**, começando pela captura real com câmera/código de barras e substituindo o resolver de demonstração pela integração ORC real.
+Próximo marco: **Fase 1 — Vertical Slice**, começando pela captura real com câmera/código de barras e substituindo a entrada/resolver simulados pelo fluxo físico e pelo boundary ORC versionado.
 
 
 ## Project Memory
 
 - [3L0 Project Skill](skills/3l0-vision/SKILL.md) — regras para continuidade e desenvolvimento.
 - [Field Journal](docs/field-journal.md) — histórico, decisões, estado atual e próximos marcos.
+- [Phase 1 Gate](docs/roadmap.md) — ordem de implementação, guardrails e critério de saída.
