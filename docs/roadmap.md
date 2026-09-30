@@ -40,7 +40,7 @@ CÂMERA / BARCODE
 
 ### Build order
 
-- [x] real camera capture + permission/recovery
+- [x] real camera capture + permission/recovery (browser implementation; physical validation pending)
 - [x] barcode/EAN extraction
 - [x] manual code-entry fallback
 - [x] observation normalization with source/evidence/context
@@ -49,8 +49,8 @@ CÂMERA / BARCODE
 - [x] deterministic matching against persistent catalog (local persistence adapter)
 - [ ] OCR as a secondary observation path
 - [ ] resolution/exception UI
-- [ ] human confirmation contract
-- [ ] persistent entity
+- [x] human confirmation contract (semantic contract; UI workflow remains pending)
+- [x] persistent entity (local catalog adapter)
 - [ ] evidence/history
 - [ ] end-to-end tests with representative inputs
 
@@ -72,7 +72,7 @@ CÂMERA / BARCODE
 - [ ] no UI control for an unavailable workflow
 - [ ] no progress percentage without a real denominator
 
-**Exit gate:** one physical product can be captured, represented as an observation, resolved through the intended ORC boundary, persisted, and recognized again without rebuilding its identity.
+**Exit gate:** one physical product can be captured, represented as an observation, resolved through the intended versioned ORC boundary, persisted, and recognized again without rebuilding its identity. Implementation alone does not close the gate; runtime and physical validation are required.
 
 ## Fiscal Resolution Layer — Architectural Boundary
 
