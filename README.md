@@ -57,6 +57,12 @@ camera / document / identifier / ERP / human
 → operational entity
 → action or exception
 
+## Brand
+
+- [Brand system](docs/brand.md)
+- [Brand board](docs/brand-board.md)
+- [Application symbol](assets/3l0-vision-symbol.svg)
+
 ## UX
 
 The operator does not fill a long product-registration form.
