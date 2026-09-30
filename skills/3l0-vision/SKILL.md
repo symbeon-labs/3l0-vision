@@ -94,6 +94,8 @@ Phase 0 — Foundation: COMPLETE.
 
 Implemented:
 - perception provider boundary and vision observation contract
+- barcode observation normalization adapter
+- replaceable vision provider registry
 - application entrypoint and shell
 - design foundation
 - Entity and Observation models
@@ -109,6 +111,52 @@ Phase 1 — Vertical Slice: IN PROGRESS.
 
 Target:
 real camera/barcode → Observation → ORC request → resolution → resolved/conflict/uncertain → confirmation/exception → persistent operational entity → evidence/history
+
+## Phase 1 handoff state
+
+Implemented in the repository:
+- browser camera capture with environment-facing camera
+- native BarcodeDetector path when the browser supports it
+- manual identifier fallback
+- observation normalization with source, context, evidence and provenance
+- deterministic catalog matching
+- Phase 1 resolution pipeline
+- local persistent catalog adapter
+- resolved/uncertain/conflict state mapping
+- provider-independent vision observation contract
+- barcode provider boundary and registry
+- semantic and pipeline test files
+
+Not yet validated end-to-end:
+- local execution of `npm test` against the current `main` state
+- physical browser/device camera test
+- real ORC service boundary
+- OCR provider integration
+- evidence/history persistence beyond the current local catalog path
+- human confirmation workflow in the product UI
+
+Known technology decisions:
+- Browser BarcodeDetector is the current Phase 1 implementation.
+- ZXing-C++ is a candidate future barcode backend.
+- PaddleOCR is a candidate future OCR backend.
+- These providers must remain adapters beneath the observation boundary and must not enter ORC semantics.
+
+### Antigravity continuation rule
+
+Continue from the current `main` state. Do not restart Phase 0 or redesign the product surface.
+
+First validate the existing vertical slice locally:
+1. install/use the repository dependencies if required;
+2. run `npm test`;
+3. fix implementation/test failures without weakening semantic invariants;
+4. test the browser camera flow on a real device;
+5. only then advance to the real ORC service boundary, OCR or richer perception.
+
+Before adding a vision technology, prove the need through a concrete observation gap. Prefer adapter integration over direct coupling.
+
+The immediate objective is not “more vision”. It is proving that one physical product can move from capture to observation to ORC resolution and back to a persistent operational identity with traceable evidence.
+
+Do not mark a roadmap item complete merely because its code exists; distinguish implementation from runtime/physical validation.
 
 ## Strategic roadmap
 1. Foundation — complete
