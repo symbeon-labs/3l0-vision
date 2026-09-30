@@ -4,6 +4,7 @@ export function createEntity(input = {}) {
     type = "unknown",
     identifiers = [],
     attributes = {},
+    relations = [],
     metadata = {}
   } = input;
 
@@ -14,6 +15,7 @@ export function createEntity(input = {}) {
     type,
     identifiers: identifiers.map(normalizeIdentifier),
     attributes: { ...attributes },
+    relations: [...relations],
     metadata: { ...metadata }
   };
 }
