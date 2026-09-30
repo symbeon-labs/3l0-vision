@@ -41,7 +41,7 @@ Requirements: unique resolution ID; traceable observations/evidence; explicit co
 }
 ```
 
-Initial statuses: RESOLVED, CONFLICT, UNCERTAIN, INCOMPLETE, REQUIRES_VERIFICATION.
+Supported product-facing statuses: RESOLVED, CONFLICT, UNCERTAIN, INCOMPLETE, REQUIRES_VERIFICATION, REJECTED_FOR_AUTOMATION.
 
 ## Product mapping
 
@@ -52,6 +52,7 @@ Initial statuses: RESOLVED, CONFLICT, UNCERTAIN, INCOMPLETE, REQUIRES_VERIFICATI
 | UNCERTAIN | Identification uncertain |
 | INCOMPLETE | Missing information |
 | REQUIRES_VERIFICATION | Confirmation required |
+| REJECTED_FOR_AUTOMATION | Automation explicitly rejected; requires a human or alternative workflow |
 
 The UI must never hide a conflict by rendering it as success.
 
