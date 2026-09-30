@@ -3,21 +3,42 @@ import assert from "node:assert/strict";
 
 import { createObservation } from "../core/observations/observation.js";
 import { createEntity } from "../core/entities/entity.js";
+import { createConfirmation } from "../core/orc/contracts.js";
 import { OrcClient } from "../core/orc/client.js";
 import { deterministicResolver } from "../core/orc/deterministic-resolver.js";
 import { mapResolutionToProductState } from "../core/state/product-state.js";
 
-test("resolves an observation against an existing entity", async () => {
+test("normalizes an observation identifier without discarding confidence", () => {
+  const observation = createObservation({
+    observationId: "obs_001",
+    observedAt: "2026-09-30T12:00:00Z",
+    source: "camera",
+    modality: "barcode",
+    identifiers: [{ scheme: "ean", value: " 789000001 ", confidence: 0.99 }],
+    evidence: [{ type: "image", ref: "img_001" }],
+    context: { operation: "receiving" }
+  });
+
+  assert.deepEqual(observation.identifiers[0], {
+    scheme: "ean",
+    value: "789000001",
+    confidence: 0.99
+  });
+  assert.deepEqual(observation.evidence, [{ type: "image", ref: "img_001" }]);
+  assert.deepEqual(observation.context, { operation: "receiving" });
+});
+
+test("resolves a unique deterministic identifier match", async () => {
   const entity = createEntity({
-    entityId: "ent_product_001",
+    entityId: "product_001",
     type: "product",
     identifiers: [{ scheme: "ean", value: "789000001" }]
   });
 
   const observation = createObservation({
-    observationId: "obs_001",
+    observationId: "obs_002",
     observedAt: "2026-09-30T12:00:00Z",
-    source: "camera",
+    source: "scanner",
     modality: "barcode",
     identifiers: [{ scheme: "ean", value: "789000001" }]
   });
@@ -32,43 +53,66 @@ test("resolves an observation against an existing entity", async () => {
   });
 
   assert.equal(result.status, "RESOLVED");
-  assert.deepEqual(result.entities, ["ent_product_001"]);
+  assert.deepEqual(result.entities, ["product_001"]);
+  assert.equal(result.provenance[0], "deterministic-identifier-match");
   assert.equal(mapResolutionToProductState(result.status), "RESOLVED");
 });
 
-test("returns uncertainty when no identifier matches", async () => {
-  const client = new OrcClient({ resolver: deterministicResolver });
+test("preserves ambiguity as conflict instead of selecting a winner", () => {
+  const entities = [
+    createEntity({
+      entityId: "product_001",
+      identifiers: [{ scheme: "ean", value: "789000001" }]
+    }),
+    createEntity({
+      entityId: "product_002",
+      identifiers: [{ scheme: "ean", value: "789000001" }]
+    })
+  ];
 
-  const result = await client.resolve({
-    resolutionId: "res_002",
-    question: { type: "identify_product", target: "product" },
-    entities: [],
-    observations: [{
-      observation_id: "obs_002",
-      identifiers: [{ scheme: "ean", value: "999" }]
-    }]
+  const observation = createObservation({
+    observationId: "obs_003",
+    observedAt: "2026-09-30T12:00:00Z",
+    source: "scanner",
+    modality: "barcode",
+    identifiers: [{ scheme: "ean", value: "789000001" }]
+  });
+
+  const result = deterministicResolver({
+    resolution_id: "res_002",
+    observations: [observation],
+    entities
+  });
+
+  assert.equal(result.status, "CONFLICT");
+  assert.deepEqual(
+    result.conflicts[0].candidates,
+    ["product_001", "product_002"]
+  );
+  assert.equal(mapResolutionToProductState(result.status), "CONFLICT");
+});
+
+test("preserves lack of deterministic evidence as uncertainty", () => {
+  const result = deterministicResolver({
+    resolution_id: "res_003",
+    observations: [],
+    entities: []
   });
 
   assert.equal(result.status, "UNCERTAIN");
   assert.equal(mapResolutionToProductState(result.status), "UNCERTAIN");
 });
 
-test("returns conflict when one observation matches multiple entities", async () => {
-  const observation = {
-    observation_id: "obs_003",
-    identifiers: [{ scheme: "ean", value: "789" }]
-  };
-
-  const result = deterministicResolver({
-    resolution_id: "res_003",
-    question: { type: "identify_product", target: "product" },
-    entities: [
-      createEntity({ entityId: "a", identifiers: [{ scheme: "ean", value: "789" }] }),
-      createEntity({ entityId: "b", identifiers: [{ scheme: "ean", value: "789" }] })
-    ],
-    observations: [observation]
+test("human confirmation remains an explicit action", () => {
+  const confirmation = createConfirmation({
+    confirmationId: "conf_001",
+    resolutionId: "res_004",
+    operatorId: "operator_001",
+    confirmedAt: "2026-09-30T12:00:00Z",
+    decision: "confirm"
   });
 
-  assert.equal(result.status, "CONFLICT");
-  assert.equal(mapResolutionToProductState(result.status), "CONFLICT");
+  assert.equal(confirmation.resolution_id, "res_004");
+  assert.equal(confirmation.operator_id, "operator_001");
+  assert.equal(confirmation.decision, "confirm");
 });
