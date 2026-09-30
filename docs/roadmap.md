@@ -3,11 +3,12 @@
 The roadmap is organized around evidence gates, not calendar promises.
 
 ## Phase 0 — Foundation
+
 - [x] product thesis
 - [x] architecture boundary
 - [x] UX principles
 - [x] vision contract
-- [x] gamification principles
+- [x] operational progress principles
 - [x] brand system
 - [x] application symbol
 - [x] strategic workstreams
@@ -16,26 +17,52 @@ The roadmap is organized around evidence gates, not calendar promises.
 - [x] design tokens
 - [x] ORC integration contract
 - [x] application shell
-- [x] executable vertical-slice foundation
+- [x] executable foundation loop
+- [x] semantic unit tests
 
-**Exit gate:** a normalized observation can enter the ORC boundary and the operator can execute the first capture → resolution → state loop. Phase 0 is complete.
+**Exit gate:** a normalized observation can enter the ORC-shaped boundary and the operator can execute the first capture → resolution → state loop. Phase 0 is complete.
 
 ## Phase 1 — Vertical Slice
 
-Camera → barcode/OCR → observation → matching → ORC → resolution → confirmation → entity.
+**Goal:** replace the simulated input/resolver path with one real physical-product resolution loop.
 
-- [ ] camera capture
-- [ ] barcode/EAN
-- [ ] OCR
-- [ ] observation normalization
-- [ ] deterministic matching
-- [ ] ORC resolution request
-- [ ] resolved/uncertain/conflict states
-- [ ] confirmation
+```
+CÂMERA / BARCODE
+→ OBSERVAÇÃO
+→ NORMALIZAÇÃO
+→ ORC
+→ RESOLUÇÃO
+→ RESOLVIDO / ATENÇÃO / CONFLITO / INCERTO
+→ CONFIRMAÇÃO SOMENTE SE NECESSÁRIA
+→ ENTIDADE PERSISTENTE
+→ EVIDÊNCIA / HISTÓRICO
+```
+
+### Build order
+
+- [ ] real camera capture + permission/recovery
+- [ ] barcode/EAN extraction
+- [ ] manual code-entry fallback
+- [ ] observation normalization with source/evidence/context
+- [ ] real ORC service boundary or versioned adapter
+- [ ] deterministic matching against persistent catalog
+- [ ] OCR as a secondary observation path
+- [ ] resolution/exception UI
+- [ ] human confirmation contract
 - [ ] persistent entity
 - [ ] evidence/history
+- [ ] end-to-end tests with representative inputs
 
-**Exit gate:** one physical product can be identified, resolved and reused later.
+### Guardrails
+
+- [ ] no image → product shortcut
+- [ ] no model confidence → operational certainty shortcut
+- [ ] no technical error → semantic uncertainty mapping
+- [ ] no confirmation prompt for deterministic resolutions that do not require policy confirmation
+- [ ] no UI control for an unavailable workflow
+- [ ] no progress percentage without a real denominator
+
+**Exit gate:** one physical product can be captured, represented as an observation, resolved through the intended ORC boundary, persisted, and recognized again without rebuilding its identity.
 
 ## Phase 2 — Receiving MVP
 
