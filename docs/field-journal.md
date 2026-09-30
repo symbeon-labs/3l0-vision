@@ -324,3 +324,60 @@ Decisão:
 
 Próximo checkpoint:
 executar a suíte local e validar o fluxo físico da câmera em dispositivo real antes de adicionar dependências nativas ou OCR.
+
+## 27. Consolidação — Fiscal Resolution Layer
+
+A camada fiscal foi posicionada definitivamente **depois do ORC**.
+
+Decisão arquitetural:
+
+```
+PHYSICAL / DOCUMENT / ERP
+→ OBSERVATION
+→ NORMALIZATION / CONTEXT
+→ ORC RESOLUTION
+→ RESOLVED ENTITY + OPERATIONAL CONTEXT
+→ FISCAL RESOLUTION LAYER
+→ FISCAL RESULT + LEGAL BASIS + SOURCE + VERSION
+→ TAX CALCULATION / COMPLIANCE
+→ NF-e / ERP / APURAÇÃO
+```
+
+### Responsabilidades
+
+- ORC resolve entidade, relações, evidências, contexto e estado operacional.
+- Fiscal Resolution determina tratamento fiscal sobre uma entidade/operação já resolvida.
+- Tax Calculation calcula valores a partir do tratamento fiscal.
+- Compliance/documentos cuidam da consequência fiscal operacional.
+
+### Decisões fixadas
+
+1. Fiscal não entra dentro do ORC.
+2. Fiscal não entra no vertical slice de câmera da Fase 1.
+3. NCM/NBS e CST/cClassTrib não podem criar identidade física silenciosamente.
+4. Regras fiscais possuem versão, validade temporal, fonte e fundamento legal.
+5. Resultado fiscal preserva proveniência e pode permanecer inconclusivo.
+6. A infraestrutura oficial deve ser integrada quando adequada; o 3L0 não deve recriar toda a pilha normativa.
+7. O boundary já existe no repositório em `core/fiscal/`, mas a execução começa no Receiving MVP.
+
+### Estrutura reservada
+
+```
+core/fiscal/
+├── context/
+├── classification/
+├── resolution/
+├── rules/
+├── sources/
+└── contracts/
+```
+
+Foi criado `core/fiscal/README.md` como contrato arquitetural inicial. Nenhuma regra de cálculo foi adicionada à Fase 1.
+
+A infraestrutura oficial brasileira já disponibiliza recursos para classificação, fundamentos legais, NCM/NBS, alíquotas e cálculo no ecossistema da Reforma Tributária do Consumo. Isso reforça a decisão de tratar o fiscal como uma camada de integração, versionamento e rastreabilidade, e não como um segundo núcleo normativo. 
+
+### Próximo uso
+
+No Receiving MVP, a sequência será:
+
+`produto resolvido → contexto fiscal → classificação → resolução fiscal → cálculo/compliance → documento/ERP`.
