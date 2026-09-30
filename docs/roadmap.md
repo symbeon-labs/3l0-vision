@@ -17,7 +17,7 @@ The roadmap is organized around evidence gates, not calendar promises.
 - [x] ORC integration contract
 - [ ] application shell
 
-**Exit gate:** a normalized observation can enter the ORC boundary. Documentation is complete; executable implementation is the remaining Phase 0 work.
+**Exit gate:** a normalized observation can enter the ORC boundary. Documentation and the first executable core are now in place; the application shell remains the final Phase 0 item.
 
 ## Phase 1 — Vertical Slice
 
