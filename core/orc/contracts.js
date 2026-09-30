@@ -3,7 +3,8 @@ export const RESOLUTION_STATUSES = Object.freeze([
   "CONFLICT",
   "UNCERTAIN",
   "INCOMPLETE",
-  "REQUIRES_VERIFICATION"
+  "REQUIRES_VERIFICATION",
+  "REJECTED_FOR_AUTOMATION"
 ]);
 
 export const TECHNICAL_ERRORS = Object.freeze([
@@ -70,5 +71,29 @@ export function createResolutionResult(input = {}) {
     requires_verification: [...requiresVerification],
     provenance: [...provenance],
     resolution_metadata: { ...resolutionMetadata }
+  };
+}
+
+export function createConfirmation(input = {}) {
+  const {
+    confirmationId,
+    resolutionId,
+    operatorId,
+    confirmedAt,
+    decision,
+    reason = null
+  } = input;
+
+  if (!confirmationId || !resolutionId || !operatorId || !confirmedAt || !decision) {
+    throw new Error("confirmationId, resolutionId, operatorId, confirmedAt and decision are required");
+  }
+
+  return {
+    confirmation_id: String(confirmationId),
+    resolution_id: String(resolutionId),
+    operator_id: String(operatorId),
+    confirmed_at: confirmedAt,
+    decision,
+    reason
   };
 }
