@@ -74,6 +74,42 @@ CÂMERA / BARCODE
 
 **Exit gate:** one physical product can be captured, represented as an observation, resolved through the intended ORC boundary, persisted, and recognized again without rebuilding its identity.
 
+## Fiscal Resolution Layer — Architectural Boundary
+
+The fiscal capability is a downstream layer of ORC, not part of ORC itself and not part of the Phase 1 camera vertical slice.
+
+```
+PHYSICAL / DOCUMENT / ERP
+→ OBSERVATION
+→ NORMALIZATION / CONTEXT
+→ ORC RESOLUTION
+→ RESOLVED ENTITY + OPERATIONAL CONTEXT
+→ FISCAL RESOLUTION LAYER
+→ FISCAL RESULT + LEGAL BASIS + SOURCE + VERSION
+→ TAX CALCULATION / COMPLIANCE
+→ NF-e / ERP / APURAÇÃO
+```
+
+### Boundary rules
+
+- ORC resolves operational identity and state; fiscal resolution consumes that result.
+- NCM/NBS and CST/cClassTrib are fiscal classification inputs, never identity truth.
+- Fiscal rules are versioned and temporally valid.
+- Fiscal outcomes retain legal basis, authoritative source and ruleset version.
+- Technical source/execution failures remain technical failures.
+- Unresolved fiscal interpretation remains explicit and can require human verification.
+- The 3L0 should integrate authoritative tax infrastructure rather than recreate the entire normative calculation stack.
+
+### Delivery timing
+
+**Phase 1:** establish contracts/documentation only. No tax calculation in the camera slice.
+
+**Phase 2 — Receiving MVP:** implement fiscal context, classification and resolution integration after physical/product identity is resolved.
+
+**Later:** calculation, compliance, document generation and broader fiscal automation.
+
+See `core/fiscal/README.md`, `docs/tax-ruleset-architecture.md` and `docs/tax-research.md`.
+
 ## Phase 2 — Receiving MVP
 
 NF-e / ERP / Product + Camera / Barcode + Operator → 3L0 → identity/data/conflicts → receiving decision.
