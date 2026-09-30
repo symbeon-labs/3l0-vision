@@ -212,3 +212,110 @@ footer {
   .hero { padding-top: 13vh; }
   footer span:last-child { display: none; }
 }
+
+
+.back {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0;
+  font: 500 10px "JetBrains Mono", monospace;
+  letter-spacing: .1em;
+  cursor: pointer;
+}
+
+.capture-stage {
+  flex: 1;
+  padding: 28px 0 10vh;
+}
+
+.camera-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #000;
+}
+
+.camera-frame video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.scan-line {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 50%;
+  height: 1px;
+  background: var(--cyan);
+  opacity: .8;
+}
+
+.camera-hint {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  padding: 8px 10px;
+  background: rgba(8, 8, 8, .82);
+  color: var(--text);
+  font: 500 9px "JetBrains Mono", monospace;
+  letter-spacing: .08em;
+}
+
+.manual-form {
+  margin-top: 18px;
+}
+
+.manual-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font: 500 9px "JetBrains Mono", monospace;
+  letter-spacing: .1em;
+}
+
+.manual-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.manual-row input {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  padding: 15px;
+  outline: none;
+  font: 500 12px "JetBrains Mono", monospace;
+}
+
+.manual-row input:focus {
+  border-color: var(--cyan);
+}
+
+.manual-row button {
+  border: 1px solid var(--cyan);
+  background: transparent;
+  color: var(--cyan);
+  padding: 0 16px;
+  font: 600 10px "JetBrains Mono", monospace;
+  letter-spacing: .08em;
+  cursor: pointer;
+}
+
+.capture-note {
+  margin-top: 14px;
+  color: var(--muted);
+  font: 400 10px "JetBrains Mono", monospace;
+}
+
+.processing-icon {
+  color: var(--cyan);
+  animation: pulse 1s infinite;
+}
