@@ -1,6 +1,6 @@
 # 3L0 Vision — Diário de Bordo
 
-**Estado:** Fase 0 concluída · Fase 1 aberta
+**Estado:** Fase 0 concluída · Fase 1 pronta para iniciar
 **Repositório:** symbeon-labs/3l0-vision
 **Núcleo:** Operational Resolution Core (ORC)
 **Data de consolidação:** 30/09/2026
@@ -183,16 +183,17 @@ Próximo objetivo:
 CÂMERA/BARCODE → OBSERVAÇÃO REAL → NORMALIZAÇÃO → ORC → RESOLUTION → RESOLVED/CONFLICT/UNCERTAIN → CONFIRMAÇÃO/EXCEÇÃO → ENTIDADE PERSISTENTE
 
 Prioridades:
-1. captura real;
+1. captura real e recuperação de permissão;
 2. barcode/EAN;
-3. OCR;
-4. observation pipeline;
-5. ORC boundary real;
-6. resolution UI;
-7. exception UI;
-8. human confirmation;
-9. persistência;
-10. testes com dados reais.
+3. entrada manual como fallback;
+4. observation pipeline com evidência/contexto;
+5. ORC boundary real ou adapter explicitamente versionado;
+6. matching determinístico contra catálogo persistente;
+7. OCR como caminho secundário de observação;
+8. resolution/exception UI;
+9. confirmação humana somente quando necessária;
+10. persistência de entidade, evidência e histórico;
+11. testes ponta a ponta com entradas representativas.
 
 ## 18. Fase 2 — Receiving MVP
 
@@ -247,7 +248,7 @@ Avaliar implantação, custo, confiabilidade, segurança, governança, ROI, esca
 | Fase 0 | CONCLUÍDA |
 | Núcleo executável | CONCLUÍDO |
 | Auditoria ORC ↔ 3L0 | CONCLUÍDA |
-| Fase 1 | ABERTA |
+| Fase 1 | PRONTA PARA INICIAR |
 | Validação de campo | PENDENTE |
 | Validação comercial | PENDENTE |
 
@@ -267,6 +268,8 @@ Ao retomar:
 ### Próximo checkpoint
 
 **Fase 1 — Vertical Slice.**
+
+Guardrails já fixados: não fazer `imagem → produto`, não converter confiança de modelo em certeza operacional, não mapear erro técnico para incerteza semântica, não pedir confirmação quando ela não é necessária e não mostrar métricas sem eventos reais.
 
 O primeiro teste deve fazer um produto real passar por:
 captura → Observation → ORC → resolução → estado → ação do operador.
