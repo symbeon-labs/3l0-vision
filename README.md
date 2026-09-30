@@ -163,6 +163,14 @@ It should not prematurely claim:
 
 **Experimental product — architecture in formation.**
 
+## Phase 0 foundation
+
+The initial foundation now includes the ORC integration contract, design-token specification and application architecture target.
+
+- [ORC Integration Contract](docs/orc-integration-contract.md)
+- [Design Tokens](docs/design-tokens.md)
+- [Application Foundation](docs/application-foundation.md)
+
 ## Strategic organization
 
 - [Project Map](docs/project-map.md)
