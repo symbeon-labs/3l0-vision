@@ -41,7 +41,7 @@ CÂMERA / BARCODE
 ### Build order
 
 - [x] real camera capture + permission/recovery
-- [ ] barcode/EAN extraction
+- [x] barcode/EAN extraction
 - [x] manual code-entry fallback
 - [x] observation normalization with source/evidence/context
 - [x] Phase 1 pipeline orchestration skeleton
@@ -53,6 +53,15 @@ CÂMERA / BARCODE
 - [ ] persistent entity
 - [ ] evidence/history
 - [ ] end-to-end tests with representative inputs
+
+### Perception architecture
+
+- [x] provider boundary for vision/perception
+- [x] provider-independent vision observation contract
+- [x] barcode normalization adapter boundary
+- [x] replaceable provider registry
+- [ ] production barcode backend evaluation (ZXing-C++ / WebAssembly)
+- [ ] OCR provider evaluation and integration
 
 ### Guardrails
 
