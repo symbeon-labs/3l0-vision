@@ -52,6 +52,8 @@ QR/EAN/document → normalization → deterministic matching → semantic infere
 
 Vision, OCR and AI produce observations, candidate interpretations or assertions. They do not independently establish truth.
 
+Perception providers are replaceable adapters. Current Phase 1 uses browser BarcodeDetector; ZXing-C++ and PaddleOCR are candidate future providers, not ORC dependencies.
+
 ## UX
 The operator experiences resolution, not data entry.
 
@@ -91,6 +93,7 @@ Before changing code:
 Phase 0 — Foundation: COMPLETE.
 
 Implemented:
+- perception provider boundary and vision observation contract
 - application entrypoint and shell
 - design foundation
 - Entity and Observation models
@@ -102,7 +105,7 @@ Implemented:
 - semantic unit tests
 - ORC coverage checklist
 
-Phase 1 — Vertical Slice: READY TO START.
+Phase 1 — Vertical Slice: IN PROGRESS.
 
 Target:
 real camera/barcode → Observation → ORC request → resolution → resolved/conflict/uncertain → confirmation/exception → persistent operational entity → evidence/history
