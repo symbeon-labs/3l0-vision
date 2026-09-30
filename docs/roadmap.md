@@ -12,12 +12,12 @@ The roadmap is organized around evidence gates, not calendar promises.
 - [x] application symbol
 - [x] strategic workstreams
 - [x] project map
-- [ ] project structure
-- [ ] design tokens
-- [ ] ORC integration contract
+- [x] project structure
+- [x] design tokens
+- [x] ORC integration contract
 - [ ] application shell
 
-**Exit gate:** a normalized observation can enter the ORC boundary.
+**Exit gate:** a normalized observation can enter the ORC boundary. Documentation is complete; executable implementation is the remaining Phase 0 work.
 
 ## Phase 1 — Vertical Slice
 
