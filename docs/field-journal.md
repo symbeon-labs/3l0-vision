@@ -1,6 +1,6 @@
 # 3L0 Vision — Diário de Bordo
 
-**Estado:** Fase 0 concluída · Fase 1 pronta para iniciar
+**Estado:** Fase 1 em execução · captura e resolução vertical iniciadas
 **Repositório:** symbeon-labs/3l0-vision
 **Núcleo:** Operational Resolution Core (ORC)
 **Data de consolidação:** 30/09/2026
@@ -275,3 +275,35 @@ O primeiro teste deve fazer um produto real passar por:
 captura → Observation → ORC → resolução → estado → ação do operador.
 
 O critério de avanço é funcionamento de ponta a ponta com dados reais, não quantidade de features.
+
+## 25. Início da Fase 1 — Captura real
+
+A Fase 1 foi iniciada no repositório.
+
+Primeiro incremento executável:
+- câmera do navegador via getUserMedia;
+- tentativa de leitura nativa de EAN/QR/Code 128 via BarcodeDetector;
+- fallback explícito para entrada manual;
+- BrowserCaptureAdapter separado da semântica do ORC;
+- catálogo local persistido em localStorage;
+- ResolutionPipeline conectando captura → Observation → normalização → candidatos → ORC → estado → persistência;
+- interface de erro técnico separada de UNCERTAIN.
+
+A primeira implementação não trata a imagem como identidade. O código capturado vira uma Observation e somente o ORC produz a resolução operacional.
+
+### Estado do incremento
+
+| Item | Estado |
+|---|---|
+| Pipeline de orquestração | CONCLUÍDO |
+| Câmera real | IMPLEMENTADA |
+| Barcode/EAN nativo | IMPLEMENTADO QUANDO SUPORTADO PELO NAVEGADOR |
+| Fallback manual | CONCLUÍDO |
+| Catálogo persistente local | CONCLUÍDO |
+| ORC service real | PENDENTE |
+| OCR secundário | PENDENTE |
+| Confirmação humana | PENDENTE |
+| Evidence/history persistente | PENDENTE |
+| Teste físico em navegador/dispositivo | PENDENTE |
+
+Próximo checkpoint: executar a aplicação em dispositivo com câmera, capturar um EAN real e verificar o ciclo completo até RESOLVED ou UNCERTAIN.
