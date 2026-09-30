@@ -307,3 +307,20 @@ A primeira implementação não trata a imagem como identidade. O código captur
 | Teste físico em navegador/dispositivo | PENDENTE |
 
 Próximo checkpoint: executar a aplicação em dispositivo com câmera, capturar um EAN real e verificar o ciclo completo até RESOLVED ou UNCERTAIN.
+
+## 26. Camada de percepção — providers substituíveis
+
+A pesquisa sobre tecnologias de visão foi convertida em uma fronteira arquitetural do produto.
+
+Decisão:
+- 3L0 possui uma camada de percepção independente do ORC.
+- Providers produzem observações; não resolvem identidade operacional.
+- Barcode/EAN/QR, OCR, detecção e pré-processamento entram como capacidades substituíveis.
+- A implementação atual continua usando Browser BarcodeDetector na fatia vertical.
+- ZXing-C++ foi registrado como candidato futuro para backend de barcode/WebAssembly.
+- PaddleOCR foi registrado como candidato futuro para OCR.
+- Foi criada a interface VisionProvider, a fábrica createVisionObservation, o adapter de barcode e o registry de providers.
+- Testes semânticos foram adicionados para preservar proveniência, normalização e ausência de identidade automática.
+
+Próximo checkpoint:
+executar a suíte local e validar o fluxo físico da câmera em dispositivo real antes de adicionar dependências nativas ou OCR.
