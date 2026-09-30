@@ -381,3 +381,21 @@ A infraestrutura oficial brasileira já disponibiliza recursos para classificaç
 No Receiving MVP, a sequência será:
 
 `produto resolvido → contexto fiscal → classificação → resolução fiscal → cálculo/compliance → documento/ERP`.
+
+
+## 28. Pesquisa de mercado — Brasil 2026
+
+Foi realizada uma primeira pesquisa competitiva ampla cobrindo WMS, ERP, smart warehousing, automação intralogística, visão computacional, barcode/GTIN, RFID/IoT, torres de controle e IA operacional.
+
+A pesquisa identificou forte maturidade do mercado em sistemas de registro e execução. Também identificou players próximos do problema físico, especialmente Z3US.AI/Apolo e BoxCubo, além de players WMS que incorporam IA, como Senior e Opérun.
+
+A conclusão não é que o 3L0 não possui concorrentes. A conclusão é que sua hipótese de diferenciação precisa permanecer arquitetural:
+
+> 3L0 como camada independente de resolução operacional entre observações heterogêneas do mundo físico e sistemas empresariais.
+
+O risco estratégico identificado é o movimento de WMS/ERP em direção a visão, agentes e automação. Portanto o 3L0 precisa provar que sua camada de resolução é independente de sensor, ERP, WMS e workflow e que pode ser reutilizada em múltiplas operações.
+
+Documento-base:
+docs/market-research-brazil-2026.md
+
+Próximo trabalho de inteligência competitiva: aprofundar preços, APIs, cases, arquitetura técnica, hardware obrigatório, markerless, evidência/auditoria, LGPD, patentes, parceiros e barreiras de entrada.
