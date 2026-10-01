@@ -6,6 +6,8 @@ import { OrcClient } from "../core/orc/client.js";
 import { deterministicResolver } from "../core/orc/deterministic-resolver.js";
 import { createEntity } from "../core/entities/entity.js";
 
+const DEMO_EAN = "789000000004";
+
 test("runs the phase 1 vertical slice from capture to persistence", async () => {
   const stages = [];
   const persisted = [];
@@ -13,7 +15,7 @@ test("runs the phase 1 vertical slice from capture to persistence", async () => 
   const entity = createEntity({
     entityId: "product_001",
     type: "product",
-    identifiers: [{ scheme: "ean", value: "789000001" }],
+    identifiers: [{ scheme: "ean", value: DEMO_EAN }],
     attributes: { name: "Produto X" }
   });
 
@@ -23,7 +25,7 @@ test("runs the phase 1 vertical slice from capture to persistence", async () => 
         return {
           source: "camera",
           modality: "barcode",
-          identifiers: [{ scheme: "ean", value: "789000001" }],
+          identifiers: [{ scheme: "ean", value: DEMO_EAN }],
           evidence: [{ type: "image", ref: "capture_001" }]
         };
       }
