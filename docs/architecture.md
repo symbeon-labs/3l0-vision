@@ -103,3 +103,45 @@ Action / ERP / History
 - a mandatory QR system
 - a hardware company
 - a replacement for fiscal source systems
+
+
+## Canonical representation and interoperability
+
+3L0 must distinguish three layers:
+
+```
+IDENTIFIER
+    ≠
+3L0 CANONICAL ENTITY
+    ≠
+TARGET SYSTEM RECORD
+```
+
+An identifier such as EAN or SKU is evidence about a representation. A target-system record is the representation of an entity inside a particular enterprise system. The 3L0 canonical entity is the operational representation produced by resolution across sources.
+
+The intended downstream architecture is:
+
+```
+PHYSICAL / DOCUMENT / ENTERPRISE SYSTEM
+                ↓
+          OBSERVATIONS
+                ↓
+           NORMALIZATION
+                ↓
+               ORC
+                ↓
+       CANONICAL 3L0 ENTITY
+         + CONTEXT + EVIDENCE
+                ↓
+        TARGET-SYSTEM MAPPING
+                ↓
+        TARGET ADAPTER / EXPORT
+                ↓
+          ERP / WMS / SYSTEM
+```
+
+The target system must not become the internal semantic model of 3L0.
+
+Mapping and adapters belong to the product/integration layer. ORC remains responsible for semantic resolution rather than system-specific serialization.
+
+See [Interoperability and Mapping](interoperability.md).
