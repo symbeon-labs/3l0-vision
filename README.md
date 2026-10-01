@@ -140,12 +140,17 @@ It should not prematurely claim:
 - confirmation only when required
 - persistent entity and evidence/history
 
-### Phase 2 — Operational MVP
-- product entity lifecycle
+### Phase 2 — Receiving MVP
+- canonical product representation
+- NF-e/XML ingestion
+- enterprise-system representation capture
+- target-system mapping contract
+- product matching across physical/document/system representations
+- reviewable JSON/CSV/XLSX output
+- receiving workflow
+- exception queue
 - evidence/history
-- exception handling
-- batch operations
-- ERP integration prototype
+- live ERP/system adapter only after mapping validation
 
 ### Phase 3 — Field Pilot
 - real establishment workflow
@@ -182,6 +187,7 @@ The initial foundation now includes the ORC integration contract, design-token s
 - [Strategic Roadmap](docs/roadmap.md)
 - [Use Cases](docs/use-cases.md)
 - [Model Strategy](docs/model-strategy.md)
+- [Interoperability & Mapping](docs/interoperability.md)
 
 The product is developed through evidence gates and coordinated workstreams rather than an unrestricted feature backlog.
 
@@ -198,7 +204,7 @@ O repositório já possui a fundação executável da Fase 1:
 
 `captura → observação → normalização → catálogo → ORC-shaped resolution → estado`
 
-O próximo marco não é iniciar a Fase 1, mas fechar seu vertical slice: substituir o resolver local pelo boundary ORC versionado, completar exceção/confirmação/histórico e validar o fluxo em dispositivo físico.
+O próximo marco não é adicionar uma nova camada de integração. É fechar o vertical slice físico. Depois disso, a Fase 2 amplia a prova para interoperabilidade: produto + documento + representação do sistema da empresa → entidade canônica 3L0 → mapeamento para o sistema-alvo.
 
 
 ## Project Memory
