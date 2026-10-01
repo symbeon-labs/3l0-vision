@@ -295,6 +295,24 @@ A roadmap item is not complete merely because its code exists.
 
 ---
 
+## Canonical representation and interoperability
+
+3L0 must preserve the distinction: **Identifier ≠ 3L0 Canonical Entity ≠ Target System Record.**
+
+The target ERP/WMS/company system is an external representation, not the 3L0 semantic model. Mapping and adapters belong to the product/integration layer; ORC remains responsible for semantic resolution.
+
+Phase 1 proves physical resolution:
+`PRODUCT → OBSERVATION → NORMALIZATION → ORC → RESOLUTION → PERSISTENT ENTITY`
+
+Phase 2 proves interoperability:
+`PRODUCT + DOCUMENT + ENTERPRISE REPRESENTATION → ORC → CANONICAL 3L0 ENTITY → TARGET MAPPING → TARGET SYSTEM REPRESENTATION`
+
+Target-system inputs may include screenshots, exports, CSV/XLSX, PDFs, structured records and operator-provided field definitions. They are observations of a system representation, not automatically authoritative truth.
+
+Before live integration, first capture the real representation, define the canonical fields and versioned mapping, generate reviewable output, and validate it with a human. Do not build live ERP/WMS writes merely to demonstrate connectivity.
+
+The immediate objective remains Phase 1 physical validation. Do not advance to Phase 2 integration before the Phase 1 exit gate unless new evidence changes the roadmap.
+
 ## Current development focus
 
 The project is in:
