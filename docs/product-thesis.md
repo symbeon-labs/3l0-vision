@@ -62,3 +62,31 @@ It is the one that:
 - reduces duplicate entities
 - produces reusable operational identity
 - lets the operator act on meaningful exceptions
+
+
+## Interoperability thesis
+
+The product problem is broader than recognizing a physical item.
+
+The same operational reality can already exist as:
+
+- physical product;
+- EAN/GTIN/SKU;
+- NF-e/XML;
+- ERP/WMS record;
+- spreadsheet export;
+- image or document;
+- operator statement.
+
+3L0 should resolve these representations into a persistent operational entity and then translate that entity into the representation required by the target operational system.
+
+The product therefore has two distinct proofs:
+
+1. **Resolution proof:** different observations can be resolved into one justified operational entity.
+2. **Interoperability proof:** the resolved entity can be transformed into a target-system representation without losing provenance, uncertainty or required human decisions.
+
+This does not mean integrating every ERP. The first interoperability experiment should capture the real schema/representation used by the target company, normalize it into the 3L0 canonical representation, and generate a reviewable output before any live write integration.
+
+The strategic sequence remains:
+
+`ONE PRODUCT → ONE RESOLUTION → ONE OPERATION → ONE TARGET REPRESENTATION → ONE MEASURABLE BENEFIT`.
