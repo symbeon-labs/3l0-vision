@@ -24,9 +24,19 @@ A resolução operacional continua sendo contextual, rastreável e baseada em ev
 
 ---
 
-## Classes de modelos
+## Taxonomia de inteligência
 
-### 1. Modelos de visão computacional
+O 3L0 separa **função** de **implementação**. “Modelo local” descreve onde/como um modelo é executado; não é uma classe funcional equivalente a visão, LLM ou decision model. Um mesmo modelo pode ser local ou remoto e cumprir funções diferentes.
+
+A taxonomia funcional adotada é:
+
+1. **Perception Models** — observam o mundo e produzem sinais visuais, espaciais ou sensoriais.
+2. **Extraction Models** — extraem estrutura de imagens, documentos, áudio ou outros sinais.
+3. **Reasoning / Generative Models** — interpretam linguagem e contexto, sintetizam informação e produzem hipóteses.
+4. **Decision Models / System One** — avaliam estados contra perguntas ou espaços de decisão delimitados e produzem decisões estruturadas/probabilidades.
+5. **Operational Resolution Layer (ORC)** — não é um modelo de IA; resolve entidades, relações, evidências, contexto e estado operacional.
+
+### 1. Perception Models — visão computacional
 
 Responsabilidade:
 
@@ -50,7 +60,7 @@ Ver também:
 
 ---
 
-### 2. OCR e modelos documentais
+### 2. Extraction Models — OCR e modelos documentais
 
 Responsabilidade:
 
@@ -68,7 +78,7 @@ Quando existir uma fonte estruturada e autoritativa, a extração visual deve se
 
 ---
 
-### 3. Modelos multimodais
+### 3. Reasoning / Generative Models — multimodais
 
 Responsabilidade:
 
@@ -86,6 +96,8 @@ Modelos multimodais devem ser usados de forma delimitada. Uma resposta textual p
 ---
 
 ### 4. LLMs generativos
+
+LLMs são uma implementação importante da classe de modelos de raciocínio/generação, mas não representam toda essa classe.
 
 Responsabilidade potencial:
 
@@ -112,7 +124,9 @@ Quando um LLM produzir uma hipótese, ela deve carregar sua origem e permanecer 
 
 ---
 
-### 5. Modelos locais / edge
+### 5. Execução local / edge
+
+“Local / edge” é uma propriedade de implantação que pode ser aplicada a diferentes classes de modelo.
 
 Responsabilidade potencial:
 
@@ -136,7 +150,7 @@ Modelos locais não são automaticamente melhores. Devem ser escolhidos quando s
 
 ---
 
-### 6. Decision models
+### 6. Decision Models / System One
 
 Decision models representam uma categoria diferente de inteligência.
 
@@ -175,7 +189,7 @@ A presença de Jev na estratégia não significa que ele seja obrigatório ou qu
 
 ---
 
-## Modelo → ORC
+## Função → saída → ORC
 
 A arquitetura deve preservar a diferença entre tipos de saída:
 
@@ -249,7 +263,7 @@ Critérios:
 
 ---
 
-## Cascata de inteligência
+## Composição e cascata de inteligência
 
 Sempre que possível, o 3L0 deve preferir uma cascata de menor custo e maior determinismo antes de modelos mais complexos.
 
@@ -259,7 +273,7 @@ Exemplo:
 
 ↓
 
-`OCR / extração`
+`OCR / extraction`
 
 ↓
 
@@ -267,15 +281,29 @@ Exemplo:
 
 ↓
 
-`visão especializada`
+`perception / vision`
 
 ↓
 
-`modelo multimodal / LLM`
+`matching conhecido`
 
 ↓
 
-`decision model`
+`reasoning / generative model, quando necessário`
+
+↓
+
+`decision model, quando a decisão for delimitada`
+
+↓
+
+`ORC resolution`
+
+↓
+
+`confirmação humana`
+
+> A cascata não implica que o decision model venha depois do ORC. O modelo pode apoiar a resolução; o ORC continua responsável por combinar esse resultado com evidências, contexto e política.
 
 ↓
 
@@ -369,7 +397,7 @@ O sistema não deve preencher uma lacuna de evidência com uma invenção silenc
 
 O ORC permanece responsável pela resolução semântica e operacional.
 
-Modelos fornecem material para essa resolução.
+Modelos fornecem observações, extrações, inferências ou decisões delimitadas para essa resolução. O ORC não deve ser confundido com uma quinta classe de modelo: ele é a camada que resolve o conjunto de evidências e contexto.
 
 ```
 Mundo físico / documentos / sistemas
@@ -482,8 +510,10 @@ Busca construir **a melhor composição de inteligências para cada operação**
 - reversibilidade;
 - resolução pelo ORC.
 
-**Modelos interpretam.  
-Regras delimitam.  
+**Percepção observa.  
+Extração estrutura.  
+Modelos generativos interpretam.  
+Decision models decidem dentro de limites.  
 Evidências sustentam.  
 O ORC resolve.  
 O sistema registra.**
