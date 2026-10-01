@@ -398,3 +398,86 @@ Documento-base:
 docs/market-research-brazil-2026.md
 
 Próximo trabalho de inteligência competitiva: aprofundar preços, APIs, cases, arquitetura técnica, hardware obrigatório, markerless, evidência/auditoria, LGPD, patentes, parceiros e barreiras de entrada.
+
+
+## 29. Consolidação executiva — auditoria e correções pré-Antigravity
+
+Em 01/10/2026, antes da transição do desenvolvimento para o Antigravity, foi realizada uma auditoria do repositório `symbeon-labs/3l0-vision`.
+
+### Resultado executivo
+
+A auditoria confirmou que a arquitetura atual é coerente com a fase do projeto e que a principal lacuna não é conceitual, mas de **validação de execução e fechamento de alguns contratos concretos**.
+
+O produto não deve ser ampliado antes da validação física do vertical slice.
+
+### Correções aplicadas no `main`
+
+Foram corrigidas inconsistências concretas encontradas na auditoria:
+
+1. O identificador de demonstração `789000001`, incompatível com o fluxo manual atual, foi substituído pelo EAN-13 válido `789000000004`.
+2. `REJECTED_FOR_AUTOMATION` passou a possuir mapeamento explícito para o estado operacional `ATTENTION`.
+3. Os testes de core, pipeline e providers de visão foram alinhados ao identificador corrigido.
+4. Foi adicionado teste explícito para garantir que uma resolução não automatizável produza atenção operacional, sem ser tratada como erro técnico.
+5. Nenhuma dessas correções alterou a tese, a arquitetura, o escopo da Fase 1 ou a separação 3L0 ↔ ORC.
+
+Commits principais:
+
+- `94e48a8b505232216746154c9a3158accb972da6`
+- `a239bef383b6814a7775257e477a58a0c0b82fdd`
+- `17cfd73ab24c8b467ef2fa62ff2baed5bdf858fd`
+- `d75e5ffa6248523e234dd5dc0c3292825d968aa9`
+- `d2b46bba6b37a670a818d39c95021b4fefef3006`
+
+### O que a auditoria confirmou
+
+- A fronteira 3L0 ↔ ORC está preservada.
+- Observação não é identidade.
+- Vision/OCR permanece como camada de percepção.
+- Erro técnico permanece separado de incerteza semântica.
+- O resolver determinístico é adequado como mecanismo local de referência da Fase 1.
+- A estratégia de modelos permanece subordinada à resolução operacional.
+- A camada fiscal permanece downstream do ORC.
+- A documentação estratégica está à frente de algumas capacidades executáveis; isso é conhecido e deve ser tratado por validação, não por nova documentação especulativa.
+
+### Pendências reais
+
+Ainda não devem ser marcadas como concluídas:
+
+- execução local de `npm test` no estado atual do `main`;
+- teste físico da câmera em navegador/dispositivo real;
+- serviço ORC real;
+- Evidence Store;
+- Resolution History/Replay;
+- fluxo completo de confirmação humana na UI;
+- integração OCR;
+- persistência operacional além do caminho local atual;
+- Receiving MVP;
+- validação de campo.
+
+### Regra executiva para a próxima etapa
+
+O próximo trabalho não é adicionar mais arquitetura nem mais features.
+
+É provar o seguinte ciclo com um produto físico real:
+
+`CAPTURA → OBSERVAÇÃO → NORMALIZAÇÃO → ORC → RESOLUÇÃO → ESTADO → AÇÃO → PERSISTÊNCIA/EVIDÊNCIA`
+
+O critério de avanço é evidência operacional.
+
+### Handoff para Antigravity
+
+O Antigravity deve partir do `main` atual e tratar este diário como registro de decisões já tomadas.
+
+Não reabrir decisões arquiteturais sem nova evidência.
+
+Ordem recomendada:
+
+1. executar `npm test`;
+2. corrigir falhas reais sem enfraquecer os invariantes semânticos;
+3. testar câmera/barcode em dispositivo real;
+4. registrar resultados e falhas observadas;
+5. somente depois avançar para ORC real, evidência/histórico e OCR conforme necessidade comprovada.
+
+A regra permanece:
+
+> **Otimizar por evidência, não por quantidade de código.**
