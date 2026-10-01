@@ -180,6 +180,7 @@ The initial foundation now includes the ORC integration contract, design-token s
 - [Project Map](docs/project-map.md)
 - [Strategic Workstreams](docs/fronts.md)
 - [Strategic Roadmap](docs/roadmap.md)
+- [Use Cases](docs/use-cases.md)
 
 The product is developed through evidence gates and coordinated workstreams rather than an unrestricted feature backlog.
 
