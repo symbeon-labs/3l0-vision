@@ -6,7 +6,7 @@ const seed = [
   createEntity({
     entityId: "product_demo_001",
     type: "product",
-    identifiers: [{ scheme: "ean", value: "789000001" }],
+    identifiers: [{ scheme: "ean", value: "789000000004" }],
     attributes: { name: "Produto X", unit: "500 ml" }
   })
 ];
