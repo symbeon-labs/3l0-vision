@@ -8,20 +8,22 @@ import { OrcClient } from "../core/orc/client.js";
 import { deterministicResolver } from "../core/orc/deterministic-resolver.js";
 import { mapResolutionToProductState } from "../core/state/product-state.js";
 
+const DEMO_EAN = "789000000004";
+
 test("normalizes an observation identifier without discarding confidence", () => {
   const observation = createObservation({
     observationId: "obs_001",
     observedAt: "2026-09-30T12:00:00Z",
     source: "camera",
     modality: "barcode",
-    identifiers: [{ scheme: "ean", value: " 789000001 ", confidence: 0.99 }],
+    identifiers: [{ scheme: "ean", value: ` ${DEMO_EAN} `, confidence: 0.99 }],
     evidence: [{ type: "image", ref: "img_001" }],
     context: { operation: "receiving" }
   });
 
   assert.deepEqual(observation.identifiers[0], {
     scheme: "ean",
-    value: "789000001",
+    value: DEMO_EAN,
     confidence: 0.99
   });
   assert.deepEqual(observation.evidence, [{ type: "image", ref: "img_001" }]);
@@ -32,7 +34,7 @@ test("resolves a unique deterministic identifier match", async () => {
   const entity = createEntity({
     entityId: "product_001",
     type: "product",
-    identifiers: [{ scheme: "ean", value: "789000001" }]
+    identifiers: [{ scheme: "ean", value: DEMO_EAN }]
   });
 
   const observation = createObservation({
@@ -40,7 +42,7 @@ test("resolves a unique deterministic identifier match", async () => {
     observedAt: "2026-09-30T12:00:00Z",
     source: "scanner",
     modality: "barcode",
-    identifiers: [{ scheme: "ean", value: "789000001" }]
+    identifiers: [{ scheme: "ean", value: DEMO_EAN }]
   });
 
   const client = new OrcClient({ resolver: deterministicResolver });
@@ -62,11 +64,11 @@ test("preserves ambiguity as conflict instead of selecting a winner", () => {
   const entities = [
     createEntity({
       entityId: "product_001",
-      identifiers: [{ scheme: "ean", value: "789000001" }]
+      identifiers: [{ scheme: "ean", value: DEMO_EAN }]
     }),
     createEntity({
       entityId: "product_002",
-      identifiers: [{ scheme: "ean", value: "789000001" }]
+      identifiers: [{ scheme: "ean", value: DEMO_EAN }]
     })
   ];
 
@@ -75,7 +77,7 @@ test("preserves ambiguity as conflict instead of selecting a winner", () => {
     observedAt: "2026-09-30T12:00:00Z",
     source: "scanner",
     modality: "barcode",
-    identifiers: [{ scheme: "ean", value: "789000001" }]
+    identifiers: [{ scheme: "ean", value: DEMO_EAN }]
   });
 
   const result = deterministicResolver({
@@ -101,6 +103,13 @@ test("preserves lack of deterministic evidence as uncertainty", () => {
 
   assert.equal(result.status, "UNCERTAIN");
   assert.equal(mapResolutionToProductState(result.status), "UNCERTAIN");
+});
+
+test("maps non-automatable resolution to an explicit attention state", () => {
+  assert.equal(
+    mapResolutionToProductState("REJECTED_FOR_AUTOMATION"),
+    "ATTENTION"
+  );
 });
 
 test("human confirmation remains an explicit action", () => {
