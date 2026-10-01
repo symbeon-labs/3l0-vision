@@ -481,3 +481,55 @@ Ordem recomendada:
 A regra permanece:
 
 > **Otimizar por evidência, não por quantidade de código.**
+
+
+## 30. Consolidação — resolução + interoperabilidade
+
+Em 01/10/2026, a visão do produto foi consolidada após a auditoria do repositório e a definição do aplicativo mínimo de validação.
+
+### Decisão
+
+A primeira prova permanece deliberadamente pequena:
+
+`PRODUTO FÍSICO → OBSERVAÇÃO → NORMALIZAÇÃO → ORC → RESOLUÇÃO → ENTIDADE PERSISTENTE`
+
+A interoperabilidade com o sistema já utilizado pela empresa não será antecipada para dentro da Fase 1. Ela passa a ser explicitamente a segunda prova do produto, dentro do Receiving MVP / Fase 2.
+
+### Nova prova de produto
+
+A Fase 2 deve provar:
+
+`PRODUTO FÍSICO + DOCUMENTO + REPRESENTAÇÃO DO SISTEMA DA EMPRESA → ORC → ENTIDADE CANÔNICA 3L0 → MAPEAMENTO → REPRESENTAÇÃO DO SISTEMA-ALVO`
+
+### Princípio fixado
+
+`IDENTIFIER ≠ ENTITY ≠ SYSTEM RECORD`
+
+EAN, SKU, registro ERP, NF-e, imagem, planilha ou captura de tela são representações/fontes distintas. O 3L0 não deve aprender o sistema da empresa como seu modelo interno.
+
+O modelo canônico 3L0 permanece independente. A tradução para o sistema-alvo ocorre por contratos de mapping e adapters.
+
+### Ordem de validação
+
+1. capturar representações reais usadas pela empresa;
+2. entender campos, tipos, obrigatoriedades, identificadores e dependências;
+3. definir a representação canônica necessária ao caso;
+4. resolver produto físico + documento + sistema;
+5. gerar uma saída reviewável para o sistema-alvo;
+6. validar o mapping com operador;
+7. somente depois considerar escrita/importação/API ao sistema real.
+
+### Guardrail
+
+Não haverá integração live com ERP/WMS apenas para demonstrar integração. Primeiro deve existir evidência de que o mapping produz uma representação correta, rastreável e revisável.
+
+### Artefato criado
+
+`docs/interoperability.md` passa a registrar a fronteira de interoperabilidade, o conceito de representação canônica, target-system mapping e a ordem de validação.
+
+### Estado
+
+A arquitetura foi atualizada sem alterar o escopo da Fase 1.
+
+O próximo checkpoint continua sendo a validação física do vertical slice. A Fase 2 agora possui um exit gate explícito de interoperabilidade.
+
