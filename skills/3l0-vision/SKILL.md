@@ -145,6 +145,17 @@ Known technology decisions:
 
 Continue from the current `main` state. Do not restart Phase 0 or redesign the product surface.
 
+The repository was audited before this handoff. The audit found that the architecture is coherent for the current stage, while implementation is intentionally ahead of runtime validation in a few areas. The latest corrective commits on `main` are:
+- `94e48a8b505232216746154c9a3158accb972da6` — valid demo EAN in the local catalog;
+- `a239bef383b6814a7775257e477a58a0c0b82fdd` — `REJECTED_FOR_AUTOMATION` mapped explicitly to `ATTENTION`;
+- `17cfd73ab24c8b467ef2fa62ff2baed5bdf858fd` — core tests aligned and non-automatable resolution covered;
+- `d75e5ffa6248523e234dd5dc0c3292825d968aa9` — pipeline tests aligned;
+- `d2b46bba6b37a670a818d39c95021b4fefef3006` — vision-provider tests aligned.
+
+These corrections do not expand scope or change the architecture. They close concrete inconsistencies identified by the audit.
+
+Do not treat the following as complete merely because contracts or placeholders exist: real ORC service, evidence/history persistence, end-to-end human confirmation, OCR integration, physical device validation, or Receiving MVP.
+
 First validate the existing vertical slice locally:
 1. install/use the repository dependencies if required;
 2. run `npm test`;
