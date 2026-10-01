@@ -111,6 +111,54 @@ PHYSICAL / DOCUMENT / ERP
 See `core/fiscal/README.md`, `docs/tax-ruleset-architecture.md` and `docs/tax-research.md`.
 
 ## Phase 2 — Receiving MVP
+**Goal:** prove that 3L0 can reconcile the physical product, document and the representation already used by the enterprise system, then produce a reviewable representation for that target system.
+
+```text
+PRODUCT + NF-e/XML + ERP/WMS REPRESENTATION + OPERATOR
+                    ↓
+             3L0 OBSERVATIONS
+                    ↓
+               NORMALIZATION
+                    ↓
+                   ORC
+                    ↓
+          CANONICAL 3L0 ENTITY
+             + CONTEXT/EVIDENCE
+                    ↓
+             TARGET MAPPING
+                    ↓
+          TARGET SYSTEM FORMAT
+                    ↓
+          RECEIVING DECISION
+```
+
+### Build order
+
+- [ ] collect representative product records from the target system
+- [ ] capture target-system field/schema representation
+- [ ] define canonical product representation
+- [ ] define versioned target mapping contract
+- [ ] NF-e/XML ingestion
+- [ ] ERP/WMS lookup or import adapter
+- [ ] product matching across physical/document/system representations
+- [ ] missing-field resolution
+- [ ] reviewable JSON/CSV/XLSX output
+- [ ] receiving workflow
+- [ ] exception queue
+- [ ] audit/evidence history
+- [ ] live ERP/system adapter only after mapping validation
+
+### Guardrails
+
+- target-system schema must not become the 3L0 semantic model;
+- screenshots/exports are observations of the enterprise representation, not automatic truth;
+- Identifier ≠ Entity ≠ System Record;
+- unresolved mapping remains explicit;
+- no live write integration before the mapping is validated with real data;
+- fiscal calculation remains downstream of operational resolution.
+
+**Exit gate:** one real product, represented by physical observation + document + enterprise-system data, can be resolved into a canonical 3L0 entity and transformed into a reviewable target-system representation with provenance, explicit conflicts and no silently invented fields.
+
 
 NF-e / ERP / Product + Camera / Barcode + Operator → 3L0 → identity/data/conflicts → receiving decision.
 
