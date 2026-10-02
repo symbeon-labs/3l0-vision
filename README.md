@@ -28,8 +28,8 @@ ORC is the independent research and semantic infrastructure behind it.
 - 3L0 Vision asks: **How can a person use that capability in real operations?**
 
 Repository:
-- ORC: https://github.com/symbeon-labs/operational-resolution-core
-- 3L0 Vision: https://github.com/symbeon-labs/3l0-vision
+- ORC: semantic research and resolution layer
+- 3L0 Vision: product application layer
 
 ## Initial product
 
@@ -103,7 +103,7 @@ The 3L0 symbol is the product identity. The open/broken circular form represents
 
 ## Current status
 
-Research validated enough to begin a product repository, but the product itself remains experimental.
+The research and architecture work are mature enough to support a product repository, while the product itself remains experimental. This repository does not by itself constitute empirical validation of the broader research program.
 
 This repository should favor:
 - small experiments
