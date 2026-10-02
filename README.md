@@ -28,7 +28,7 @@ ORC is the independent research and semantic infrastructure behind it.
 - 3L0 Vision asks: **How can a person use that capability in real operations?**
 
 Repository:
-- ORC: semantic research and resolution layer
+- [ORC](https://github.com/symbeon-labs/operational-resolution-core): semantic research and resolution layer
 - 3L0 Vision: product application layer
 
 ## Initial product
