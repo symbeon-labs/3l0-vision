@@ -533,3 +533,66 @@ A arquitetura foi atualizada sem alterar o escopo da Fase 1.
 
 O próximo checkpoint continua sendo a validação física do vertical slice. A Fase 2 agora possui um exit gate explícito de interoperabilidade.
 
+
+
+## 31. Caso 01 — evidência de origem operacional
+
+Em 08/10/2026, foi concluído o primeiro mapeamento operacional formal do estabelecimento que motivou a investigação que levou ao 3L0.
+
+### Contexto
+
+O estabelecimento é um pequeno comércio de bebidas e alimentação, com compra, recebimento, armazenamento, venda e controles fiscais/financeiros.
+
+O caso foi escolhido porque havia uma operação real, uma dor observável e abertura do responsável para experimentar inovação. O mapeamento exigiu um processo prévio de aproximação e tradução da proposta até que fosse possível registrar como o trabalho realmente acontece.
+
+### O que o mapeamento confirmou
+
+A operação distribui informações entre sistema de vendas/caixa, documentos fiscais, pagamentos, fornecedores, contabilidade e controles auxiliares.
+
+A mesma realidade precisa ser conferida por diferentes representações:
+
+`mercadoria física + identificação + NF + estoque + venda + caixa + fiscal/contábil`
+
+O mapeamento registra digitação/transcrição manual, dupla conferência, divergências entre físico e sistema, retrabalho e necessidade de voltar aos registros anteriores para encontrar a origem de diferenças.
+
+### Relação com a tese
+
+O caso transforma a origem do 3L0 em uma trilha observável:
+
+`operação real → problema → mapeamento → hipótese → experimento → evidência`
+
+A hipótese investigada é que parte desse trabalho existe porque a mesma realidade operacional aparece em representações heterogêneas que não são reconciliadas automaticamente.
+
+Isso reforça a sequência:
+
+`OBSERVAÇÃO → NORMALIZAÇÃO → RESOLUÇÃO → REPRESENTAÇÃO OPERACIONAL`
+
+e, na etapa de interoperabilidade:
+
+`ENTIDADE CANÔNICA 3L0 → MAPEAMENTO → REPRESENTAÇÃO DO SISTEMA-ALVO`
+
+### Limite da evidência
+
+O mapeamento não é evidência de precisão, economia, confiabilidade em escala, vantagem competitiva ou valor comercial definitivo.
+
+Ele é **evidência de origem e de problema**, a ser seguida por experimentação.
+
+### Próximo checkpoint
+
+Transformar o Caso 01 em experimento:
+
+1. selecionar produtos representativos;
+2. capturar suas observações reais;
+3. executar resolução física;
+4. capturar a representação usada pelo sistema da empresa;
+5. construir mapping para a representação canônica;
+6. gerar saída reviewável;
+7. medir tempo, trabalho manual, conflitos e intervenção;
+8. somente depois considerar integração live.
+
+Artefatos:
+
+- `docs/cases/case-01/README.md`
+- `docs/cases/case-01/operational-mapping.md`
+
+O PDF preenchido original permanece como fonte primária do mapeamento fora do conjunto textual versionado pelo conector nesta etapa.

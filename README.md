@@ -188,6 +188,7 @@ The initial foundation now includes the ORC integration contract, design-token s
 - [Use Cases](docs/use-cases.md)
 - [Model Strategy](docs/model-strategy.md)
 - [Interoperability & Mapping](docs/interoperability.md)
+- [Case 01 — origem operacional](docs/cases/case-01/README.md)
 
 The product is developed through evidence gates and coordinated workstreams rather than an unrestricted feature backlog.
 
