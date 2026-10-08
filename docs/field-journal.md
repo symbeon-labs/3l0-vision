@@ -596,3 +596,41 @@ Artefatos:
 - `docs/cases/case-01/operational-mapping.md`
 
 O PDF preenchido original permanece como fonte primária do mapeamento fora do conjunto textual versionado pelo conector nesta etapa.
+
+
+## 32. Consolidação — método de desenvolvimento sem inflação de escopo
+
+Em 08/10/2026, a estrutura de desenvolvimento foi consolidada para permitir continuidade por colaboradores sem depender de contexto oral.
+
+### Decisão
+
+O repositório passa a tratar desenvolvimento como um ciclo verificável:
+
+`PROBLEMA → CONTEXTO → DECISÃO → MENOR IMPLEMENTAÇÃO → TESTE → EVIDÊNCIA → VALIDAÇÃO → PRÓXIMA DECISÃO`
+
+A regra executiva é:
+
+> **Se não é necessário para validar a fase atual, não construir.**
+
+### Artefatos canônicos adicionados
+
+- `docs/development-method.md` — método repetível de desenvolvimento, validação e disciplina de escopo.
+- `docs/decisions/README.md` — índice de decisões arquiteturais.
+- ADR-0001 — evidência acima de quantidade de features.
+- ADR-0002 — cada conceito canônico possui uma única origem.
+- ADR-0003 — limites de fase também são limites de implementação.
+- ADR-0004 — sistemas-alvo permanecem representações externas.
+
+### Regra de continuidade
+
+Um colaborador deve conseguir entrar pelo README, seguir para o SKILL, roadmap e método, localizar a decisão relevante e então chegar ao código/testes sem precisar reconstruir a intenção do projeto a partir de conversas anteriores.
+
+Isso não cria uma nova camada de produto. É uma camada mínima de **governança de implementação** para reduzir retrabalho, decisões paralelas e inflação de escopo.
+
+### Estado
+
+A documentação estrutural necessária para continuidade foi considerada suficiente.
+
+Não abrir nova frente documental sem evidência de uma lacuna real.
+
+O foco retorna para a Fase 1 e para a validação do Caso 01.

@@ -189,6 +189,8 @@ The initial foundation now includes the ORC integration contract, design-token s
 - [Model Strategy](docs/model-strategy.md)
 - [Interoperability & Mapping](docs/interoperability.md)
 - [Case 01 — origem operacional](docs/cases/case-01/README.md)
+- [Development Method](docs/development-method.md) — método mínimo para implementação e continuidade.
+- [Architectural Decisions](docs/decisions/README.md) — decisões estruturais que devem permanecer estáveis.
 
 The product is developed through evidence gates and coordinated workstreams rather than an unrestricted feature backlog.
 
@@ -213,3 +215,4 @@ O próximo marco não é adicionar uma nova camada de integração. É fechar o 
 - [3L0 Project Skill](skills/3l0-vision/SKILL.md) — regras para continuidade e desenvolvimento.
 - [Field Journal](docs/field-journal.md) — histórico, decisões, estado atual e próximos marcos.
 - [Phase 1 Gate](docs/roadmap.md) — ordem de implementação, guardrails e critério de saída.
+- [Development Method](docs/development-method.md) — como transformar problema em implementação, teste e evidência.

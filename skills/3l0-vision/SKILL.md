@@ -202,6 +202,8 @@ Use project artifacts according to their responsibility:
 | `docs/orc-coverage.md` | ORC semantic coverage and boundary |
 | `docs/project-map.md` | Repository orientation |
 | `docs/field-journal.md` | Decisions, experiments, milestones, validation and historical state |
+| `docs/development-method.md` | Repeatable implementation method and scope discipline |
+| `docs/decisions/` | Rationale for structural decisions |
 
 When the current state or rationale is unclear, consult `docs/field-journal.md`.
 
@@ -210,6 +212,8 @@ Do not copy historical project state into this skill unless it changes a permane
 ---
 
 ## Development protocol
+
+The complete lightweight method is defined in [`docs/development-method.md`](../../docs/development-method.md). This skill contains the mandatory guardrails; the method explains how to apply them without expanding scope.
 
 Before changing code:
 
