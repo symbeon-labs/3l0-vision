@@ -1,17 +1,27 @@
-name: Validate web interface
+name: Validate 3L0 Vision
 
 on:
   pull_request:
     branches: [main]
     paths:
       - "app/**"
+      - "core/**"
+      - "server/**"
+      - "tests/**"
+      - "docs/**"
       - "index.html"
       - "package.json"
       - ".github/workflows/validate-web.yml"
   push:
-    branches: [feat/first-usable-interface]
+    branches:
+      - feat/first-usable-interface
+      - feat/gate-1-api-backend
     paths:
       - "app/**"
+      - "core/**"
+      - "server/**"
+      - "tests/**"
+      - "docs/**"
       - "index.html"
       - "package.json"
       - ".github/workflows/validate-web.yml"
