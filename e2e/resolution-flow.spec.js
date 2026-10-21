@@ -54,5 +54,5 @@ test("API outage uses the clearly labeled local fallback", async ({ page }) => {
   await page.goto("/");
   await page.locator("#use-demo").click();
   await expect(page.getByText("FALLBACK LOCAL")).toBeVisible();
-  await expect(page.getByText("RESOLVIDO", { exact: true })).toBeVisible();
+  await expect(page.locator(".result-state")).toContainText("RESOLVIDO");
 });
