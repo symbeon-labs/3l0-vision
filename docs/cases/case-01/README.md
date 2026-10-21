@@ -1,91 +1,55 @@
-# Caso 01 — Origem operacional do 3L0
+# Caso 01 — origem operacional do 3L0
 
 ## Status
 
-**Mapeamento operacional concluído.**  
-**Validação de campo: pendente.**
+**Mapeamento inicial: concluído.**  
+**Validação quantitativa e de campo: pendente.**
 
 ## Por que este caso existe
 
-O Caso 01 registra a operação real que motivou a investigação que levou à criação do 3L0.
+O Caso 01 representa a classe de problema que motivou a investigação: diferentes fontes descrevem partes de uma mesma operação e pessoas precisam reconciliá-las manualmente.
 
-O estabelecimento é um pequeno comércio de bebidas e alimentação, com operação de compra, recebimento, armazenamento, venda e controle fiscal/financeiro. O caso foi escolhido como primeiro campo de investigação porque combina uma operação real, problemas observáveis de reconciliação e abertura do responsável para experimentar uma solução de inovação.
+Esta versão pública foi minimizada e anonimizada. Não identifica o estabelecimento nem publica seus valores financeiros ou detalhes comerciais desnecessários. O registro de origem integral autorizado é preservado separadamente no vault privado.
 
-O objetivo deste artefato não é apresentar o estabelecimento como cliente validado nem transformar suas características em requisito universal do produto.
+## Problema investigado
 
-O objetivo é preservar a trilha:
+Uma operação de varejo pode manter representações de produtos e movimentações em fontes distintas: item físico, código, descrição, documento de fornecedor, sistema comercial e controles administrativos.
 
-`operação real → problema observado → mapeamento → hipótese → experimento → evidência`
-
-## O que foi descoberto
-
-As informações necessárias à operação estão distribuídas entre diferentes fontes: sistema de vendas/caixa, documentos fiscais, pagamentos, fornecedores, contabilidade e controles auxiliares.
-
-A mesma realidade operacional precisa ser conferida em múltiplas representações:
-
-- mercadoria física;
-- descrição, marca, embalagem e unidade;
-- código cadastrado;
-- nota fiscal;
-- estoque;
-- venda;
-- caixa e pagamentos;
-- controles fiscais/contábeis;
-- planilhas ou controles paralelos.
-
-O mapeamento registra digitação/transcrição manual, dupla conferência e retrabalho. Quando existe divergência, a operação precisa retornar aos registros anteriores para localizar sua origem.
-
-## Relação com a tese do 3L0
-
-O caso fornece uma manifestação concreta do problema que o 3L0 investiga:
-
-> **A realidade operacional existe em múltiplas representações, mas o trabalho de reconciliá-las ainda recai sobre pessoas e controles paralelos.**
-
-Isso conecta diretamente com a tese de:
+A hipótese é que uma camada de resolução com evidência, proveniência, contexto e incerteza explícitos reduza a necessidade de reconstruir manualmente a relação entre essas representações.
 
 `OBSERVAÇÃO → NORMALIZAÇÃO → RESOLUÇÃO → REPRESENTAÇÃO OPERACIONAL`
 
-e, posteriormente:
+## O que este caso não prova
 
-`ENTIDADE CANÔNICA 3L0 → MAPEAMENTO → REPRESENTAÇÃO DO SISTEMA-ALVO`
-
-## O que este caso ainda não prova
-
-Este caso **não** prova:
+O mapeamento inicial não prova:
 
 - precisão de reconhecimento;
 - economia mensurada;
+- redução de erros;
 - confiabilidade em escala;
 - vantagem competitiva;
 - valor comercial definitivo;
-- capacidade de integração com qualquer ERP;
-- automação completa da operação.
+- integração com qualquer ERP.
 
-Essas afirmações dependem de experimentos e validações posteriores.
+Essas afirmações dependem de experimentos com dados autorizados e medições reproduzíveis.
 
 ## Próximo experimento
 
-O próximo passo é transformar o mapeamento em um experimento controlado:
-
-1. selecionar produtos representativos;
-2. capturar suas representações reais;
-3. testar a resolução física;
-4. capturar as representações utilizadas pelo sistema da empresa;
-5. definir o mapping para a representação canônica 3L0;
-6. gerar saída reviewável;
-7. medir trabalho manual, divergências, intervenções e tempo;
-8. somente depois considerar integração live.
+1. Selecionar itens e registros representativos com autorização.
+2. Registrar a linha de base do fluxo manual.
+3. Capturar representações físicas e documentais.
+4. Resolver identidade e preservar proveniência.
+5. Produzir saída revisável pelo operador.
+6. Medir tempo, entradas manuais, conflitos, correções e intervenções.
+7. Só avaliar integração em escrita após validação do mapeamento.
 
 ## Artefatos
 
-- [Mapeamento operacional preenchido](operational-mapping.md)
+- [Mapeamento operacional público minimizado](operational-mapping.md)
 - [Interoperabilidade e Mapping](../../interoperability.md)
 - [Product Thesis](../../product-thesis.md)
-- [Field Journal](../../field-journal.md)
 - [Roadmap](../../roadmap.md)
 
 ## Princípio
 
-O Caso 01 é **evidência de origem**, não evidência de sucesso.
-
-O valor do caso está em permitir que a hipótese do 3L0 seja confrontada com uma operação real.
+O Caso 01 é **evidência de origem, não evidência de sucesso**.
