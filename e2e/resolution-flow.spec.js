@@ -2,10 +2,9 @@ import { test, expect } from "@playwright/test";
 
 test("RESOLVED: demo identifier is resolved through API v1", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: /Usar EAN de demonstração|Consultar catálogo/ }).count();
   await page.locator("#use-demo").click();
   await expect(page.getByText("API V1")).toBeVisible();
-  await expect(page.getByText("RESOLVIDO", { exact: true })).toBeVisible();
+  await expect(page.locator(".result-state")).toContainText("RESOLVIDO");
   await expect(page.getByText("Produto X")).toBeVisible();
 });
 
@@ -15,7 +14,7 @@ test("UNCERTAIN: unknown identifier remains an explicit uncertain result", async
   await page.locator("#code").fill("unknown-123");
   await page.locator("#manual-form button[type=submit]").click();
   await expect(page.getByText("API V1")).toBeVisible();
-  await expect(page.getByText("INCERTO", { exact: true })).toBeVisible();
+  await expect(page.locator(".result-state")).toContainText("INCERTO");
   await expect(page.getByText("Sem correspondência suficiente.")).toBeVisible();
 });
 
@@ -45,7 +44,7 @@ test("CONFLICT: UI presents a conflict without choosing a candidate", async ({ p
   await page.goto("/");
   await page.locator("#use-demo").click();
   await expect(page.getByText("API V1")).toBeVisible();
-  await expect(page.getByText("CONFLITO", { exact: true })).toBeVisible();
+  await expect(page.locator(".result-state")).toContainText("CONFLITO");
   await expect(page.getByText("Há um conflito.")).toBeVisible();
   await expect(page.getByText("Nenhuma identidade confirmada")).toBeVisible();
 });
