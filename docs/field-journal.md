@@ -60,3 +60,21 @@ O Caso 01 público foi minimizado para remover detalhes comerciais específicos.
 ## Fonte restrita
 
 O diário completo permanece preservado no vault privado, junto aos registros de pesquisa que não são necessários à documentação pública do produto.
+
+## 2026-10-21 — Reconciliação da visão do produto
+
+- Criado `docs/product-vision.md` como síntese canônica da tese, experiência do operador, fronteira ORC, fluxo inicial de recebimento, evolução fiscal, hipótese de diferenciação, estado de implementação e critérios de validação.
+- O `README.md` agora aponta para essa visão canônica.
+- Os documentos especializados continuam sendo as fontes detalhadas para arquitetura, roadmap, interoperabilidade, pesquisa de mercado e regras fiscais; a síntese não os substitui.
+- A apresentação HTML interativa permanece um artefato de trabalho local para reconciliação visual. Ainda não foi publicada no repositório nem no portal.
+- Próxima etapa: revisar a apresentação contra a visão canônica e produzir uma versão institucional pública reduzida, após verificar conteúdo e claims públicos.
+- Esta alteração está em uma branch de documentação e ainda não foi mesclada em `main`.
+
+
+## 2026-10-21 — Superfície pública preparada para revisão
+
+- Criado rascunho institucional `docs/public-brief-draft.md`, derivado da visão canônica e sem métricas de desempenho ou alegações de prontidão não comprovadas.
+- Criada a primeira página `index.html` no repositório público `symbeon-labs/3l0-portal`, na branch `feat/public-vision-landing`, para revisão via PR #1.
+- A página distingue a fundação técnica experimental das capacidades ainda em validação ou planejadas.
+- Removido o link direto para o repositório privado de visão na página pública, evitando oferecer ao público um destino inacessível e não intencional.
+- PR #1 do portal e PR #2 deste repositório continuam sujeitos a revisão final; não afirmar publicação ou implantação até merge e confirmação do destino de deploy.

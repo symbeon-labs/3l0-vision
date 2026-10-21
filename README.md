@@ -180,6 +180,10 @@ The initial foundation now includes the ORC integration contract, design-token s
 - [Design Tokens](docs/design-tokens.md)
 - [Application Foundation](docs/application-foundation.md)
 
+## Product vision
+
+- [Canonical Product Vision](docs/product-vision.md) — consolidated product thesis, operator experience, ORC boundary, current implementation status, validation criteria and public-surface rules.
+
 ## Strategic organization
 
 - [Project Map](docs/project-map.md)
