@@ -8,9 +8,12 @@ on:
       - "core/**"
       - "server/**"
       - "tests/**"
+      - "e2e/**"
       - "docs/**"
       - "index.html"
       - "package.json"
+      - "playwright.config.js"
+      - "vite.config.js"
       - ".github/workflows/validate-web.yml"
   push:
     branches:
@@ -21,9 +24,12 @@ on:
       - "core/**"
       - "server/**"
       - "tests/**"
+      - "e2e/**"
       - "docs/**"
       - "index.html"
       - "package.json"
+      - "playwright.config.js"
+      - "vite.config.js"
       - ".github/workflows/validate-web.yml"
 
 jobs:
@@ -38,7 +44,11 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
-      - name: Run tests
+      - name: Install Chromium for headless E2E
+        run: npx playwright install --with-deps chromium
+      - name: Run unit and API tests
         run: npm test
+      - name: Run browser end-to-end tests
+        run: npm run test:e2e
       - name: Build web app
         run: npm run build
