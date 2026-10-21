@@ -63,3 +63,48 @@ test("invalid input is rejected", async () => {
     assert.equal(response.status, 400);
   });
 });
+
+test("duplicate matching entities produce CONFLICT rather than an arbitrary winner", async () => {
+  const duplicateRepository = {
+    async findCandidates() {
+      return [
+        { entity_id: "product_a", identifiers: [{ scheme: "ean", value: "789000000004" }], attributes: { name: "Produto A" } },
+        { entity_id: "product_b", identifiers: [{ scheme: "ean", value: "789000000004" }], attributes: { name: "Produto B" } }
+      ];
+    },
+    async persistResolution() {
+      throw new Error("conflict must not persist a resolved entity");
+    }
+  };
+  const server = createApiServer({ repository: duplicateRepository });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  try {
+    const response = await fetch(`http://127.0.0.1:${address.port}/api/v1/resolve`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ code: "789000000004", scheme: "ean" })
+    });
+    const body = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(body.status, "CONFLICT");
+    assert.equal(body.state, "CONFLICT");
+    assert.deepEqual(body.result.conflicts[0].candidates, ["product_a", "product_b"]);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  }
+});
+
+test("EAN format is inferred when scheme is omitted", async () => {
+  await withServer(async (base) => {
+    const response = await fetch(`${base}/api/v1/resolve`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ code: "789000000004" })
+    });
+    const body = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(body.status, "RESOLVED");
+    assert.equal(body.observation.identifiers[0].scheme, "ean");
+  });
+});
