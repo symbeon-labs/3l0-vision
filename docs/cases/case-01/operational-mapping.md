@@ -1,164 +1,54 @@
-# Mapeamento do Processo Operacional — Caso 01
+# Mapeamento Operacional — Caso 01 (versão pública minimizada)
 
-> Transcrição estruturada do formulário preenchido pelo estabelecimento. O documento original permanece como fonte primária do mapeamento.
+> Versão pública anonimizada para explicar a origem do problema investigado. Detalhes específicos do estabelecimento, valores financeiros e elementos operacionais não necessários à explicação foram omitidos. O registro integral autorizado é mantido no vault privado.
 
-## 1. Sobre a operação
+## Objetivo
 
-### O que a empresa faz?
+Investigar como um pequeno negócio de varejo pode reconciliar a mercadoria física com registros de estoque, vendas, documentos fiscais e controles administrativos, sem redigitar repetidamente informações já disponíveis.
 
-Comércio de bebidas e produtos de alimentação, funcionando como lanchonete/comércio varejista. A operação envolve compra, armazenamento, controle e venda de mercadorias, além da comercialização de produtos de fabricação própria, como café.
+## Processo de referência
 
-### O que vocês recebem, movimentam ou entregam?
+| Etapa | Atividade geral |
+|---|---|
+| 1 | Compra e recebimento de mercadorias |
+| 2 | Conferência de itens, quantidades e documentos |
+| 3 | Armazenamento e organização |
+| 4 | Venda e recebimento de pagamento |
+| 5 | Registro comercial e fiscal |
+| 6 | Conferência periódica de estoque e registros administrativos |
 
-Recebem bebidas e demais mercadorias de fornecedores, armazenam e disponibilizam para venda ao consumidor. Também produzem e comercializam alguns produtos próprios.
+## Representações envolvidas
 
-### Qual é o volume aproximado de operações?
+A mesma operação pode aparecer em fontes diferentes, como mercadoria física, identificador ou código, descrição de produto, documento de fornecedor, sistema de vendas/estoque e controles auxiliares.
 
-Movimentação frequente de vendas ao longo do mês, com faturamento informado anteriormente em torno de R$ 45 mil mensais, exigindo controle de estoque, caixa, compras e documentação fiscal.
+Essas representações não devem ser tratadas como equivalentes automaticamente. Cada uma precisa preservar sua origem e seu contexto.
 
-### Quais produtos ou mercadorias são mais comuns?
+## Hipóteses de fricção a investigar
 
-Principalmente cervejas e outras bebidas, além de produtos de fabricação própria e itens relacionados à atividade da lanchonete.
+- repetição de digitação ou transcrição;
+- divergências entre contagem física e registro;
+- inconsistências entre documento e item recebido;
+- dificuldade de localizar a origem de uma divergência;
+- necessidade de alternar entre fontes para concluir uma conferência.
 
-### Quem participa desse processo?
+Esses pontos são hipóteses de trabalho derivadas do mapeamento inicial, não métricas quantitativas de frequência, custo ou impacto.
 
-Proprietário/responsável pela empresa, funcionários envolvidos no atendimento e vendas e fornecedores. Também há interação com contador e sistemas/serviços relacionados à emissão e controle fiscal.
+## Hipótese de produto
 
-## 2. Como o processo funciona hoje
+Uma camada de observação e resolução pode ajudar a relacionar representações da mesma entidade, preservar evidências e apresentar exceções ao operador sem substituir o sistema comercial ou fiscal existente.
 
-| Etapa | O que acontece? | Quem faz? |
-|---|---|---|
-| 1 | Compra de mercadorias e produtos dos fornecedores. | Responsável pela empresa |
-| 2 | Recebimento e conferência das mercadorias. | Responsável/funcionário |
-| 3 | Armazenamento e organização dos produtos. | Funcionário/responsável |
-| 4 | Venda ao cliente e recebimento do pagamento. | Atendimento/caixa |
-| 5 | Registro da venda e controle fiscal/financeiro. | Caixa/responsável/sistema |
-| 6 | Conferência de estoque, caixa, notas e informações para gestão/contabilidade. | Responsável |
+Fluxo a testar:
 
-## 3. Informações e sistemas
+`OBSERVAÇÃO → NORMALIZAÇÃO → RESOLUÇÃO → ESTADO OPERACIONAL → AÇÃO`
 
-### Quais sistemas são utilizados?
+## Dados ainda necessários
 
-Sistema de vendas/caixa, meios eletrônicos de pagamento, controles fiscais e contábeis e, quando necessário, planilhas ou controles auxiliares.
+A validação requer amostra representativa e autorizada de itens e registros, observações em condições reais e medições de linha de base. Devem ser medidos tempo por operação, entradas manuais, conflitos, correções, duplicidades, intervenções humanas e falhas de integração.
 
-### Quais documentos ou registros são utilizados?
+## Limites
 
-Notas fiscais de compra e venda, registros de vendas, comprovantes de pagamento, informações de estoque, documentos fiscais da empresa e controles financeiros.
+Este documento não identifica o estabelecimento nem publica faturamento, nomes, endereço, fornecedores, detalhes de sistemas ou registros fiscais. Não prova precisão, economia, confiabilidade em escala, vantagem competitiva ou retorno comercial.
 
-### São utilizadas planilhas ou controles paralelos?
+## Princípio
 
-Sim. Podem ser necessários controles auxiliares para estoque, compras, caixa, despesas e conferência das informações fiscais.
-
-### É necessário consultar mais de uma fonte para realizar o trabalho?
-
-Sim. Informações podem estar distribuídas entre sistema de vendas, documentos fiscais, banco/máquina de cartão, fornecedores e contabilidade.
-
-## 4. Conferência e controle
-
-### O que precisa ser conferido?
-
-Mercadorias recebidas, quantidades, preços, notas fiscais, estoque, vendas, caixa e pagamentos.
-
-### Como vocês identificam os produtos?
-
-Por descrição do produto, embalagem, marca, código cadastrado e unidade de venda.
-
-### Como confirmam quantidades ou informações?
-
-Por conferência física da mercadoria, comparação com a nota fiscal e registros do sistema.
-
-### Existe alguma etapa de digitação ou transcrição manual?
-
-Sim. Principalmente no cadastro/atualização de produtos, conferências, controles auxiliares e eventualmente lançamento de informações.
-
-### Existe dupla conferência?
-
-Sim, quando necessário, principalmente em recebimento de mercadorias, valores, estoque e divergências.
-
-## 5. Problemas e dificuldades
-
-### Qual é a parte mais demorada do processo?
-
-Conferir informações de diferentes fontes, controlar estoque, conferir compras e manter as informações financeiras e fiscais organizadas.
-
-### Onde acontecem mais erros?
-
-Em divergências entre quantidade física e sistema, preços, entradas de mercadorias, registros de vendas e controles realizados manualmente.
-
-### Onde acontece mais retrabalho?
-
-Quando uma informação precisa ser conferida ou digitada novamente em outro controle, sistema ou documento.
-
-### Quais são as situações mais difíceis de resolver?
-
-Divergências de estoque, diferenças entre valores registrados e recebidos, problemas com notas fiscais, produtos cadastrados incorretamente e necessidade de identificar a origem de uma diferença.
-
-### Quando existe uma divergência, o que normalmente acontece?
-
-É necessário voltar aos registros anteriores, conferir documentos, estoque, vendas e pagamentos até identificar a origem do problema.
-
-## 6. Tempo e impacto
-
-### Quanto tempo o processo costuma levar?
-
-As vendas individuais são rápidas, mas a conferência administrativa e financeira pode consumir bastante tempo, principalmente quando realizada manualmente.
-
-### Com que frequência os problemas acontecem?
-
-As pequenas divergências podem ocorrer durante a rotina, principalmente em operações com grande quantidade de produtos e vendas.
-
-### Quantas pessoas participam?
-
-Responsável pela empresa e funcionários envolvidos nas vendas, estoque e atendimento, além do contador em atividades fiscais/contábeis.
-
-### Que impacto os problemas causam?
-
-Atraso, retrabalho, erro, custo e perda.
-
-### Existe algum problema especialmente importante?
-
-Ter informações de vendas, estoque, caixa e fiscal/contábil integradas e confiáveis, reduzindo a necessidade de controles paralelos.
-
-## 7. Melhorias
-
-### Se pudesse eliminar uma tarefa manual, qual seria?
-
-Eliminar a necessidade de digitar ou conferir repetidamente informações de vendas, estoque e documentos fiscais em diferentes controles.
-
-### Que informação seria útil receber automaticamente?
-
-- Estoque baixo;
-- produtos com maior saída;
-- produtos parados;
-- divergências de estoque;
-- faturamento diário/mensal;
-- lucro/margem por produto;
-- contas a pagar;
-- contas a receber;
-- compras;
-- alertas fiscais;
-- resumo diário do caixa.
-
-### O que vocês gostariam que funcionasse melhor?
-
-Uma solução integrada que permita acompanhar vendas, estoque, caixa, compras, notas fiscais e resultados financeiros, de forma simples e adequada à realidade de uma pequena empresa brasileira.
-
-### Existe alguma melhoria que já tentaram implementar?
-
-Já houve busca por sistemas de controle de notas, certificado digital, soluções gratuitas/mais econômicas e formas de melhorar o controle fiscal e financeiro da empresa.
-
-## 8. Observações
-
-A operação precisa de uma solução simples, de baixo custo e adequada à realidade dos pequenos comércios brasileiros. O principal objetivo é reduzir controles manuais, evitar erros e retrabalho e permitir que o responsável acompanhe rapidamente vendas, estoque, caixa, compras e informações fiscais.
-
-Como a empresa trabalha com bebidas e produtos de fabricação própria, é importante que o sistema consiga lidar com diferentes tipos de mercadorias, unidades de venda, custos e margens. Também é importante facilitar a integração entre a operação comercial e as obrigações fiscais/contábeis, sem exigir conhecimentos técnicos elevados do proprietário.
-
-## Relação com o 3L0
-
-Este mapeamento é uma fonte de evidência para investigação, não uma especificação automática do produto.
-
-O caso sugere uma sequência de investigação:
-
-`MUNDO REAL → OBSERVAÇÕES → REPRESENTAÇÕES OPERACIONAIS → RECONCILIAÇÃO → RESOLUÇÃO → SAÍDA PARA O SISTEMA`
-
-A hipótese precisa ser validada com dados e operações reais antes de qualquer conclusão de desempenho ou valor.
+O caso é um ponto de partida para formular e testar hipóteses, não evidência de sucesso do produto.
