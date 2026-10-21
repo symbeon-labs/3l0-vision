@@ -106,7 +106,7 @@ export function createApiServer({ repository = createMemoryRepository() } = {}) 
 
       const scheme = typeof body.scheme === "string" && body.scheme.trim()
         ? body.scheme.trim().toLowerCase()
-        : (/^\\d{8}$|^\\d{12,14}$/.test(code) ? "ean" : "identifier");
+        : (/^\d{8}$|^\d{12,14}$/.test(code) ? "ean" : "identifier");
 
       try {
         const pipeline = new ResolutionPipeline({
