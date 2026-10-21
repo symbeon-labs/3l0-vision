@@ -1,6 +1,6 @@
 # 3L0 Vision API — Gate 1
 
-Status: **initial API scaffold; experimental, not production-ready**.
+Status: **experimental integration; not production-ready**.
 
 ## Repository boundary
 
@@ -21,31 +21,44 @@ Request:
 ```
 
 - `code`: required string, 1–128 characters.
-- `scheme`: optional string; inferred conservatively when omitted.
+- `scheme`: optional string; numeric EAN-shaped values are inferred as `ean`.
 - Uses the existing `ResolutionPipeline`, `OrcClient`, and deterministic resolver.
 - Returns the observation, canonical resolution status, product state, and explicit limitations.
+- Canonical semantic states are `RESOLVED`, `UNCERTAIN`, and `CONFLICT`.
 
-## Current boundaries
+## Frontend integration and controlled fallback
 
-- Synthetic catalog only; the sample EAN resolves to `product_demo_001`.
-- Catalog/resolution storage is process memory and is lost on restart.
-- No OCR, Jev/TypeSafe, remote ORC, ERP/WMS, authentication, rate limiting, durable database, or deployment is configured.
-- Do not expose this API publicly before security, persistence, operational logging, and integration tests are reviewed.
-- The API is an internal vertical slice. It does not claim field validation or production readiness.
+The interface now calls same-origin `POST /api/v1/resolve` first. It uses the local browser pipeline only when the API is unreachable, returns 404/5xx, or provides an invalid response contract. A 4xx input rejection does **not** silently trigger fallback. The result screen identifies whether the answer came from `API V1` or `FALLBACK LOCAL`.
 
-## Local run
+For local development, Vite proxies `/api/*` to `http://127.0.0.1:8787`. Run the backend and frontend in separate terminals:
 
+Terminal 1:
 ```bash
 npm install
 npm run api
 ```
 
-Default port: `8787`; override with `PORT`.
+Terminal 2:
+```bash
+npm run dev
+```
+
+Default API port: `8787`; override with `PORT`. The Vite proxy is for local development only; a deployed environment needs an explicitly configured same-origin reverse proxy or serverless route. A static frontend deployment alone does not host this API.
+
+## Current boundaries
+
+- Backend catalog is synthetic and in process memory; its state is lost on restart.
+- Browser fallback uses the local browser catalog and is explicitly labeled.
+- No OCR, Jev/TypeSafe, remote ORC, ERP/WMS, authentication, rate limiting, durable database, or deployment is configured.
+- Do not expose this API publicly before security, persistence, operational logging, and integration tests are reviewed.
+- Exact identifier matching is not proof of physical-object identity or field readiness.
 
 ## Gate 1 acceptance checks
 
 - Health endpoint discloses the local experimental mode.
 - Synthetic EAN produces deterministic `RESOLVED`.
 - Unknown identifiers produce semantic `UNCERTAIN`, not a server error.
+- Duplicate matching entities produce `CONFLICT`, without selecting or persisting an arbitrary winner.
 - Invalid request input is rejected.
-- CI runs the API tests alongside the existing tests and web build.
+- CI runs API tests and builds the web app.
+- Browser/API end-to-end validation and deployment routing remain separate acceptance items.
