@@ -1,0 +1,54 @@
+name: Validate 3L0 Vision
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "core/**"
+      - "server/**"
+      - "tests/**"
+      - "e2e/**"
+      - "docs/**"
+      - "index.html"
+      - "package.json"
+      - "playwright.config.js"
+      - "vite.config.js"
+      - ".github/workflows/validate-web.yml"
+  push:
+    branches:
+      - feat/first-usable-interface
+      - feat/gate-1-api-backend
+    paths:
+      - "app/**"
+      - "core/**"
+      - "server/**"
+      - "tests/**"
+      - "e2e/**"
+      - "docs/**"
+      - "index.html"
+      - "package.json"
+      - "playwright.config.js"
+      - "vite.config.js"
+      - ".github/workflows/validate-web.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Install Chromium for headless E2E
+        run: npx playwright install --with-deps chromium
+      - name: Run unit and API tests
+        run: npm test
+      - name: Run browser end-to-end tests
+        run: npm run test:e2e
+      - name: Build web app
+        run: npm run build
