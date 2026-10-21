@@ -38,7 +38,7 @@ export class ResolutionPipeline {
     question = { type: "identify_product", target: "product" },
     context = {},
     ruleset = { id: "default", version: "0.1" }
-  } {
+  }) {
     this.stage("CAPTURING", { input });
 
     const captured = await this.captureAdapter.capture(input);
