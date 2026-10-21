@@ -29,5 +29,6 @@ Each decision contains:
 - [ADR-0002 — Canonical concepts have one home](0002-canonical-concepts-have-one-home.md)
 - [ADR-0003 — Phase boundaries are implementation boundaries](0003-phase-boundaries-are-implementation-boundaries.md)
 - [ADR-0004 — Target systems remain external representations](0004-target-systems-remain-external-representations.md)
+- [ADR-0005 — Physical labels are optional identification accelerators](0005-physical-labels-are-optional-identification-accelerators.md)
 
 New decisions should link to the relevant roadmap, architecture or field-journal entry rather than duplicating it.
