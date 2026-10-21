@@ -60,3 +60,12 @@ O Caso 01 público foi minimizado para remover detalhes comerciais específicos.
 ## Fonte restrita
 
 O diário completo permanece preservado no vault privado, junto aos registros de pesquisa que não são necessários à documentação pública do produto.
+
+## 2026-10-21 — Reconciliação da visão do produto
+
+- Criado `docs/product-vision.md` como síntese canônica da tese, experiência do operador, fronteira ORC, fluxo inicial de recebimento, evolução fiscal, hipótese de diferenciação, estado de implementação e critérios de validação.
+- O `README.md` agora aponta para essa visão canônica.
+- Os documentos especializados continuam sendo as fontes detalhadas para arquitetura, roadmap, interoperabilidade, pesquisa de mercado e regras fiscais; a síntese não os substitui.
+- A apresentação HTML interativa permanece um artefato de trabalho local para reconciliação visual. Ainda não foi publicada no repositório nem no portal.
+- Próxima etapa: revisar a apresentação contra a visão canônica e produzir uma versão institucional pública reduzida, após verificar conteúdo e claims públicos.
+- Esta alteração está em uma branch de documentação e ainda não foi mesclada em `main`.
