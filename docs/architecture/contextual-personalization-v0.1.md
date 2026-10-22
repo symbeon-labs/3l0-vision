@@ -293,3 +293,31 @@ Estas decisões exigem confirmação antes da implementação:
 Adotar o CPE como módulo lógico interno do 3L0 Vision, começar com triagem progressiva e regras explícitas, e adiar infraestrutura autônoma, aprendizado adaptativo avançado e monetização até que o fluxo operacional e o valor para os usuários tenham evidências suficientes.
 
 **Referência de produto:** `docs/application-foundation.md`, `docs/architecture.md`, `docs/roadmap.md` e `docs/strategy/business-plan-v0.1.md`.
+
+
+## 16. Identidade visual do projeto no aplicativo
+
+A identidade do projeto deve ser incorporada ao próprio 3L0 Vision, não ficar restrita ao portal institucional. A aplicação atual ainda precisa passar por uma etapa explícita de personalização visual conforme a identidade aprovada do projeto.
+
+### Regras
+- O portal e o aplicativo devem ser reconhecidos como partes do mesmo ecossistema 3L0, preservando a função distinta de cada superfície.
+- O Vision deve aplicar o sistema de identidade visual aprovado: marca, símbolo/logotipo, paleta, tipografia, tokens, espaçamento, componentes, iconografia e estados interativos, conforme os artefatos oficiais existentes.
+- Antes de introduzir novos valores visuais, consultar e reutilizar os tokens e o sistema de design já definidos no repositório. Não inventar uma identidade paralela nem redesenhar a marca sem aprovação.
+- Centralizar cores, tipografia, raios, espaçamento, bordas, superfícies e estados nos design tokens e componentes reutilizáveis, evitando estilos inconsistentes espalhados pela aplicação.
+- Personalizar o shell do aplicativo, navegação, telas de entrada/autenticação quando implementadas, estados vazios, mensagens de erro, carregamento, formulários e resultados — não apenas a página inicial.
+- Preservar legibilidade, contraste acessível, responsividade e feedback de interação. A identidade visual não deve reduzir a clareza operacional.
+- Distinguir claramente estados reais do produto, demonstrações e capacidades indisponíveis. A estética não deve sugerir recursos que ainda não existem.
+- A experiência autenticada deverá manter a identidade 3L0 enquanto pode adaptar conteúdo, orientação e fluxos ao perfil. A personalização contextual não deve substituir nem fragmentar a identidade central da marca.
+
+### Sequência de trabalho visual
+1. Auditar a aplicação publicada e o código atual, identificando lacunas entre a identidade aprovada e a interface existente.
+2. Localizar e confirmar os artefatos oficiais de marca, tokens e componentes no repositório.
+3. Documentar uma matriz de telas/componentes a atualizar.
+4. Aplicar a identidade usando tokens e componentes compartilhados.
+5. Validar responsividade, contraste, estados e consistência visual em desktop e dispositivos móveis.
+6. Comparar a implementação publicada com o código e os artefatos de referência antes de considerar a etapa concluída.
+
+### Critério de aceitação visual
+A aplicação será considerada alinhada quando suas principais telas e estados utilizarem de forma consistente os ativos e tokens aprovados, forem responsivos e acessíveis, e a experiência do aplicativo for visualmente coerente com o portal sem se confundir com ele.
+
+Esta seção define um requisito de implementação futuro; não declara que a personalização visual já foi executada.
