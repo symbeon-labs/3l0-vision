@@ -4,6 +4,7 @@ import { ResolutionPipeline } from "../core/pipeline/resolution-pipeline.js";
 import { BrowserCaptureAdapter } from "./capture/browser-capture.js";
 import { parseGlyphReference } from "../core/vision/glyph-reference.js";
 import { LocalCatalog } from "./catalog/local-catalog.js";
+import { renderInventoryScreen } from "./inventory/inventory-screen.js";
 import "./styles.css";
 
 const app = document.querySelector("#app");
@@ -22,6 +23,7 @@ function renderHome() {
         <h1>O que vamos<br /><strong>resolver?</strong></h1>
         <p class="description">Conecte o que você observa no mundo físico à identidade operacional correta. Sem transformar uma leitura isolada em certeza.</p>
         <button class="capture-card" id="identify" type="button"><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Câmera, código de barras, QR ou entrada manual</small></span><span class="arrow">→</span></button>
+        <button class="inventory-entry" id="open-inventory" type="button"><span><strong>ABRIR INVENTÁRIO</strong><small>Produtos · movimentações · saldo confirmado</small></span><span class="arrow">↗</span></button>
         <div class="demo-note"><span class="pulse-dot"></span> AMBIENTE EXPERIMENTAL <span>·</span> CATÁLOGO LOCAL DE DEMONSTRAÇÃO</div>
       </section>
       <section class="learning-section" aria-labelledby="how-title">
@@ -50,6 +52,7 @@ function renderHome() {
       <footer><span>3L0 VISION</span><span>TORNAR O MUNDO FÍSICO COMPUTÁVEL.</span></footer>
     </main>`;
   document.querySelector("#identify").addEventListener("click", renderCapture);
+  document.querySelector("#open-inventory").addEventListener("click", () => renderInventoryScreen({ app, onBack: renderHome }));
   document.querySelector(".brand-mark").addEventListener("click", event => { event.preventDefault(); renderHome(); });
 }
 
