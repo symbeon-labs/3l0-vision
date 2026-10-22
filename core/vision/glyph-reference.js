@@ -1,5 +1,3 @@
-const GLYPH_PREFIX = "3l0-glyph:v1:";
-
 /**
  * Parse the canonical, versioned QR payload used by the Gate A prototype.
  * This validates syntax only; it does not look up a registry or prove identity.
