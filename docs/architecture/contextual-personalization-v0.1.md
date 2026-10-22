@@ -321,3 +321,139 @@ A identidade do projeto deve ser incorporada ao próprio 3L0 Vision, não ficar 
 A aplicação será considerada alinhada quando suas principais telas e estados utilizarem de forma consistente os ativos e tokens aprovados, forem responsivos e acessíveis, e a experiência do aplicativo for visualmente coerente com o portal sem se confundir com ele.
 
 Esta seção define um requisito de implementação futuro; não declara que a personalização visual já foi executada.
+
+## 17. UX/UI, experiência de plataforma, Agent, Skills e narrativa
+
+A personalização deve ser concebida como uma experiência de produto integrada, e não como um formulário isolado nem apenas como uma camada visual. UX, UI, identidade, capacidades do 3L0 Agent, Skills disponíveis e narrativa do produto devem partir do mesmo modelo de contexto e permanecer coerentes entre si.
+
+### 17.1 Princípio de experiência
+
+A experiência deve ajudar o usuário a compreender:
+- onde está na plataforma e qual é o próximo passo;
+- o que o 3L0 pode fazer no contexto atual;
+- por que determinada pergunta, recomendação, fluxo ou capacidade está sendo apresentada;
+- o que será executado, com quais entradas e limites;
+- o que foi concluído, o que continua incerto e onde é necessária sua intervenção;
+- quais evidências e resultados foram produzidos.
+
+A personalização deve reduzir esforço e ambiguidade, não esconder complexidade importante. O sistema pode graduar a explicação e a profundidade da interface, mas deve preservar estados, limites, riscos e ações relevantes.
+
+### 17.2 UX — desenho da jornada
+
+A jornada deve ser modelada de ponta a ponta, incluindo:
+1. descoberta e entrada a partir do Portal;
+2. orientação inicial e explicação do valor do produto;
+3. identificação/autenticação e seleção do contexto autorizado, conforme a implementação real;
+4. triagem progressiva, com indicação do motivo das perguntas e possibilidade de corrigir respostas;
+5. apresentação da configuração sugerida e das capacidades que realmente estão disponíveis;
+6. confirmação antes de ações relevantes, externas ou potencialmente irreversíveis;
+7. execução com feedback de progresso, falhas e necessidade de intervenção;
+8. apresentação do resultado, evidências, incerteza e próximos passos;
+9. feedback explícito e adaptação controlada da experiência.
+
+A jornada deve contemplar primeira utilização, retorno, contexto incompleto, erro de integração, ausência de permissões, capacidade indisponível, resultado inconclusivo e recuperação após falha. Não assumir que o usuário conhece os conceitos internos do 3L0, ORC, Agent ou Skills.
+
+### 17.3 UI — sistema visual e estados
+
+A interface deve combinar a identidade oficial do 3L0 com uma hierarquia visual funcional. O sistema de design deve definir tokens e componentes reutilizáveis para:
+- estrutura da plataforma, navegação e orientação contextual;
+- formulários e perguntas adaptativas;
+- cartões de capacidades/Skills, com descrição, requisitos e disponibilidade;
+- estados de execução, progresso, sucesso, falha, conflito e incerteza;
+- solicitações de confirmação e intervenção humana;
+- resultados, evidências, histórico e explicações;
+- feedback, preferências e correção de informações.
+
+Os estados devem ser comunicados por texto e estrutura visual, e não apenas por cor ou animação. Devem ser testados em tamanhos de tela relevantes, com teclado, leitor de tela e contraste adequado. Animações e elementos conversacionais não podem mascarar latência, falhas ou ações que não ocorreram.
+
+A interface não deve representar como conectada, ativa ou executável uma Skill, integração ou capacidade que ainda não esteja disponível no ambiente atual.
+
+### 17.4 Modelo de integração do 3L0 Agent
+
+O 3L0 Agent deve aparecer na experiência como mecanismo de coordenação de tarefas e composição de capacidades quando essa integração estiver efetivamente implementada. Não deve ser apresentado como autoridade de identidade, permissão, verdade ou resolução semântica que pertença a outros componentes.
+
+A experiência deve separar claramente:
+- **intenção do usuário:** o resultado solicitado;
+- **plano ou fluxo proposto:** como a plataforma pretende abordar a tarefa;
+- **capacidades/Skills selecionadas:** ferramentas ou procedimentos elegíveis para aquela tarefa;
+- **execução observada:** etapas que realmente ocorreram;
+- **resultado e evidências:** o que foi produzido e o que sustenta a conclusão;
+- **limitações e intervenção:** o que falhou, ficou pendente ou exige decisão humana.
+
+O Vision permanece responsável pela experiência de usuário, pelo contexto aplicado e pela apresentação dos estados. O Agent coordena tarefas dentro das capacidades e políticas recebidas. A autorização deve continuar sendo imposta por controles confiáveis, não por instruções de prompt ou pela decisão do Agent. O ORC mantém sua responsabilidade de resolução semântica nos fluxos em que for usado.
+
+Enquanto o adaptador do Agent e o fluxo real não estiverem integrados e validados, a UI e a narrativa devem tratar essa integração como planejada ou experimental — nunca simular uma execução real como se tivesse ocorrido.
+
+### 17.5 Skills como capacidades de produto
+
+Skills devem ser modeladas como capacidades identificáveis, versionadas e governadas, não como funcionalidades mágicas nem como um catálogo indiscriminado de prompts.
+
+Para cada Skill, o catálogo deverá registrar, conforme aplicável:
+- identificador e versão;
+- propósito e tarefas adequadas;
+- entradas necessárias e formatos aceitos;
+- saídas esperadas;
+- dependências e integrações;
+- permissões exigidas;
+- limitações conhecidas e riscos;
+- critérios de elegibilidade;
+- política de confirmação/revisão humana;
+- estado de disponibilidade no ambiente;
+- evidências e testes de validação.
+
+O CPE poderá usar o perfil e o contexto para filtrar e recomendar Skills elegíveis. A seleção final deve respeitar disponibilidade real, políticas, permissões e compatibilidade de entradas. Uma recomendação não equivale a execução; execução não equivale a sucesso; sucesso declarado não equivale a resultado verificado.
+
+A interface deve explicar a função da Skill em linguagem adequada ao usuário, mostrar requisitos relevantes e comunicar claramente se ela está disponível, precisa de configuração, foi executada ou falhou. Não expor detalhes internos desnecessários nem ocultar consequências relevantes.
+
+### 17.6 Narrativa de produto e linguagem
+
+A narrativa deve acompanhar a experiência real e usar uma linguagem consistente entre Portal, Vision e Agent:
+- explicar o problema e o resultado esperado antes de enfatizar a tecnologia;
+- apresentar a personalização como adaptação contextual e controlada, não como conhecimento infalível do usuário;
+- descrever o Agent como coordenador de tarefas e capacidades, quando aplicável;
+- descrever Skills como capacidades delimitadas com requisitos e limites;
+- distinguir explicitamente o que está disponível hoje, o que é experimental e o que está no roadmap;
+- explicar incerteza, validação, evidências e necessidade de confirmação em linguagem compreensível;
+- evitar promessas de autonomia, integração, precisão, segurança, impacto ou retorno que não tenham validação suficiente.
+
+O Portal pode usar uma narrativa institucional concisa para descoberta e acesso; o Vision deve traduzir essa promessa em orientação operacional e resultados observáveis. A linguagem e a marca podem variar de profundidade por superfície, mas não podem contradizer-se. A interface não deve prometer algo que o fluxo executável não entrega.
+
+### 17.7 Personalização sem fragmentação da plataforma
+
+A personalização poderá ajustar:
+- ordem e relevância das perguntas;
+- onboarding e nível de orientação;
+- conteúdo, exemplos e explicações;
+- fluxos elegíveis e Skills recomendadas;
+- visualização de resultados e próximos passos;
+- preferências explícitas de interação.
+
+Não deverá criar uma identidade visual diferente para cada perfil, alterar permissões, esconder estados relevantes, mudar silenciosamente critérios de avaliação ou inventar capacidades. A plataforma deve continuar reconhecível como um único produto 3L0, com experiências contextualizadas sobre uma base consistente.
+
+### 17.8 Sequência de design e implementação
+
+1. Mapear a jornada atual do Portal ao Vision e identificar o que existe, está incompleto ou é apenas planejado.
+2. Auditar a UI atual e os ativos/tokens oficiais da identidade 3L0.
+3. Definir personas operacionais apenas na medida necessária para tarefas e necessidades observáveis, sem inferir atributos sensíveis.
+4. Construir mapa de jornada, arquitetura de informação e estados de UX, incluindo exceções e recuperação.
+5. Definir o catálogo versionado de capacidades/Skills e o contrato de integração do Agent.
+6. Mapear os estados do Agent e das Skills para estados de interface explícitos, sem confundir plano, execução e resultado.
+7. Definir a narrativa por superfície e os termos consistentes usados na interface.
+8. Implementar primeiro a estrutura de UI e os estados sobre capacidades reais já disponíveis; manter integrações futuras claramente sinalizadas.
+9. Validar com testes funcionais, acessibilidade, responsividade, falhas e tarefas representativas de usuários.
+10. Só então ampliar a personalização com base em evidências de uso, feedback e avaliação.
+
+### 17.9 Critérios de aceitação de UX/UI e integração
+
+- A jornada completa possui estados normais, alternativos e de recuperação documentados.
+- O usuário consegue entender o objetivo, o próximo passo e o estado atual sem conhecer a arquitetura interna.
+- A interface usa a identidade oficial e componentes consistentes em todas as telas e estados relevantes.
+- Recomendações de fluxo/Skill são explicáveis e respeitam o catálogo, disponibilidade, entradas, políticas e permissões.
+- A interface diferencia claramente intenção, plano, execução, resultado e evidência.
+- Falhas, incerteza, conflitos e necessidade de confirmação são visíveis e acionáveis.
+- Nenhuma integração simulada é apresentada como execução real.
+- A narrativa do Portal, Vision e Agent é coerente com o estado implementado do produto.
+- Testes cobrem contexto incompleto, Skill indisponível, dependência falha, permissão negada, erro do Agent, resultado inconclusivo e isolamento entre organizações.
+- A avaliação de usabilidade, acessibilidade e conclusão de tarefas é registrada antes de afirmar que a experiência está validada.
+
+Esta seção amplia os requisitos arquiteturais para orientar UX, UI, narrativa e integração futura do Agent/Skills. Não declara que essas integrações ou melhorias já foram implementadas.
