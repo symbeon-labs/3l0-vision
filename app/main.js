@@ -2,6 +2,7 @@ import { OrcClient } from "../core/orc/client.js";
 import { deterministicResolver } from "../core/orc/deterministic-resolver.js";
 import { ResolutionPipeline } from "../core/pipeline/resolution-pipeline.js";
 import { BrowserCaptureAdapter } from "./capture/browser-capture.js";
+import { parseGlyphReference } from "../core/vision/glyph-reference.js";
 import { LocalCatalog } from "./catalog/local-catalog.js";
 import "./styles.css";
 
@@ -31,14 +32,28 @@ function handleCaptureStatus(status) {
   if (status.type === "camera_ready") target.textContent = "APONTE PARA O CÓDIGO";
   if (status.type === "barcode_unavailable") target.textContent = "LEITURA AUTOMÁTICA INDISPONÍVEL · USE A ENTRADA MANUAL";
   if (status.type === "camera_error") target.textContent = "CÂMERA INDISPONÍVEL · USE A ENTRADA MANUAL";
-  if (status.type === "barcode_detected") { target.textContent = "CÓDIGO DETECTADO · " + status.value; resolveInput({ code: status.value, scheme: formatToScheme(status.format), method: "barcode" }); }
+  if (status.type === "barcode_detected") {
+    target.textContent = "CÓDIGO DETECTADO · " + status.value;
+    try {
+      const glyph = status.format === "qr_code" ? parseGlyphReference(status.value) : null;
+      resolveInput({
+        code: glyph ? glyph.value : status.value,
+        scheme: glyph ? glyph.scheme : formatToScheme(status.format),
+        method: "barcode",
+        glyphVersion: glyph?.version ?? null
+      });
+    } catch (error) {
+      target.textContent = "REFERÊNCIA GLYPH INVÁLIDA · " + error.message;
+      console.warn("Glyph QR validation failed", error);
+    }
+  }
 }
 
 async function resolveInput(input) {
   stopCapture();
   renderProcessing();
   try {
-    const pipeline = new ResolutionPipeline({ captureAdapter: { async capture() { return { source: input.method === "barcode" ? "browser-camera" : "manual-entry", modality: "identifier", identifiers: [{ scheme: input.scheme, value: input.code }], context: { capture_method: input.method } }; } }, entityRepository: catalog, orcClient: client, onStage: function (event) { updateProcessingStage(event.name); } });
+    const pipeline = new ResolutionPipeline({ captureAdapter: { async capture() { return { source: input.method === "barcode" ? "browser-camera" : "manual-entry", modality: "identifier", identifiers: [{ scheme: input.scheme, value: input.code }], context: { capture_method: input.method, ...(input.glyphVersion ? { glyph: { version: input.glyphVersion, validation: "syntax-only" } } : {}) } }; } }, entityRepository: catalog, orcClient: client, onStage: function (event) { updateProcessingStage(event.name); } });
     const output = await pipeline.run({ input, context: { operation: "identify_product", interface: "web" } });
     renderResult(output);
   } catch (error) { renderError(error); }
