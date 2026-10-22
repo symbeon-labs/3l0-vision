@@ -1,7 +1,7 @@
 # Integração visual — 3L0 Portal → 3L0 Vision
 
 **Data:** 21/10/2026  
-**Status:** aplicada em branch de integração; pendente de revisão visual, testes e merge.
+**Status:** mergeado em main pela PR #8 (commit 839a76d8f7b5c0348f7fae9e66345907096a600b). O preview Vercel foi reportado como Ready; o deploy de produção e a verificação visual pós-merge ainda precisam ser confirmados.
 
 ## Objetivo
 
@@ -25,13 +25,13 @@ A referência é a página pública do repositório `symbeon-labs/3l0-portal`, e
 
 Esta é uma integração visual em CSS. Não altera o pipeline de resolução, os contratos de observação, o catálogo, a validação sintática Glyph nem a fronteira de integração ORC. A aparência não implica que funções experimentais tenham sido validadas em campo.
 
-## Validação necessária antes do merge
+## Validação pós-merge e produção
 
 1. Executar os testes existentes do repositório.
 2. Verificar a página inicial, câmera, entrada manual, processamento, resultados `RESOLVED`, `UNCERTAIN` e `CONFLICT`.
 3. Conferir desktop e mobile, teclado/foco e preferência por movimento reduzido.
 4. Confirmar que a configuração de build/deploy da interface produz os artefatos esperados.
-5. Só então mesclar e confirmar o deploy real pela URL publicada.
+5. Confirmar que a produção aponta para o commit mergeado, abrir a URL canônica publicada e validar os fluxos visualmente.
 
 ## Fonte e implementação
 
