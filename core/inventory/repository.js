@@ -61,6 +61,17 @@ export class InventoryRepository {
     return { movement, duplicate: false };
   }
 
+  setMovementState(movementId, state) {
+    const allowedStates = ["CONFIRMED", "IMPORTED", "ESTIMATED", "CONFLICTING", "NEEDS_REVIEW"];
+    if (!allowedStates.includes(state)) throw new Error("inventory_movement_state_invalid");
+    const records = this.read(COLLECTIONS.movements);
+    const index = records.findIndex((record) => record.movementId === movementId);
+    if (index < 0) throw new Error("inventory_movement_not_found");
+    records[index] = { ...records[index], state };
+    this.write(COLLECTIONS.movements, records);
+    return records[index];
+  }
+
   listEvidence() {
     return this.read(COLLECTIONS.evidence);
   }
