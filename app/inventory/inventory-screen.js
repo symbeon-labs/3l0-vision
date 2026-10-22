@@ -48,9 +48,9 @@ export function renderInventoryScreen({ app, onBack }) {
           }).join("")}</tbody></table></div>` : '<div class="inventory-empty">Nenhum produto cadastrado. Comece pelo formulário acima.</div>'}
         </section>
         <section class="inventory-table-section"><div class="inventory-section-head"><div><p class="eyebrow">04 · RASTREABILIDADE</p><h2>Movimentações recentes</h2></div></div>
-          ${movements.length ? `<div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Estado</th></tr></thead><tbody>${movements.slice(0, 30).map((movement) => {
+          ${movements.length ? `<div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Estado</th><th>Ação</th></tr></thead><tbody>${movements.slice(0, 30).map((movement) => {
             const product = repository.getProduct(movement.productId);
-            return `<tr><td>${escapeHtml(new Date(movement.occurredAt).toLocaleString("pt-BR"))}</td><td>${escapeHtml(product?.name || "Produto indisponível")}</td><td>${escapeHtml(movement.type)}</td><td>${escapeHtml(formatNumber(movement.quantity))} ${escapeHtml(movement.unit)}</td><td><span class="inventory-badge">${escapeHtml(movement.state)}</span></td></tr>`;
+            return `<tr><td>${escapeHtml(new Date(movement.occurredAt).toLocaleString("pt-BR"))}</td><td>${escapeHtml(product?.name || "Produto indisponível")}</td><td>${escapeHtml(movement.type)}</td><td>${escapeHtml(formatNumber(movement.quantity))} ${escapeHtml(movement.unit)}</td><td><span class="inventory-badge">${escapeHtml(movement.state)}</span></td><td>${movement.state === "NEEDS_REVIEW" ? `<button class="inventory-confirm" type="button" data-confirm-movement="${escapeHtml(movement.movementId)}">CONFIRMAR</button>` : "—"}</td></tr>`;
           }).join("")}</tbody></table></div>` : '<div class="inventory-empty">Nenhuma movimentação registrada.</div>'}
         </section>
         <footer><span>3L0 VISION · INVENTÁRIO</span><span>PROTÓTIPO LOCAL · V0.1</span></footer>
@@ -60,6 +60,7 @@ export function renderInventoryScreen({ app, onBack }) {
     document.querySelector("#product-form").addEventListener("submit", handleProduct);
     document.querySelector("#movement-form").addEventListener("submit", handleMovement);
     document.querySelector("#inventory-export")?.addEventListener("click", exportCsv);
+    document.querySelectorAll("[data-confirm-movement]").forEach((button) => button.addEventListener("click", () => confirmMovement(button.dataset.confirmMovement)));
   }
 
   function handleProduct(event) {
@@ -101,6 +102,15 @@ export function renderInventoryScreen({ app, onBack }) {
       render("Movimentação registrada como NEEDS_REVIEW; não altera o saldo confirmado.");
     } catch (error) {
       render("Não foi possível registrar a movimentação: " + error.message);
+    }
+  }
+
+  function confirmMovement(movementId) {
+    try {
+      repository.setMovementState(movementId, "CONFIRMED");
+      render("Movimentação confirmada localmente; saldo recalculado. Em produção, esta ação exige autorização e trilha de auditoria no servidor.");
+    } catch (error) {
+      render("Não foi possível confirmar a movimentação: " + error.message);
     }
   }
 
