@@ -138,15 +138,27 @@ PRODUCT + NF-e/XML + ERP/WMS REPRESENTATION + OPERATOR
 - [ ] capture target-system field/schema representation
 - [ ] define canonical product representation
 - [ ] define versioned target mapping contract
-- [ ] NF-e/XML ingestion
+- [ ] NF-e/XML ingestion and source-preserving document extraction
+- [ ] physical product capture after/alongside document review (EAN/GTIN, QR/Glyph, image/OCR, operator)
 - [ ] ERP/WMS lookup or import adapter
-- [ ] product matching across physical/document/system representations
-- [ ] missing-field resolution
-- [ ] reviewable JSON/CSV/XLSX output
+- [ ] product matching across physical/document/system representations through ORC
+- [ ] explicit reconciliation of declared quantity vs physically received quantity
+- [ ] missing-field resolution without inventing values
+- [ ] mapping validation against target schema, required fields and enumerations
+- [ ] reviewable JSON/CSV/XLSX output with provenance and mapping version
 - [ ] receiving workflow
 - [ ] exception queue
 - [ ] audit/evidence history
 - [ ] live ERP/system adapter only after mapping validation
+
+### Recommended receiving sequence
+
+```text
+NF-e/XML → document declarations → physical product observation → ORC resolution
+→ canonical 3L0 entity → versioned ERP mapping → reviewable output
+```
+
+This is the recommended sequence for Case 01, not a requirement that sources arrive in that order. Each source remains a separate observation. Document identity, physical identity, received quantity and fiscal classification are distinct claims and must not be inferred from one another automatically.
 
 ### Guardrails
 
