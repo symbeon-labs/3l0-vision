@@ -1,6 +1,6 @@
 # 3L0 Vision — Interoperabilidade e Mapeamento Operacional
 
-**Status:** direção arquitetural; capacidade de Receiving MVP / Fase 2. Implementação end-to-end e validação de campo pendentes.
+**Status:** direção arquitetural; fundação parcial de código da Fase 2. Implementação end-to-end e validação de campo pendentes. O contrato de observação documental aceita itens já extraídos; não faz parsing de XML bruto. O mapper genérico produz saída em memória para revisão e não escreve no ERP.
 
 ## Objetivo
 
@@ -137,7 +137,7 @@ A integração live só entra após:
 
 Essas entradas são representações e observações. Nenhuma é automaticamente autoridade universal sobre todas as propriedades do produto.
 
-## Gates de validação
+## Estado de implementação — 2026-10-21\n\nImplementado nesta tranche:\n- contrato de observação para itens documentais já extraídos, com origem e valores declarados preservados;\n- mapping genérico versionado com caminhos de origem/destino, transformações explícitas limitadas, proveniência por campo e bloqueio para resolução diferente de `RESOLVED`;\n- campos obrigatórios ausentes permanecem ausentes e geram erro explícito; a saída é sempre marcada como não-live.\n\nAinda pendente: parser de XML bruto da NF-e, schema real de ERP/WMS, entidade canônica persistente, resolução conjunta de fontes, reconciliação de quantidades, UI, artefato de exportação e validação de campo. Consulte `docs/phase-2-execution-log.md`.\n\n## Gates de validação
 
 ### Gate A — captura e normalização
 Receber fontes representativas e normalizá-las sem perder origem, versão, contexto ou erro técnico.
