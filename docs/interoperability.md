@@ -1,232 +1,181 @@
 # 3L0 Vision — Interoperabilidade e Mapeamento Operacional
 
-Status: **architectural direction · Phase 2**
+**Status:** direção arquitetural; fundação parcial de código da Fase 2. Implementação end-to-end e validação de campo pendentes. O contrato de observação documental aceita itens já extraídos; não faz parsing de XML bruto. O mapper genérico produz saída em memória para revisão e não escreve no ERP.
 
-## Purpose
+## Objetivo
 
-The 3L0 must not learn an enterprise system as its internal semantic model.
+O 3L0 Vision relaciona representações heterogêneas da mesma realidade operacional e transforma uma entidade resolvida em uma representação adequada ao sistema de destino. Não deve adotar o esquema de um ERP como seu modelo semântico interno.
 
-Its role is to resolve heterogeneous representations of the same operational reality and translate the resolved representation into the schema required by a target operational system.
+Para o Caso 01, o primeiro fluxo recomendado é **receber o documento fiscal, observar a mercadoria física, resolver a relação entre as fontes e só então gerar uma representação revisável para o ERP específico**.
 
-The canonical direction is:
+## Fluxo de referência — recebimento
 
-```
-PHYSICAL / DOCUMENT / ENTERPRISE SYSTEM
-              ↓
-        OBSERVATIONS
-              ↓
-         NORMALIZATION
-              ↓
-             ORC
-              ↓
-     3L0 CANONICAL ENTITY
-       + CONTEXT + EVIDENCE
-              ↓
-      TARGET SYSTEM MAPPING
-              ↓
-       ERP / WMS / SYSTEM
-```
-
-## Canonical principle
-
-**Identifier ≠ Entity ≠ System Record.**
-
-A barcode, SKU or internal code identifies a representation. The enterprise record is a representation inside a particular system. The 3L0 entity is the operational representation resolved across sources.
-
-Therefore:
-
-```
-EAN/SKU
-  ↓
-identifier
-
-ERP record
-  ↓
-system representation
-
-3L0 entity
-  ↓
-resolved operational representation
+```text
+1. NF-e / XML / documento disponível
+            ↓
+2. EXTRAÇÃO DE DECLARAÇÕES DO DOCUMENTO
+            ↓
+3. CAPTURA DA MERCADORIA FÍSICA
+   EAN/GTIN · QR/Glyph · imagem/OCR · operador
+            ↓
+4. OBSERVAÇÕES + PROVENIÊNCIA + CONTEXTO
+            ↓
+5. NORMALIZAÇÃO E RESOLUÇÃO ORC
+            ↓
+6. ENTIDADE CANÔNICA 3L0
+   + evidências + campos ausentes + conflitos
+            ↓
+7. MAPPING VERSIONADO PARA O ERP DE DESTINO
+            ↓
+8. VALIDAÇÃO E SAÍDA REVISÁVEL
+   JSON / CSV / XLSX ou contrato específico
+            ↓
+9. ADAPTADOR AUTORIZADO PARA INTEGRAÇÃO LIVE
+   somente após validação do mapping
 ```
 
-These must not be collapsed into one primitive.
+A sequência acima é a ordem operacional recomendada para o piloto de recebimento. Não impõe uma ordem global de chegada às fontes: documento, produto e dados do ERP podem estar disponíveis em momentos diferentes. Cada fonte deve ser preservada como observação, e a resolução deve considerar o contexto e a evidência disponível.
 
-## Inputs
+## Princípio canônico
 
-The interoperability probe may accept:
+**Identificador ≠ entidade canônica 3L0 ≠ registro do sistema de destino.**
 
-- product image;
-- QR / EAN / barcode;
+- **Identificador:** EAN/GTIN, SKU, código interno, QR ou referência Glyph. É uma referência observada, não a entidade por si só.
+- **Entidade canônica 3L0:** representação operacional persistente produzida por resolução justificada entre observações, evidências e contexto.
+- **Registro de destino:** representação da entidade dentro de um ERP/WMS específico, com seus códigos, campos, enumerações e restrições próprias.
+
+Não colapsar essas três camadas. O código do ERP A pode diferir do SKU do ERP B sem exigir que a identidade canônica seja alterada.
+
+## 1. Documento fiscal: declaração de origem
+
+Quando disponível e autorizado, preferir o XML estruturado da NF-e ao OCR de uma imagem. Preservar a fonte e extrair, conforme presentes, elementos como:
+
+- identificador do emitente/fornecedor;
+- código e descrição do item no documento;
+- GTIN/EAN declarado;
+- unidade comercial e quantidade;
+- valores;
+- classificações e dados fiscais relevantes ao fluxo.
+
+A NF-e informa o que foi declarado no documento. Não prova, por si só, que a mercadoria física recebida corresponde ao item ou à quantidade declarada. O parser deve preservar os valores originais e a proveniência; não deve silenciosamente corrigir ou completar dados ausentes.
+
+Imagem/PDF e OCR são caminhos alternativos quando XML não estiver disponível. Resultados extraídos por OCR devem permanecer distinguíveis dos dados estruturados de origem.
+
+## 2. Observação física: evidência independente
+
+O operador observa o produto com as modalidades disponíveis:
+
+- EAN/GTIN e outros códigos;
+- QR comum ou referência Glyph reconhecida;
+- imagem e características da embalagem;
+- OCR de texto visível;
+- confirmação/correção do operador.
+
+Uma etiqueta Glyph pode recuperar uma entidade candidata quando seu registro estiver disponível. A validação sintática do QR não prova que o registro existe, que está ativo ou que a etiqueta está corretamente associada ao objeto físico. A leitura Glyph não deve contornar a resolução ORC.
+
+## 3. Resolução: relacionar as fontes
+
+O Vision normaliza as fontes em observações com identificadores, contexto, evidências e proveniência. O ORC resolve a pergunta operacional delimitada: se as evidências sustentam que o produto observado, o item documental e o registro empresarial correspondem à mesma entidade.
+
+Estados semânticos mantêm-se explícitos:
+- `RESOLVED`: a resolução é sustentada para a pergunta e o contexto definidos;
+- `UNCERTAIN`: evidência insuficiente ou ambígua;
+- `CONFLICT`: evidências incompatíveis.
+
+Falhas técnicas — por exemplo, indisponibilidade de um serviço — devem permanecer falhas técnicas, não ser convertidas em conflito semântico. A resolução da identidade não confirma automaticamente quantidade recebida, preço, validade, integridade da embalagem ou conformidade fiscal; cada afirmação exige evidência e regras próprias.
+
+## 4. Entidade canônica e mapping de destino
+
+Depois da resolução, o produto canônico do 3L0 serve como base estável para gerar representações específicas. O mapping é um contrato versionado na camada de produto/integração, não uma responsabilidade do núcleo semântico do ORC.
+
+Exemplo conceitual:
+
+| Campo canônico 3L0 | ERP A | ERP B |
+|---|---|---|
+| Identidade canônica | referência interna mapeada | referência interna mapeada |
+| Descrição do produto | `description` | `product_name` |
+| GTIN/EAN | `ean` | `barcode` |
+| Unidade comercial | `unit_measure` | `sales_unit` |
+| NCM, se disponível e validado | campo fiscal do ERP A | campo fiscal do ERP B |
+
+Os nomes acima são ilustrativos, não um contrato de ERP real. O mapping real deve ser derivado do schema, exportação ou documentação autorizada do sistema de destino.
+
+Para cada campo mapeado, registrar quando aplicável:
+- caminho/campo canônico e campo de destino;
+- origem e referência de evidência;
+- regra de transformação;
+- versão do mapping;
+- validação e restrições do destino;
+- estado de resolução;
+- necessidade de confirmação humana.
+
+Campos ausentes ou não resolvidos permanecem explícitos. Não inventar valores para satisfazer um formulário ou esquema de ERP. Classificações fiscais não devem ser usadas como verdade de identidade; a resolução fiscal é uma camada downstream, com fontes, base normativa e versão próprias.
+
+## 5. Adaptador e saída
+
+O adaptador cuida do transporte, autenticação, serialização e contrato específico do ERP/WMS. A primeira prova deve gerar uma saída revisável (por exemplo JSON/CSV/XLSX) e registrar validações e exceções. Não escrever automaticamente no ERP durante o primeiro experimento.
+
+A integração live só entra após:
+1. schema de destino documentado;
+2. mapping versionado e testado;
+3. campos obrigatórios e enumerações identificados;
+4. tratamento de erros e idempotência definidos;
+5. autorização e credenciais de integração configuradas;
+6. revisão humana e comparação operacional concluídas.
+
+## Entradas possíveis
+
 - NF-e XML;
-- NF image/PDF;
-- ERP/WMS export;
+- imagem/PDF do documento;
+- imagem do produto;
+- QR / EAN / barcode;
+- exportação ERP/WMS;
 - CSV/XLSX;
-- structured product registration;
-- screenshot or captured representation of the target system;
-- operator-provided values.
+- registro estruturado de produto;
+- captura de tela do sistema-alvo;
+- valores fornecidos pelo operador.
 
-These are **observations or source representations**, not automatically authoritative truth.
+Essas entradas são representações e observações. Nenhuma é automaticamente autoridade universal sobre todas as propriedades do produto.
 
-## Target-system capture
+## Estado de implementação — 2026-10-21\n\nImplementado nesta tranche:\n- contrato de observação para itens documentais já extraídos, com origem e valores declarados preservados;\n- mapping genérico versionado com caminhos de origem/destino, transformações explícitas limitadas, proveniência por campo e bloqueio para resolução diferente de `RESOLVED`;\n- campos obrigatórios ausentes permanecem ausentes e geram erro explícito; a saída é sempre marcada como não-live.\n\nAinda pendente: parser de XML bruto da NF-e, schema real de ERP/WMS, entidade canônica persistente, resolução conjunta de fontes, reconciliação de quantidades, UI, artefato de exportação e validação de campo. Consulte `docs/phase-2-execution-log.md`.\n\n## Gates de validação
 
-The first interoperability experiment should be able to receive a representation of how the company currently registers a product.
+### Gate A — captura e normalização
+Receber fontes representativas e normalizá-las sem perder origem, versão, contexto ou erro técnico.
 
-Examples:
+### Gate B — entidade canônica
+Definir a representação mínima de produto e preservar a distinção entre identificadores, entidade e registros de sistemas.
 
-- screenshot;
-- exported spreadsheet;
-- CSV/XLSX;
-- PDF;
-- structured sample record;
-- manually transcribed field list.
+### Gate C — resolução
+Relacionar produto físico, documento e representação empresarial; testar ambiguidades, ausência de dados e contradições.
 
-The objective is not to automate the system immediately.
+### Gate D — mapping
+Derivar o mapping do schema real do ERP/WMS e gerar saída validável, versionada e revisável.
 
-The objective is to discover and document:
+### Gate E — exportação revisável
+Validar dados, proveniência, campos obrigatórios e exceções sem escrita live.
 
-- field names;
-- field types;
-- required fields;
-- optional fields;
-- identifiers;
-- enumerations;
-- relationships;
-- source of each field;
-- fields that require human confirmation;
-- fields that can be resolved from authoritative sources;
-- fields that are local to the target system.
+### Gate F — integração live
+Somente depois da prova anterior, implementar adaptador autenticado para importação/escrita.
 
-## Mapping
+## Relação com as fases
 
-The mapping layer translates between the canonical 3L0 representation and the target system representation.
+**Fase 1** valida um ciclo de captura, observação, resolução e estado de produto. O Gate A do Glyph é apenas validação sintática de uma referência QR versionada e sua entrada como observação; não implementa registry, emissão, revogação ou consulta de identidade.
 
-Conceptually:
+**Fase 2 — Receiving MVP** demonstra a reconciliação de produto físico + documento + representação empresarial, resolução em entidade canônica e geração de uma saída para um ERP específico.
 
-```
-3L0 canonical field
-        ↓
-mapping rule
-        ↓
-target-system field
-```
+## O que isso não significa
 
-Example:
+Esta arquitetura não significa:
+- substituir o ERP;
+- recriar o modelo de dados do ERP dentro do ORC;
+- tratar screenshot/export como verdade automática;
+- afirmar integração com todos os ERPs;
+- habilitar escrita live antes de validar o mapping;
+- considerar uma etiqueta QR prova de autenticidade física;
+- presumir que o MVP já ingere NF-e/XML ou gera mapping funcional.
 
-```
-canonical.product.identifiers.ean
-        ↓
-target.ean
+## Critério de sucesso
 
-canonical.product.description
-        ↓
-target.description
+A capacidade estará demonstrada quando um produto real, representado por evidências físicas, documentais e empresariais, puder ser resolvido em uma entidade canônica e transformado em uma representação revisável do sistema-alvo, preservando proveniência, conflitos, campos não resolvidos e versão do mapping, sem inventar dados.
 
-canonical.product.unit
-        ↓
-target.unit_measure
-
-canonical.fiscal.ncm
-        ↓
-target.ncm
-```
-
-The mapping must preserve provenance and unresolved states.
-
-A field that cannot be safely resolved must remain unresolved or require confirmation. It must not be filled by invention.
-
-## Adapter boundary
-
-The integration architecture should evolve toward:
-
-```
-3L0 Canonical Representation
-            ↓
-       Mapping Contract
-            ↓
-      Target Adapter
-            ↓
-      Enterprise System
-```
-
-The adapter owns system-specific transport and serialization.
-
-The canonical model must not become coupled to one ERP/WMS.
-
-## Validation order
-
-Do not begin with live ERP writes.
-
-### Probe A — Representation capture
-
-Collect the real product representations already used by the company.
-
-### Probe B — Canonical normalization
-
-Transform those representations into a stable 3L0 canonical structure.
-
-### Probe C — Resolution
-
-Relate physical product, document and enterprise representation through ORC.
-
-### Probe D — Target mapping
-
-Generate the structure expected by the target system.
-
-### Probe E — Export
-
-Initially produce JSON/CSV/XLSX or another reviewable representation.
-
-### Probe F — Live integration
-
-Only after the mapping is validated operationally, implement authenticated API/import/write adapters.
-
-## Phase relationship
-
-This capability belongs primarily to the **Receiving MVP / Phase 2**.
-
-Phase 1 proves:
-
-```
-ONE PHYSICAL PRODUCT
-→ OBSERVATION
-→ RESOLUTION
-→ PERSISTENT IDENTITY
-```
-
-Phase 2 proves:
-
-```
-PHYSICAL PRODUCT
-+ DOCUMENT
-+ ENTERPRISE REPRESENTATION
-→ RESOLUTION
-→ CANONICAL ENTITY
-→ TARGET-SYSTEM REPRESENTATION
-→ RECEIVING DECISION
-```
-
-## What this does not mean
-
-This layer does not mean:
-
-- replacing the ERP;
-- recreating the ERP data model;
-- building live integrations before validation;
-- treating screenshots as authoritative records;
-- turning every target-system field into an ORC primitive;
-- moving enterprise-specific semantics into the ORC core.
-
-The target system remains a consumer and source of operational representations.
-
-## Success criterion
-
-The interoperability capability is proven when the same real product can be represented from multiple sources and the system can:
-
-1. preserve the source of each value;
-2. resolve the representations into one operational entity when justified;
-3. expose conflicts and missing information;
-4. generate the target-system representation without silently inventing data;
-5. allow a human to review unresolved mappings;
-6. reproduce the mapping from a versioned contract.
-
-The commercial integration comes after this proof, not before it.
+A integração comercial vem depois dessa prova, não antes.

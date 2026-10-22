@@ -137,16 +137,28 @@ PRODUCT + NF-e/XML + ERP/WMS REPRESENTATION + OPERATOR
 - [ ] collect representative product records from the target system
 - [ ] capture target-system field/schema representation
 - [ ] define canonical product representation
-- [ ] define versioned target mapping contract
-- [ ] NF-e/XML ingestion
+- [x] define initial versioned target mapping contract (code-level foundation; real target schema still pending)
+- [x] source-preserving document-item observation contract (accepts already-extracted fields)\n- [ ] raw NF-e/XML parsing, structural validation and file ingestion
+- [ ] physical product capture after/alongside document review (EAN/GTIN, QR/Glyph, image/OCR, operator)
 - [ ] ERP/WMS lookup or import adapter
-- [ ] product matching across physical/document/system representations
-- [ ] missing-field resolution
-- [ ] reviewable JSON/CSV/XLSX output
+- [ ] product matching across physical/document/system representations through ORC
+- [ ] explicit reconciliation of declared quantity vs physically received quantity
+- [ ] missing-field resolution without inventing values
+- [x] generic required-source-field validation and explicit mapping transforms\n- [ ] mapping validation against the real target schema and its enumerations
+- [x] reviewable in-memory target payload with mapping version and field provenance\n- [ ] serialized JSON/CSV/XLSX export artifact
 - [ ] receiving workflow
 - [ ] exception queue
 - [ ] audit/evidence history
 - [ ] live ERP/system adapter only after mapping validation
+
+### Recommended receiving sequence
+
+```text
+NF-e/XML → document declarations → physical product observation → ORC resolution
+→ canonical 3L0 entity → versioned ERP mapping → reviewable output
+```
+
+This is the recommended sequence for Case 01, not a requirement that sources arrive in that order. Each source remains a separate observation. Document identity, physical identity, received quantity and fiscal classification are distinct claims and must not be inferred from one another automatically.
 
 ### Guardrails
 
@@ -232,3 +244,8 @@ No priority yet for large feature catalogs, autonomous agents, complex gamificat
 ## North-star metric
 
 > **Operational work eliminated per successfully resolved operation.**
+
+
+## Phase 2 execution status — 2026-10-21
+
+The initial code tranche adds a source-preserving document-item observation contract and a generic versioned target-mapping function. The mapper only accepts `RESOLVED`, records missing fields and provenance, and returns `REVIEW_REQUIRED` or `INVALID_MAPPING_INPUT`; it never writes to a target system. These components are foundations, not an end-to-end Receiving MVP. Raw NF-e XML parsing, real ERP schema, canonical persistence, cross-source ORC reconciliation, UI, export artifacts and field validation remain pending. See `docs/phase-2-execution-log.md`.

@@ -2,6 +2,7 @@ import { OrcClient } from "../core/orc/client.js";
 import { deterministicResolver } from "../core/orc/deterministic-resolver.js";
 import { ResolutionPipeline } from "../core/pipeline/resolution-pipeline.js";
 import { BrowserCaptureAdapter } from "./capture/browser-capture.js";
+import { parseGlyphReference } from "../core/vision/glyph-reference.js";
 import { LocalCatalog } from "./catalog/local-catalog.js";
 import "./styles.css";
 
@@ -18,10 +19,14 @@ function renderHome() {
 }
 
 function renderCapture() {
-  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR</button><div class="status">CAPTURA <span>AO VIVO</span></div></header><section class="capture-stage"><p class="eyebrow">OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" inputmode="numeric" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve.</p></section></main>';
+  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR</button><div class="status">CAPTURA <span>AO VIVO</span></div></header><section class="capture-stage"><p class="eyebrow">OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve.</p></section></main>';
   document.querySelector("#back").addEventListener("click", renderHome);
   captureAdapter = new BrowserCaptureAdapter({ videoElement: document.querySelector("#camera"), onStatus: handleCaptureStatus });
-  document.querySelector("#manual-form").addEventListener("submit", async function (event) { event.preventDefault(); const code = new FormData(event.currentTarget).get("code")?.toString().trim(); if (code) await resolveInput({ code, scheme: inferScheme(code), method: "manual" }); });
+  document.querySelector("#manual-form").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    const code = new FormData(event.currentTarget).get("code")?.toString().trim();
+    if (code) await resolveInput({ code, scheme: inferScheme(code), method: "manual" });
+  });
   captureAdapter.start().catch(function (error) { handleCaptureStatus({ type: "camera_error", error }); });
 }
 
@@ -31,14 +36,40 @@ function handleCaptureStatus(status) {
   if (status.type === "camera_ready") target.textContent = "APONTE PARA O CÓDIGO";
   if (status.type === "barcode_unavailable") target.textContent = "LEITURA AUTOMÁTICA INDISPONÍVEL · USE A ENTRADA MANUAL";
   if (status.type === "camera_error") target.textContent = "CÂMERA INDISPONÍVEL · USE A ENTRADA MANUAL";
-  if (status.type === "barcode_detected") { target.textContent = "CÓDIGO DETECTADO · " + status.value; resolveInput({ code: status.value, scheme: formatToScheme(status.format), method: "barcode" }); }
+  if (status.type === "barcode_scan_error") target.textContent = "FALHA TÉCNICA NA LEITURA · TENTE NOVAMENTE OU INFORME O CÓDIGO";
+  if (status.type === "barcode_detected") {
+    try {
+      const glyph = status.format === "qr_code" ? parseGlyphReference(status.value) : null;
+      const code = glyph ? glyph.value : status.value;
+      const scheme = glyph ? glyph.scheme : formatToScheme(status.format);
+      target.textContent = glyph ? "REFERÊNCIA GLYPH RECONHECIDA · VALIDADA SINTATICAMENTE" : "CÓDIGO DETECTADO · " + status.format;
+      void resolveInput({ code, scheme, method: "barcode", glyphVersion: glyph?.version ?? null });
+    } catch (error) {
+      target.textContent = "REFERÊNCIA GLYPH INVÁLIDA OU NÃO SUPORTADA";
+      console.warn("Glyph QR validation failed", error);
+    }
+  }
 }
 
 async function resolveInput(input) {
   stopCapture();
   renderProcessing();
   try {
-    const pipeline = new ResolutionPipeline({ captureAdapter: { async capture() { return { source: input.method === "barcode" ? "browser-camera" : "manual-entry", modality: "identifier", identifiers: [{ scheme: input.scheme, value: input.code }], context: { capture_method: input.method } }; } }, entityRepository: catalog, orcClient: client, onStage: function (event) { updateProcessingStage(event.name); } });
+    const pipeline = new ResolutionPipeline({
+      captureAdapter: {
+        async capture() {
+          return {
+            source: input.method === "barcode" ? "browser-camera" : "manual-entry",
+            modality: "identifier",
+            identifiers: [{ scheme: input.scheme, value: input.code }],
+            context: { capture_method: input.method, ...(input.glyphVersion ? { glyph: { version: input.glyphVersion, validation: "syntax-only" } } : {}) }
+          };
+        }
+      },
+      entityRepository: catalog,
+      orcClient: client,
+      onStage: function (event) { updateProcessingStage(event.name); }
+    });
     const output = await pipeline.run({ input, context: { operation: "identify_product", interface: "web" } });
     renderResult(output);
   } catch (error) { renderError(error); }
@@ -55,7 +86,7 @@ function renderResult(output) {
 
 function renderError(error) { app.innerHTML = '<main class="shell"><section class="hero"><p class="eyebrow">ERRO TÉCNICO</p><div class="result-icon conflict">!</div><h1>Não foi possível<br /><strong>processar.</strong></h1><p class="description">A operação falhou tecnicamente. Isso não é uma resolução incerta.</p><button class="primary" id="retry" type="button">TENTAR NOVAMENTE</button></section></main>'; document.querySelector("#retry").addEventListener("click", renderCapture); console.error(error); }
 function stopCapture() { if (captureAdapter) captureAdapter.stop(); captureAdapter = null; }
-function inferScheme(code) { return /^\\d{8}$|^\\d{12,14}$/.test(code) ? "ean" : "identifier"; }
-function formatToScheme(format) { return format && format.indexOf("ean") === 0 ? "ean" : format === "qr_code" ? "qr" : "identifier"; }
+function inferScheme(code) { return /^\d{8}$|^\d{12,14}$/.test(code) ? "ean" : "identifier"; }
+function formatToScheme(format) { return format && format.indexOf("ean") === 0 ? "ean" : format === "qr_code" ? "qr" : format === "code_128" ? "code128" : "identifier"; }
 
 renderHome();

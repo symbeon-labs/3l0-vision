@@ -4,22 +4,22 @@
 
 3L0 Vision is the application/product layer. ORC is the resolution infrastructure.
 
-```
-PHYSICAL WORLD
-    ↓
-capture / documents / identifiers / enterprise data
-    ↓
-3L0 Vision
-    ↓
-observations / assertions / evidence / context
-    ↓
-ORC
-    ↓
-resolved representation
-    ↓
-3L0 Vision
-    ↓
-operator / operational system / ERP
+```text
+PHYSICAL WORLD / DOCUMENTS / ENTERPRISE RECORDS
+                     ↓
+                  3L0 Vision
+                     ↓
+       observations / evidence / context
+                     ↓
+                    ORC
+                     ↓
+       resolved operational representation
+                     ↓
+                  3L0 Vision
+                     ↓
+       mapping / adapter / operator review
+                     ↓
+               ERP / WMS / system
 ```
 
 ## Input modalities
@@ -28,7 +28,7 @@ operator / operational system / ERP
 - QR
 - EAN / barcode
 - known internal identifiers
-- structured XML
+- structured XML, including NF-e XML when available
 
 ### Extractive
 - OCR
@@ -48,80 +48,56 @@ operator / operational system / ERP
 
 ## Resolution boundary
 
-Vision models do not create truth.
+Vision models do not create truth. They produce observations.
 
-They produce observations.
+A vision model may report a possible brand, visible text or candidate product with a confidence estimate. 3L0 Vision passes these observations into the resolution layer together with evidence and context. ORC determines what operational representation is supportable for the question being asked.
 
-A vision model may say:
-
-- possible brand: X
-- visible text: Y
-- possible product: Z
-- confidence: 0.82
-
-3L0 Vision passes those observations into the resolution layer together with evidence and context.
-
-ORC decides what operational representation is supportable.
+An identity resolution does not automatically confirm quantity received, price, expiration, packaging condition or fiscal compliance; those claims require their own evidence and rules.
 
 ## Provider independence
 
-The product should not be coupled to one vision provider.
+The product should not be coupled to one vision provider. The vision interface should allow local models, cloud APIs, OCR engines, barcode libraries and future providers while keeping the observation contract stable.
 
-The vision interface should allow:
-- local models
-- cloud APIs
-- OCR engines
-- barcode libraries
-- future providers
+## Receiving flow — Case 01
 
-The same observation contract should remain stable.
+For the first receiving experiment, the recommended operator sequence is:
 
-## Initial architecture
-
-```
-Mobile/Web Client
-       ↓
-Capture Service
-       ↓
-Observation Normalization
-       ↓
-Matching
-       ↓
-ORC Resolution
-       ↓
-Operational Entity
-       ↓
-Action / ERP / History
+```text
+NF-e / XML / document
+        ↓
+extract document declarations
+        ↓
+capture the physical product
+(EAN/GTIN · QR/Glyph · image/OCR · operator)
+        ↓
+normalize observations + evidence + context
+        ↓
+ORC resolution across available sources
+        ↓
+canonical 3L0 entity + provenance + exceptions
+        ↓
+versioned mapping for the target ERP/WMS
+        ↓
+reviewable output
+        ↓
+authorized live adapter only after validation
 ```
 
-## Non-goals
-
-3L0 Vision is not initially:
-- a new ERP
-- a generic chatbot
-- an autonomous agent with unrestricted authority
-- a mandatory QR system
-- a hardware company
-- a replacement for fiscal source systems
-
+This is a recommended workflow order, not a requirement that every source arrive in that sequence. A document describes what was declared; it does not prove the physical item or quantity matches. The physical capture provides independent evidence. ORC resolves the relationship without allowing a QR, image or model score to bypass resolution.
 
 ## Canonical representation and interoperability
 
 3L0 must distinguish three layers:
 
-```
-IDENTIFIER
-    ≠
-3L0 CANONICAL ENTITY
-    ≠
-TARGET SYSTEM RECORD
+```text
+IDENTIFIER ≠ 3L0 CANONICAL ENTITY ≠ TARGET SYSTEM RECORD
 ```
 
-An identifier such as EAN or SKU is evidence about a representation. A target-system record is the representation of an entity inside a particular enterprise system. The 3L0 canonical entity is the operational representation produced by resolution across sources.
+An identifier such as EAN, SKU or Glyph reference is a reference observed in a source. The 3L0 canonical entity is the operational representation produced by justified resolution across sources. A target-system record is the representation of that entity inside a particular ERP/WMS.
 
 The intended downstream architecture is:
 
-```
+```text
 PHYSICAL / DOCUMENT / ENTERPRISE SYSTEM
                 ↓
           OBSERVATIONS
@@ -133,15 +109,32 @@ PHYSICAL / DOCUMENT / ENTERPRISE SYSTEM
        CANONICAL 3L0 ENTITY
          + CONTEXT + EVIDENCE
                 ↓
-        TARGET-SYSTEM MAPPING
+        VERSIONED TARGET MAPPING
+                ↓
+        VALIDATION / REVIEWABLE EXPORT
                 ↓
         TARGET ADAPTER / EXPORT
                 ↓
           ERP / WMS / SYSTEM
 ```
 
-The target system must not become the internal semantic model of 3L0.
+Mapping and adapters belong to the product/integration layer. ORC remains responsible for semantic resolution, not system-specific serialization. Target-system schema must not become the internal semantic model of 3L0. Unresolved fields remain explicit; values must not be invented to satisfy a target schema. Live writes follow mapping validation and authorization.
 
-Mapping and adapters belong to the product/integration layer. ORC remains responsible for semantic resolution rather than system-specific serialization.
+## Glyph boundary
 
-See [Interoperability and Mapping](interoperability.md).
+Glyph is an optional physical-reference layer. In the Gate A prototype, a QR payload in the `3l0-glyph:v1:<opaque-id>` form is syntax-validated and normalized as an observation identifier. Syntax validation alone does not look up a registry, prove the record is active, prove physical attachment, or establish authenticity. Ordinary QR payloads remain generic QR observations. Malformed payloads claiming the Glyph namespace are rejected rather than silently treated as generic QR.
+
+Gate A does not implement issuance, registry persistence, lookup, revocation, anti-counterfeit features or ERP integration.
+
+## Non-goals
+
+3L0 Vision is not initially:
+- a new ERP;
+- a generic chatbot;
+- an autonomous agent with unrestricted authority;
+- a mandatory QR system;
+- a hardware company;
+- a replacement for fiscal source systems;
+- a claim of production-ready integration with every ERP.
+
+See [Interoperability and Mapping](interoperability.md) and [ADR-0004 — Target systems remain external representations](decisions/0004-target-systems-remain-external-representations.md).

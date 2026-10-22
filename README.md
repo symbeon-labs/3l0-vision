@@ -220,3 +220,4 @@ O próximo marco não é adicionar uma nova camada de integração. É fechar o 
 - [Field Journal](docs/field-journal.md) — histórico, decisões, estado atual e próximos marcos.
 - [Phase 1 Gate](docs/roadmap.md) — ordem de implementação, guardrails e critério de saída.
 - [Development Method](docs/development-method.md) — como transformar problema em implementação, teste e evidência.
+- [Gate A — Glyph continuity](docs/development/gate-a-glyph-continuity.md) — estado técnico, configuração Vercel, validação e próximos passos.
