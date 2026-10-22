@@ -105,3 +105,12 @@ test("rejects a record inserted into another tenant's storage namespace", () => 
   storage.setItem("3l0.inventory.v0.1:tenant_a:products", JSON.stringify([{ tenantId: "tenant_b", productId: "p2" }]));
   assert.throws(() => repo.listProducts(), /tenant_scope_mismatch/);
 });
+
+test("allows an explicit review decision to change the projected balance", () => {
+  const { repo } = setup();
+  repo.recordMovement(movement({ state: "NEEDS_REVIEW" }));
+  assert.equal(repo.getStockBalance("p1").quantity, 0);
+  repo.setMovementState("m1", "CONFIRMED");
+  assert.equal(repo.getStockBalance("p1").quantity, 10);
+  assert.throws(() => repo.setMovementState("m1", "UNKNOWN"), /inventory_movement_state_invalid/);
+});
