@@ -163,3 +163,20 @@ ICP; primeiro caso de uso; primeira skill/oferta; unidade de cobrança; preço; 
 ## 12. Governança
 
 O agente deve recuperar fontes canônicas, separar fato/hipótese/proposta/decisão aceita, identificar o gate atual e propor a menor ação verificável. Pesquisa e plano não autorizam automaticamente implementação nem publicação. Atualizar a fonte canônica após decisão humana explícita.
+
+
+## 13. Etiquetas e identificação física
+
+Etiquetas são parte da estratégia de produto, não apenas um detalhe de impressão. Podem conectar objetos físicos a registros canônicos, evidências, eventos e sistemas de destino. Devem acelerar a identificação, mas não ser obrigatórias para toda operação: o produto continua prevendo leitura de códigos, OCR/visão e identificação sem marcador quando viável.
+
+A estratégia específica está em [Estratégia de etiquetas e identificação v0.1](labeling-and-identification-strategy-v0.1.md).
+
+Hipóteses de oferta:
+- leitura e resolução de etiquetas existentes como parte de um fluxo operacional;
+- geração e gestão de identificadores/etiquetas como possível add-on futuro;
+- integração de códigos e atributos com ERP/WMS/CRM;
+- rastreabilidade por eventos quando houver cobertura técnica demonstrada.
+
+A direção previamente registrada para o Caso 01 é QR convencional com `glyph_id` opaco ligado ao cadastro canônico produto/SKU; etiqueta opcional, evidência para resolução e não prova de autenticidade. QR/barcode, Glyph e SCIC são camadas distintas; SCIC é experimental. Antes de implementar, auditar o estado atual do Gate A.
+
+Perguntas comerciais pendentes: clientes já usam etiquetas? Precisam ler, gerar ou ambos? Quais padrões e equipamentos existem? Pagariam por geração/gestão ou esperam isso incluído? Medir volume, ilegibilidade, retrabalho e custo antes de escolher monetização.
