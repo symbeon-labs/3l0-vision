@@ -14,7 +14,7 @@ Responsabilidades:
 - **ORC:** infraestrutura semântica e de resolução.
 - **3L0 Agent:** coordenação de tarefas e composição de capacidades.
 - **Skills:** capacidades especializadas com contratos e versões.
-- **Adaptadores:** mapeamento do modelo 3L0 para ERP, CRM, marketplace ou API.
+- **Adaptadores:** mapeamento para ERP, CRM, marketplace ou API.
 - **Portal:** publicação pública seletiva; não é fonte da verdade técnica.
 - **App:** experiência de uso que deve refletir a implementação real.
 - **Core Vault:** contexto estratégico e operacional protegido.
@@ -154,16 +154,15 @@ ICP; primeiro caso de uso; primeira skill/oferta; unidade de cobrança; preço; 
 
 ## 11. Distribuição de informação
 
-- 3l0-vision: fonte canônica de visão, pesquisa, plano e roadmap.
-- 3l0-core-vault: contexto compacto, evidências e estado de decisão para o Operational Brain.
-- 3l0-agent: contratos de skill, seleção, entitlement, orçamento, aprovação e medição.
+- 3l0-vision: fonte canônica de visão, pesquisa, negócio e roadmap.
+- 3l0-core-vault: contexto compacto, evidências e estado de decisão.
+- 3l0-agent: contratos de skill, seleção, entitlement, orçamento, aprovação e medição. Fronteira documental atual: https://github.com/symbeon-labs/3l0-agent/blob/main/docs/commercial-orchestration-boundary-v0.1.md (conteúdo atualizado para v0.2).
 - 3l0-portal: publicação seletiva aprovada.
 - 3L0 App: descoberta, autorização, execução e histórico.
 
 ## 12. Governança
 
 O agente deve recuperar fontes canônicas, separar fato/hipótese/proposta/decisão aceita, identificar o gate atual e propor a menor ação verificável. Pesquisa e plano não autorizam automaticamente implementação nem publicação. Atualizar a fonte canônica após decisão humana explícita.
-
 
 ## 13. Etiquetas e identificação física
 
@@ -177,6 +176,17 @@ Hipóteses de oferta:
 - integração de códigos e atributos com ERP/WMS/CRM;
 - rastreabilidade por eventos quando houver cobertura técnica demonstrada.
 
-A direção previamente registrada para o Caso 01 é QR convencional com `glyph_id` opaco ligado ao cadastro canônico produto/SKU; etiqueta opcional, evidência para resolução e não prova de autenticidade. QR/barcode, Glyph e SCIC são camadas distintas; SCIC é experimental. Antes de implementar, auditar o estado atual do Gate A.
+A direção registrada para o Caso 01 é QR convencional com `glyph_id` opaco ligado ao cadastro canônico produto/SKU; etiqueta opcional, evidência para resolução e não prova de autenticidade. QR/barcode, Glyph e SCIC são camadas distintas; SCIC é experimental. Antes de implementar, auditar o estado atual do Gate A.
 
 Perguntas comerciais pendentes: clientes já usam etiquetas? Precisam ler, gerar ou ambos? Quais padrões e equipamentos existem? Pagariam por geração/gestão ou esperam isso incluído? Medir volume, ilegibilidade, retrabalho e custo antes de escolher monetização.
+
+## 14. Próxima execução: plano de negócio ↔ Agent ↔ Portal
+
+**Ordem de trabalho acordada:**
+1. Consolidar a seleção do primeiro caso de uso e a oferta mínima; manter ICP, preço e modelo de cobrança como hipóteses até validação.
+2. No Agent, auditar o módulo de orquestração e o adaptador Vision, mapear requisito → implementação → teste → lacuna e fechar o contrato versionado do primeiro fluxo.
+3. Validar o vertical slice `CAPTURE → OBSERVE → CANDIDATES → CONFIRM → SAVE → RECOGNIZE AGAIN`, incluindo erros técnicos distintos de incerteza/conflito semântico.
+4. Atualizar o portal apenas com narrativa alinhada ao estado real: disponível, experimental, piloto ou planejado. Não publicar preços, integração ativa ou promessa de impacto sem evidência.
+5. Medir o fluxo e os custos antes de implementar billing/entitlements de produção.
+
+**Gate atual:** especificar e auditar o primeiro fluxo; não iniciar billing nem declarar plano comercial aprovado. Gliphy permanece em espera até concluir a prioridade comercial e a integração de posicionamento ao portal.
