@@ -47,3 +47,13 @@ Não publicar catálogo amplo de serviços antes de escolher ICP/caso inicial, d
 
 ## Próxima ação
 Pesquisa primária com potenciais clientes e comparação de 2–3 fluxos candidatos. Depois, especificar a primeira oferta e o contrato de skill.
+
+
+## Trilha transversal — etiquetas e identificação
+
+- **Gate A — contrato/validador:** auditar implementação atual; parser Glyph versionado; observação `3l0-glyph`; proveniência; integração Vision/ORC; estados RESOLVED/UNCERTAIN/CONFLICT; testes de QR inválido, versão desconhecida, referência ausente, duplicação e erro de leitura.
+- **Gate B — leitura existente:** catalogar formatos e equipamentos do primeiro ambiente; medir sucesso, falhas e intervenção.
+- **Gate C — geração/impressão:** somente com demanda validada; definir unicidade, token opaco, ciclo de vida, revogação, templates e critérios de leitura.
+- **Gate D — integração/monetização:** mapear para ERP/WMS/CRM, medir custos e validar se geração/gestão é recurso base, add-on ou serviço.
+
+Não declarar geração/impressão disponível antes de verificar código e testes. QR/etiqueta não prova autenticidade. A etiqueta é uma via de identificação opcional; o fluxo markerless permanece válido.
