@@ -54,9 +54,10 @@ function renderHome() {
 }
 
 function renderCapture() {
-  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">CAPTURA <span>AO VIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
+  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">CAPTURA <span>AO VIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><div class="photo-capture"><button class="secondary" id="capture-photo" type="button">CAPTURAR IMAGEM</button><p class="capture-note">A imagem fica apenas nesta sessão do navegador. OCR e envio para análise ainda não estão conectados.</p><div id="photo-evidence" class="photo-evidence" hidden></div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
   document.querySelector("#back").addEventListener("click", renderHome);
   captureAdapter = new BrowserCaptureAdapter({ videoElement: document.querySelector("#camera"), onStatus: handleCaptureStatus });
+  document.querySelector("#capture-photo").addEventListener("click", capturePhoto);
   document.querySelector("#manual-form").addEventListener("submit", async function (event) {
     event.preventDefault();
     const code = new FormData(event.currentTarget).get("code")?.toString().trim();
@@ -64,6 +65,29 @@ function renderCapture() {
   });
   captureAdapter.start().catch(function (error) { handleCaptureStatus({ type: "camera_error", error }); });
 }
+
+async function capturePhoto() {
+  const button = document.querySelector("#capture-photo");
+  const target = document.querySelector("#photo-evidence");
+  if (!captureAdapter || !button || !target) return;
+
+  button.disabled = true;
+  button.textContent = "CAPTURANDO...";
+  try {
+    const photo = await captureAdapter.captureFrame();
+    target.hidden = false;
+    target.innerHTML = '<img alt="Prévia da imagem capturada nesta sessão" src="' + photo.previewUrl + '" /><div class="photo-meta"><strong>Imagem capturada</strong><span>' + photo.width + ' × ' + photo.height + ' px · ' + Math.ceil(photo.sizeBytes / 1024) + ' KB</span><span>' + new Date(photo.capturedAt).toLocaleTimeString() + '</span><p>Imagem disponível apenas nesta sessão. Nenhum upload foi realizado e o OCR ainda não foi executado.</p></div>';
+    button.textContent = "CAPTURAR NOVAMENTE";
+  } catch (error) {
+    const status = document.querySelector("#camera-status");
+    if (status) status.textContent = "NÃO FOI POSSÍVEL CAPTURAR A IMAGEM · VERIFIQUE A CÂMERA E TENTE NOVAMENTE";
+    button.textContent = "TENTAR CAPTURA NOVAMENTE";
+    console.error("Image capture failed", error);
+  } finally {
+    button.disabled = false;
+  }
+}
+
 
 function handleCaptureStatus(status) {
   const target = document.querySelector("#camera-status");
