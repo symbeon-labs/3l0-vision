@@ -756,3 +756,21 @@ footer {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* Supabase Auth */
+.auth-shell { justify-content: flex-start; }
+.auth-panel { width: 100%; max-width: 460px; margin: clamp(48px, 10vh, 100px) auto 48px; }
+.auth-panel h1 { margin: 18px 0; font-size: clamp(42px, 9vw, 64px); line-height: .98; letter-spacing: -.055em; }
+.auth-form { display: flex; flex-direction: column; gap: 10px; margin-top: 30px; }
+.auth-form label { margin-top: 10px; color: var(--muted); font: 500 10px "JetBrains Mono", monospace; letter-spacing: .12em; }
+.auth-form input { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--text); font: 14px Inter, sans-serif; outline: none; }
+.auth-form input:focus { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan); }
+.auth-submit { width: 100%; margin-top: 12px; }
+.auth-submit:disabled, .session-control:disabled { opacity: .55; cursor: wait; }
+.auth-message { min-height: 20px; margin: 4px 0 0; color: var(--amber); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.auth-switch { display: block; width: 100%; padding: 12px 0; border: 0; background: transparent; color: var(--cyan); text-align: left; cursor: pointer; font-size: 12px; }
+.auth-footnote { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; line-height: 1.7; }
+.session-control { margin-left: auto; padding: 7px 10px; border: 1px solid var(--line); border-radius: 3px; background: transparent; color: var(--muted); font: 500 10px "JetBrains Mono", monospace; letter-spacing: .1em; cursor: pointer; }
+.session-control:hover { border-color: var(--cyan); color: var(--cyan); }
+[hidden] { display: none !important; }
