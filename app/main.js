@@ -200,7 +200,20 @@ function renderHome() {
       <footer><span>3L0 VISION</span><span>TORNAR O MUNDO FÍSICO COMPUTÁVEL.</span></footer>
     </main>`;
   mountSessionControl();
-  document.querySelector("#identify").addEventListener("click", renderCapture);
+  const identifyButton = document.querySelector("#identify");
+  const workspaceSelector = document.querySelector("#workspace-selector");
+  identifyButton.addEventListener("click", () => { if (activeWorkspace) renderCapture(); });
+  workspaceSelector.addEventListener("change", () => {
+    const option = workspaceSelector.selectedOptions[0];
+    let workspace = null;
+    try { workspace = option?.dataset.workspace ? JSON.parse(option.dataset.workspace) : null; } catch {}
+    setActiveWorkspace(workspace);
+    identifyButton.disabled = !activeWorkspace;
+    identifyButton.querySelector("small").textContent = activeWorkspace
+      ? "Contexto: " + activeWorkspace.name + " · Câmera, códigos ou entrada manual"
+      : "Selecione um workspace para iniciar";
+  });
+  void loadWorkspaceChoices(workspaceSelector, identifyButton);
   document.querySelector("#workspace-entry").addEventListener("click", () => renderWorkspaceOnboarding({ app, onBack: renderHome, supabase }));
   document.querySelector(".brand-mark").addEventListener("click", event => { event.preventDefault(); renderHome(); });
 }
