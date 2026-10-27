@@ -162,7 +162,15 @@ function renderHome() {
         <p class="eyebrow">RESOLUÇÃO OPERACIONAL · 01</p>
         <h1>O que vamos<br /><strong>resolver?</strong></h1>
         <p class="description">Conecte o que você observa no mundo físico à identidade operacional correta. Sem transformar uma leitura isolada em certeza.</p>
-        <button class="capture-card" id="identify" type="button"><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Câmera, código de barras, QR ou entrada manual</small></span><span class="arrow">→</span></button>
+        <section class="active-workspace-panel" aria-labelledby="active-workspace-title">
+          <p class="eyebrow">CONTEXTO ATIVO</p>
+          <label for="workspace-selector" id="active-workspace-title">Workspace da operação</label>
+          <select id="workspace-selector" class="workspace-selector" aria-describedby="workspace-context-help">
+            <option value="">Carregando seus workspaces…</option>
+          </select>
+          <p id="workspace-context-help" class="workspace-help">A identificação usará o contexto selecionado. A seleção local não substitui a autorização do servidor.</p>
+        </section>
+        <button class="capture-card" id="identify" type="button" disabled><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Selecione um workspace para iniciar</small></span><span class="arrow">→</span></button>
         <button class="workspace-entry" id="workspace-entry" type="button"><span><strong>GERENCIAR WORKSPACE</strong><small>Criar e consultar espaços de operação persistidos</small></span><span aria-hidden="true">→</span></button>
         <div class="demo-note"><span class="pulse-dot"></span> AMBIENTE EXPERIMENTAL <span>·</span> CATÁLOGO LOCAL DE DEMONSTRAÇÃO</div>
       </section>
