@@ -457,3 +457,115 @@ Não deverá criar uma identidade visual diferente para cada perfil, alterar per
 - A avaliação de usabilidade, acessibilidade e conclusão de tarefas é registrada antes de afirmar que a experiência está validada.
 
 Esta seção amplia os requisitos arquiteturais para orientar UX, UI, narrativa e integração futura do Agent/Skills. Não declara que essas integrações ou melhorias já foram implementadas.
+
+
+## 18. Workspaces como estrutura da plataforma operacional
+
+### 18.1 Decisão de produto
+
+O 3L0 deve ser concebido como uma plataforma operacional comum acessada por diferentes aplicações, e não como um conjunto de apps isolados com cadastros, contexto e históricos independentes. Cada aplicação é uma superfície de interação com capacidades delimitadas; o contexto organizacional, as permissões, os registros operacionais e a proveniência devem permanecer coerentes através das superfícies autorizadas.
+
+O workspace torna-se o contexto de trabalho selecionado na interface. Esta decisão é uma diretriz arquitetural para implementação e não declara que a infraestrutura multi-workspace já existe.
+
+### 18.2 Hierarquia conceitual
+
+Usar os conceitos abaixo de forma distinta:
+
+- **Organização (tenant):** empresa/cliente e fronteira primária de isolamento de dados, identidade organizacional, políticas e integrações.
+- **Workspace:** ambiente de trabalho autorizado dentro de uma organização, com membros, finalidade, processos, configurações, aplicações habilitadas e histórico.
+- **Unidade operacional:** filial, centro de distribuição, armazém ou outro local/unidade quando o processo exigir essa distinção.
+- **Membro e papel:** identidade individual associada à organização/workspace, com permissões explícitas e limitadas.
+- **Aplicação:** interface que acessa capacidades autorizadas no contexto selecionado; não deve criar um silo paralelo de dados.
+- **Processo/execução:** fluxo operacional realizado dentro de um workspace, com entradas, eventos, evidências, resultado, exceções e histórico.
+
+A hierarquia exata entre unidades e workspaces pode variar conforme o caso operacional, mas a organização deve continuar sendo a fronteira de isolamento e toda associação deve ser validada no servidor.
+
+### 18.3 Modelo mínimo de domínio
+
+O primeiro contrato de domínio deve avaliar, sem presumir que já exista em código, os seguintes registros:
+
+- `Organization`: identidade do cliente, estado e políticas aplicáveis.
+- `Workspace`: organização proprietária, nome, finalidade, estado e configuração versionada.
+- `Membership`: usuário, workspace/organização, papel, estado do convite e datas relevantes.
+- `OperationalUnit`: unidade física ou funcional opcional.
+- `BusinessProfile`: informações operacionais necessárias, com origem, atualização e estado de verificação.
+- `OperationalContext`: processo/objetivo delimitado, restrições, fontes autorizadas e critérios de sucesso.
+- `CapabilityBinding`: capacidades/Skills disponíveis para o workspace, versão, dependências, permissões e estado real.
+- `IntegrationBinding`: sistema externo, organização proprietária, escopos autorizados, versão do contrato e estado da conexão, sem guardar segredos em registros de perfil.
+- `Execution` e `EvidenceReference`: execução, versão de configuração, eventos, resultados, evidências, proveniência e decisões humanas.
+- `AuditEvent`: alterações relevantes de acesso, configuração, dados e integrações, com acesso restrito e política de retenção.
+
+A implementação deve começar pelo conjunto mínimo necessário ao primeiro fluxo e versionar os contratos antes de ampliar o modelo. Não coletar campos apenas porque cabem no esquema.
+
+### 18.4 Jornada de entrada e ativação
+
+O fluxo de referência da interface deve ser:
+
+1. **Portal público:** apresenta o produto e permite solicitar ou iniciar acesso; não é a fonte de verdade de identidade nem armazena o contexto operacional canônico.
+2. **Autenticação no Vision:** identifica o usuário por mecanismo real configurado. A UI não deve simular autenticação.
+3. **Seleção/criação autorizada do workspace:** exibe apenas organizações e workspaces aos quais o usuário tem acesso efetivo.
+4. **Onboarding progressivo:** recolhe os dados mínimos para identificar o objetivo, o processo, os sistemas existentes, as restrições e os critérios de sucesso; permite corrigir respostas e distingue dados declarados de observados ou verificados.
+5. **Configuração inicial:** apresenta o processo/capacidades elegíveis, explica requisitos e limites e pede confirmação quando necessário.
+6. **Convite do operador:** cria uma identidade individual e uma associação explícita ao workspace, com escopo mínimo. Não usar contas compartilhadas.
+7. **Primeira execução:** registra entradas, versão da configuração, resultado, evidências, incerteza, exceções e confirmação humana quando aplicável.
+
+### 18.5 Case 01 como teste da arquitetura
+
+O Case 01 deve validar a separação entre ambiente administrativo da plataforma e ambiente operacional do cliente. O responsável pela plataforma pode manter um workspace administrativo/de desenvolvimento distinto; a operação do cliente deve pertencer ao workspace da organização correspondente. Qualquer suporte administrativo a dados do cliente deve ser explicitamente autorizado, limitado, auditável e revogável.
+
+O primeiro teste não exige implementar toda a plataforma corporativa. Deve provar um vertical slice delimitado: um workspace do cliente, um operador individual, um processo real autorizado, persistência coerente, evidência rastreável e uma política clara para confirmar ações. Dados sintéticos devem ser usados antes de dados reais sempre que possível.
+
+### 18.6 Persistência central e sistemas corporativos existentes
+
+“Centralizar contexto” não significa copiar indiscriminadamente todos os dados de uma empresa para uma base única nem substituir ERP, WMS, TMS ou outros sistemas de registro. A plataforma deve manter a representação operacional necessária para relacionar processos, entidades, evidências, estados e histórico, respeitando qual sistema é autoridade para cada campo/entidade.
+
+Para cada integração, documentar:
+- sistema de origem e autoridade por entidade/campo;
+- direção e finalidade do fluxo;
+- contrato e versão do payload;
+- identidade/tenant e workspace autorizados;
+- idempotência, retries e tratamento de duplicidade;
+- falhas parciais, reconciliação e reprocessamento;
+- registro de solicitações, respostas e mudanças;
+- política de retenção e minimização de dados.
+
+Nenhuma integração deve ser apresentada como ativa antes de ser implementada e validada. Escritas em sistemas externos exigem autorização explícita, política de confirmação adequada ao risco e tratamento seguro de falhas.
+
+### 18.7 Responsabilidades preservadas
+
+- **Portal:** descoberta pública e encaminhamento.
+- **Vision:** experiência operacional, onboarding, seleção de workspace autorizado, contexto da interface e apresentação de estados/resultados.
+- **Camada confiável de identidade/autorização:** autenticação, verificação de associação e imposição de permissões no servidor. O CPE e o Agent não concedem permissões.
+- **CPE:** configuração explicável da experiência e seleção de fluxos elegíveis com base em contexto, catálogo e políticas.
+- **Agent:** coordenação de tarefas somente nas capacidades realmente integradas.
+- **ORC:** resolução semântica de entidades, relações, evidências, conflitos e incerteza.
+- **Adaptadores:** sincronização com sistemas externos sob contratos e políticas explícitas.
+- **Core Vault:** contexto estratégico interno protegido; não deve ser dependência de runtime público nem repositório geral de dados de clientes.
+
+### 18.8 Requisitos de segurança e confiabilidade
+
+- Validar a organização e a associação ao workspace em cada operação no servidor; ocultar itens na UI não é controle de segurança.
+- Testar acesso cruzado entre organizações e entre workspaces, incluindo APIs, arquivos, exports, histórico e tarefas assíncronas.
+- Usar papéis mínimos e convites individuais; definir claramente suporte administrativo, auditoria e revogação.
+- Separar dados sintéticos, dados de piloto e dados de produção.
+- Manter proveniência, timestamps, versão de contrato/configuração e histórico de correções.
+- Tratar sincronização como processo sujeito a atraso, duplicidade e falha; nunca assumir consistência automática entre sistemas.
+- Definir base legal, transparência, retenção, correção e exclusão adequadas à LGPD antes de processar dados pessoais.
+- Não usar o workspace como único mecanismo de autorização: validar também o recurso, a ação e o escopo permitido.
+
+### 18.9 Critérios de aceitação do primeiro vertical slice
+
+A fundação de workspace não deve ser considerada validada até demonstrar, com testes e evidências:
+
+1. Usuário autenticado vê somente os workspaces aos quais está autorizado.
+2. Um operador convidado não recebe permissões administrativas por padrão.
+3. Requisições com IDs de outra organização/workspace são negadas no servidor.
+4. O fluxo mantém perfil, contexto, execução e evidências associados ao workspace correto.
+5. A origem e o estado de validação de dados relevantes são visíveis e corrigíveis.
+6. Falhas, conflitos, resultados inconclusivos e confirmações humanas ficam registrados.
+7. Uma integração externa, quando implementada, documenta autoridade dos dados, idempotência, erros e reconciliação.
+8. A UI distingue claramente capacidades implementadas, experimentais e planejadas.
+9. Testes funcionais, de segurança, responsividade e acessibilidade são executados contra o commit candidato.
+10. O piloto mede resultados operacionais antes de afirmar ganho de eficiência, precisão, ROI ou vantagem competitiva.
+
+Esta seção amplia o handoff para a visão de plataforma e define requisitos para implementação incremental. Não declara que autenticação, isolamento multi-tenant, persistência compartilhada, convites ou sincronizações empresariais já estejam implementados.
