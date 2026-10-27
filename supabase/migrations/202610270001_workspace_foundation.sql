@@ -112,7 +112,7 @@ create or replace function public.create_workspace_with_org(
   p_success_criteria jsonb default '[]'::jsonb
 ) returns jsonb
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare
