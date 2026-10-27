@@ -92,6 +92,108 @@ async function capturePhoto() {
 }
 
 
+async function handleFiscalXml(event) {
+  const file = event.currentTarget.files?.[0];
+  const status = document.querySelector("#xml-status");
+  const summary = document.querySelector("#xml-summary");
+  if (!file || !status || !summary) return;
+
+  summary.replaceChildren();
+  summary.hidden = true;
+
+  if (!file.name.toLowerCase().endsWith(".xml")) {
+    status.textContent = "Formato não suportado nesta etapa. Selecione um XML fiscal.";
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    status.textContent = "O arquivo excede o limite de 5 MB.";
+    return;
+  }
+
+  status.textContent = "Lendo e interpretando o XML localmente...";
+  try {
+    const xmlText = await file.text();
+    const invoice = parseFiscalXml(xmlText);
+    const heading = document.createElement("h3");
+    heading.textContent = "Dados extraídos — revise antes de usar";
+    summary.append(heading);
+
+    const note = document.createElement("p");
+    note.className = "capture-note";
+    note.textContent = "Extração sintática apenas. Não verifica assinatura, autorização fiscal, cancelamento ou autenticidade.";
+    summary.append(note);
+
+    const facts = document.createElement("dl");
+    facts.className = "xml-facts";
+    const rows = [
+      ["Emitente", invoice.issuer?.name || invoice.issuer?.cnpj || "Não identificado"],
+      ["CNPJ/CPF do emitente", invoice.issuer?.cnpj || "Ausente"],
+      ["Número", invoice.number || "Ausente"],
+      ["Série", invoice.series || "Ausente"],
+      ["Emissão", invoice.issueDate || "Ausente"],
+      ["Total informado", invoice.total === null ? "Ausente" : invoice.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })],
+      ["Itens encontrados", String(invoice.items.length)],
+      ["Chave de acesso", invoice.accessKey || "Ausente"]
+    ];
+    for (const [label, value] of rows) {
+      const term = document.createElement("dt");
+      term.textContent = label;
+      const detail = document.createElement("dd");
+      detail.textContent = value;
+      facts.append(term, detail);
+    }
+    summary.append(facts);
+
+    if (invoice.items.length) {
+      const listTitle = document.createElement("h4");
+      listTitle.textContent = "Itens";
+      summary.append(listTitle);
+      const list = document.createElement("ul");
+      list.className = "xml-items";
+      for (const item of invoice.items) {
+        const entry = document.createElement("li");
+        const qty = item.quantity === null ? "quantidade ausente" : item.quantity + (item.unit ? " " + item.unit : "");
+        entry.textContent = [item.description || item.code || "Item sem descrição", qty, item.total === null ? "" : item.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })].filter(Boolean).join(" · ");
+        list.append(entry);
+      }
+      summary.append(list);
+    }
+
+    const recommendations = recommendContextSources({
+      missingFields: invoice.missingFields,
+      availableSources: ["invoice_xml"]
+    });
+    const recommendationTitle = document.createElement("h4");
+    recommendationTitle.textContent = invoice.missingFields.length ? "Próximas fontes recomendadas" : "Campos essenciais encontrados";
+    summary.append(recommendationTitle);
+    const recommendationList = document.createElement("ul");
+    recommendationList.className = "xml-items";
+    if (!recommendations.length) {
+      const entry = document.createElement("li");
+      entry.textContent = "Nenhuma lacuna conhecida pelo verificador básico. Isso não equivale a uma validação fiscal.";
+      recommendationList.append(entry);
+    } else {
+      for (const recommendation of recommendations.slice(0, 3)) {
+        const entry = document.createElement("li");
+        entry.textContent = recommendation.label + " — pode ajudar com: " + recommendation.matchedFields.join(", ") + ". Status: " + recommendation.status + ".";
+        recommendationList.append(entry);
+      }
+    }
+    summary.append(recommendationList);
+    summary.hidden = false;
+    status.textContent = "XML processado localmente: " + file.name + ". Nenhum upload foi realizado.";
+  } catch (error) {
+    status.textContent = "Não foi possível interpretar este XML: " + ({
+      empty_xml: "arquivo vazio",
+      xml_too_large: "arquivo maior que 5 MB",
+      xml_doctype_not_allowed: "declarações DOCTYPE/ENTITY não são permitidas",
+      invalid_xml: "estrutura XML inválida",
+      nfe_info_not_found: "não foi encontrada a estrutura de dados da NF-e"
+    }[error.message] || "estrutura não reconhecida como NF-e/NFC-e compatível");
+    console.warn("Fiscal XML parsing failed", error);
+  }
+}
+
 function handleCaptureStatus(status) {
   const target = document.querySelector("#camera-status");
   if (!target) return;
