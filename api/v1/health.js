@@ -1,4 +1,4 @@
-import { sendJson } from "../../api/_lib/supabase.js";
+import { sendJson } from "../_lib/supabase.js";
 
 export default function handler(req, res) {
   if (req.method !== "GET") {
