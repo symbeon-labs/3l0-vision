@@ -57,18 +57,18 @@ alter table public.workspace_invitations enable row level security;
 -- SECURITY DEFINER helpers avoid recursive RLS evaluation when policies inspect memberships.
 create or replace function public.is_active_workspace_member(p_workspace_id uuid)
 returns boolean language sql stable security definer set search_path = ''
-as $
+as $$
   select exists (select 1 from public.workspace_memberships m
     where m.workspace_id = p_workspace_id and m.user_id = auth.uid() and m.status = 'active');
-$;
+$$;
 
 create or replace function public.is_active_workspace_owner(p_workspace_id uuid)
 returns boolean language sql stable security definer set search_path = ''
-as $
+as $$
   select exists (select 1 from public.workspace_memberships m
     where m.workspace_id = p_workspace_id and m.user_id = auth.uid()
       and m.role = 'workspace_owner' and m.status = 'active');
-$;
+$$;
 
 revoke all on function public.is_active_workspace_member(uuid) from public, anon;
 revoke all on function public.is_active_workspace_owner(uuid) from public, anon;
