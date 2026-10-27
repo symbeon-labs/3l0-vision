@@ -5,6 +5,7 @@ import { BrowserCaptureAdapter } from "./capture/browser-capture.js";
 import { parseGlyphReference } from "../core/vision/glyph-reference.js";
 import { LocalCatalog } from "./catalog/local-catalog.js";
 import "./styles.css";
+import { createRouteGuard } from "./auth/route-guard.js";
 
 const app = document.querySelector("#app");
 const catalog = new LocalCatalog();
@@ -12,11 +13,11 @@ const client = new OrcClient({ resolver: deterministicResolver });
 let captureAdapter = null;
 let resolutions = 0;
 
-function renderHome() {
+function renderHome({ onLogin } = {}) {
   stopCapture();
   app.innerHTML = `
     <main class="shell home-shell">
-      <header class="topbar"><a class="brand-mark" href="#" aria-label="3L0 Vision início">3L0<span class="brand-dot">.</span></a><div class="status">PROTÓTIPO <span>FASE 1</span></div></header>
+      <header class="topbar"><a class="brand-mark" href="#" aria-label="3L0 Vision início">3L0<span class="brand-dot">.</span></a><div class="topbar-actions"><button class="auth-link" id="open-login" type="button">ENTRAR</button><div class="status">PROTÓTIPO <span>FASE 1</span></div></div></header>
       <section class="home-hero">
         <p class="eyebrow">RESOLUÇÃO OPERACIONAL · 01</p>
         <h1>O que vamos<br /><strong>resolver?</strong></h1>
@@ -50,7 +51,36 @@ function renderHome() {
       <footer><span>3L0 VISION</span><span>TORNAR O MUNDO FÍSICO COMPUTÁVEL.</span></footer>
     </main>`;
   document.querySelector("#identify").addEventListener("click", renderCapture);
-  document.querySelector(".brand-mark").addEventListener("click", event => { event.preventDefault(); renderHome(); });
+  document.querySelector("#open-login")?.addEventListener("click", () => onLogin?.());
+  document.querySelector(".brand-mark").addEventListener("click", event => { event.preventDefault(); const routeGuard = createRouteGuard({
+  app,
+  renderPublic: ({ onLogin }) => renderHome({ onLogin }),
+  renderProtected: ({ user, onLogout }) => renderWorkspace({ user, onLogout })
+});
+
+function renderWorkspace({ user, onLogout }) {
+  stopCapture();
+  const safeEmail = String(user?.email ?? "usuário autenticado").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[char]);
+  app.innerHTML = `
+    <main class="shell home-shell workspace-shell">
+      <header class="topbar"><a class="brand-mark" href="#/" aria-label="3L0 Vision início">3L0<span class="brand-dot">.</span></a><div class="topbar-actions"><span class="status">SESSÃO <span>ATIVA</span></span><button class="auth-link" id="logout" type="button">SAIR</button></div></header>
+      <section class="home-hero">
+        <p class="eyebrow">ÁREA AUTENTICADA · AMBIENTE DE TESTE</p>
+        <h1>Bem-vindo<br /><strong>ao 3L0.</strong></h1>
+        <p class="description">Sessão autenticada como <strong>${safeEmail}</strong>. A camada de dados operacionais multiusuário ainda está em preparação e não é simulada como se estivesse pronta.</p>
+        <button class="capture-card" id="identify" type="button"><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Executar o fluxo de captura e resolução local</small></span><span class="arrow">→</span></button>
+        <div class="demo-note"><span class="pulse-dot"></span> AUTENTICADO <span>·</span> CATÁLOGO LOCAL DO NAVEGADOR</div>
+      </section>
+      <section class="limits-panel"><p class="eyebrow">PRONTIDÃO DE TESTE</p><h2>Limites atuais</h2><div class="limits-grid"><p><strong>Configurado</strong><br />Login, sessão Auth e rota de interface protegida.</p><p><strong>Pendente</strong><br />Persistência de catálogo/evidências por workspace no banco e testes E2E de isolamento entre usuários.</p></div></section>
+    </main>`;
+  document.querySelector("#logout").addEventListener("click", () => { void onLogout(); });
+  document.querySelector("#identify").addEventListener("click", renderCapture);
+  document.querySelector(".brand-mark").addEventListener("click", (event) => { event.preventDefault(); window.location.hash = "/"; });
+}
+
+routeGuard.start(); });
 }
 
 function renderCapture() {
