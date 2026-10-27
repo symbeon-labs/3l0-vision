@@ -33,7 +33,6 @@ export function createRouteGuard({ app, renderProtected, renderPublic }) {
 
   async function renderRoute() {
     const sequence = ++renderSequence;
-    if (checking) { checking = false; }
     checking = true;
     const path = normalizedPath();
     try {
@@ -83,7 +82,7 @@ export function createRouteGuard({ app, renderProtected, renderPublic }) {
     if (supabaseConfigured) {
       supabase().auth.onAuthStateChange((_event, session) => {
         user = session?.user ?? null;
-        void renderRoute();
+        if (normalizedPath() === "/app" || PRIVATE_ROUTES.has(normalizedPath())) void renderRoute();
       });
     }
     void renderRoute();
