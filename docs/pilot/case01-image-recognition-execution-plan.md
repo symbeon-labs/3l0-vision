@@ -86,3 +86,51 @@ Não definir limiares universais antes de medir o Caso 01. Nunca otimizar apenas
 - Não armazenar imagens em localStorage.
 - Remover objetos temporários e encerrar a câmera quando a tela for abandonada.
 - Tratar imagens de documentos como potencialmente sensíveis e coletar somente o necessário.
+
+
+## Fatia 2A — Fontes de contexto e orientação adaptativa
+
+O Caso 01 deve aceitar fontes heterogêneas e orientar a pessoa sobre qual evidência adicional é mais útil para resolver a lacuna atual. Não presumir que um formato ou uma consulta externa estará sempre disponível.
+
+### Fontes previstas no catálogo
+
+- XML fiscal: campos estruturados quando o usuário possui e pode fornecer o arquivo.
+- PDF/DANFE/DANFSe: documento visual/estruturado conforme o parser disponível.
+- Foto/imagem: captura ou upload; extração textual depende de OCR conectado.
+- QR Code/chave de acesso: referência para classificar documento e avaliar consulta permitida; não garante acesso ao XML ou a todos os dados.
+- Código de barras/GTIN: identificador do produto, sujeito a catálogo ou fonte de resolução.
+- Catálogo/ERP: SKU, descrição, unidade e referências internas via importação ou API autorizada.
+- Cadastro empresarial: enriquecimento cadastral somente por fonte permitida e com política de acesso verificada.
+- Mercadoria física: observação visual, código lido ou anotação humana.
+
+O catálogo executável inicial está em `core/evidence/source-catalog.js`. Ele registra formatos, capacidades, pré-requisitos e estado de implementação. Os estados são deliberadamente explícitos: a presença de uma fonte no catálogo não significa que seu parser, OCR ou integração externa já estejam operacionais.
+
+### Motor inicial de recomendação
+
+`recommendContextSources({ missingFields, availableSources })` gera recomendações determinísticas com base nos campos faltantes e nas fontes já disponíveis. A saída informa quais campos a fonte pode ajudar a resolver, formatos, pré-requisitos e estado técnico. Isso é orientação de ingestão, não validação fiscal nem prova de identidade.
+
+### Regras obrigatórias
+
+1. Solicitar apenas a fonte adicional que melhor resolve a lacuna conhecida; aceitar alternativas quando o usuário não a possui.
+2. Manter proveniência por campo: extraído de documento, retornado por fonte externa, observado pela câmera ou confirmado por pessoa.
+3. Registrar fonte, horário da consulta, identificador de referência e versão do adaptador quando aplicável.
+4. Não tratar QR/chave como autorização automática nem prometer consulta universal. Aplicar requisitos da fonte oficial e permissões do usuário.
+5. Nunca preencher lacunas com dados inventados. Quando uma fonte não estiver integrada, informar que é uma etapa planejada e oferecer entrada manual ou arquivo alternativo.
+6. Preservar divergências entre fontes e direcionar para revisão; não sobrescrever silenciosamente dados existentes.
+7. Não enviar arquivos a serviços externos sem aviso, autorização aplicável e controles de privacidade.
+
+### Testes de aceitação da orientação
+
+- Recomenda XML como primeira opção para campos estruturados de itens quando disponível.
+- Não recomenda novamente uma fonte que o usuário já forneceu.
+- Expõe pré-requisitos e status de implementação.
+- Para campo desconhecido, não inventa uma recomendação.
+- Mantém separado o catálogo declarativo das integrações que ainda não estão implementadas.
+
+### Próximos passos de implementação
+
+1. Ligar o catálogo ao fluxo de ingestão da interface e exibir opções de arquivo/fonte.
+2. Adicionar validadores de tipo/tamanho e parsers de XML fiscal com fixtures sintéticas e testes.
+3. Adicionar leitura de PDF/OCR somente após escolher e testar o adaptador com amostras autorizadas do Caso 01.
+4. Conectar importação de catálogo/ERP e consultas externas como adaptadores independentes, sempre com estado explícito de indisponibilidade/erro.
+5. Incorporar a proveniência ao contrato canônico de observação e à resolução ORC.
