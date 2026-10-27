@@ -16,6 +16,18 @@ let resolutions = 0;
 let supabase = null;
 let authUser = null;
 let authTransition = false;
+let activeWorkspace = null;
+const WORKSPACE_STORAGE_KEY = "3l0.activeWorkspaceId";
+function getStoredWorkspaceId() {
+  try { return localStorage.getItem(WORKSPACE_STORAGE_KEY); } catch { return null; }
+}
+function setActiveWorkspace(workspace) {
+  activeWorkspace = workspace || null;
+  try {
+    if (activeWorkspace?.id) localStorage.setItem(WORKSPACE_STORAGE_KEY, activeWorkspace.id);
+    else localStorage.removeItem(WORKSPACE_STORAGE_KEY);
+  } catch { /* Server authorization remains authoritative. */ }
+}
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -150,7 +162,15 @@ function renderHome() {
         <p class="eyebrow">RESOLUÇÃO OPERACIONAL · 01</p>
         <h1>O que vamos<br /><strong>resolver?</strong></h1>
         <p class="description">Conecte o que você observa no mundo físico à identidade operacional correta. Sem transformar uma leitura isolada em certeza.</p>
-        <button class="capture-card" id="identify" type="button"><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Câmera, código de barras, QR ou entrada manual</small></span><span class="arrow">→</span></button>
+        <section class="active-workspace-panel" aria-labelledby="active-workspace-title">
+          <p class="eyebrow">CONTEXTO ATIVO</p>
+          <label for="workspace-selector" id="active-workspace-title">Workspace da operação</label>
+          <select id="workspace-selector" class="workspace-selector" aria-describedby="workspace-context-help">
+            <option value="">Carregando seus workspaces…</option>
+          </select>
+          <p id="workspace-context-help" class="workspace-help">A identificação usará o contexto selecionado. A seleção local não substitui a autorização do servidor.</p>
+        </section>
+        <button class="capture-card" id="identify" type="button" disabled><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Selecione um workspace para iniciar</small></span><span class="arrow">→</span></button>
         <button class="workspace-entry" id="workspace-entry" type="button"><span><strong>GERENCIAR WORKSPACE</strong><small>Criar e consultar espaços de operação persistidos</small></span><span aria-hidden="true">→</span></button>
         <div class="demo-note"><span class="pulse-dot"></span> AMBIENTE EXPERIMENTAL <span>·</span> CATÁLOGO LOCAL DE DEMONSTRAÇÃO</div>
       </section>
@@ -180,13 +200,60 @@ function renderHome() {
       <footer><span>3L0 VISION</span><span>TORNAR O MUNDO FÍSICO COMPUTÁVEL.</span></footer>
     </main>`;
   mountSessionControl();
-  document.querySelector("#identify").addEventListener("click", renderCapture);
+  const identifyButton = document.querySelector("#identify");
+  const workspaceSelector = document.querySelector("#workspace-selector");
+  identifyButton.addEventListener("click", () => { if (activeWorkspace) renderCapture(); });
+  workspaceSelector.addEventListener("change", () => {
+    const option = workspaceSelector.selectedOptions[0];
+    let workspace = null;
+    try { workspace = option?.dataset.workspace ? JSON.parse(option.dataset.workspace) : null; } catch {}
+    setActiveWorkspace(workspace);
+    identifyButton.disabled = !activeWorkspace;
+    identifyButton.querySelector("small").textContent = activeWorkspace
+      ? "Contexto: " + activeWorkspace.name + " · Câmera, códigos ou entrada manual"
+      : "Selecione um workspace para iniciar";
+  });
+  void loadWorkspaceChoices(workspaceSelector, identifyButton);
   document.querySelector("#workspace-entry").addEventListener("click", () => renderWorkspaceOnboarding({ app, onBack: renderHome, supabase }));
   document.querySelector(".brand-mark").addEventListener("click", event => { event.preventDefault(); renderHome(); });
 }
 
+async function loadWorkspaceChoices(selector, identifyButton) {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
+    if (!token) throw new Error("Sessão expirada. Entre novamente.");
+    const response = await fetch("/api/workspaces", { headers: { Authorization: "Bearer " + token } });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Não foi possível carregar os workspaces.");
+    const workspaces = payload.workspaces || [];
+    selector.innerHTML = '<option value="">Selecione um workspace…</option>';
+    for (const workspace of workspaces) {
+      const option = document.createElement("option");
+      option.value = workspace.id;
+      option.textContent = workspace.name + " · " + workspace.status;
+      option.dataset.workspace = JSON.stringify(workspace);
+      selector.append(option);
+    }
+    const storedId = getStoredWorkspaceId();
+    const stored = workspaces.find((item) => item.id === storedId);
+    setActiveWorkspace(stored || null);
+    selector.value = stored?.id || "";
+    identifyButton.disabled = !stored;
+    identifyButton.querySelector("small").textContent = stored
+      ? "Contexto: " + stored.name + " · Câmera, códigos ou entrada manual"
+      : workspaces.length ? "Selecione um workspace para iniciar" : "Crie um workspace antes de iniciar";
+    if (!workspaces.length) selector.innerHTML = '<option value="">Nenhum workspace disponível — crie um primeiro</option>';
+  } catch (error) {
+    selector.innerHTML = '<option value="">Não foi possível carregar os workspaces</option>';
+    document.querySelector("#workspace-context-help").textContent = error.message;
+    identifyButton.disabled = true;
+  }
+}
+
 function renderCapture() {
-  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">CAPTURA <span>AO VIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
+  if (!activeWorkspace?.id) { renderHome(); return; }
+  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>ATIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
   document.querySelector("#back").addEventListener("click", renderHome);
   captureAdapter = new BrowserCaptureAdapter({ videoElement: document.querySelector("#camera"), onStatus: handleCaptureStatus });
   document.querySelector("#manual-form").addEventListener("submit", async function (event) {
@@ -237,7 +304,11 @@ async function resolveInput(input) {
       orcClient: client,
       onStage: function (event) { updateProcessingStage(event.name); }
     });
-    const output = await pipeline.run({ input, context: { operation: "identify_product", interface: "web" } });
+    const output = await pipeline.run({ input, context: {
+      operation: "identify_product",
+      interface: "web",
+      workspace: activeWorkspace ? { id: activeWorkspace.id, name: activeWorkspace.name, organization_id: activeWorkspace.organization_id, status: activeWorkspace.status } : null
+    } });
     renderResult(output);
   } catch (error) { renderError(error); }
 }
