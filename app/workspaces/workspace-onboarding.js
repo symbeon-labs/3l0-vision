@@ -20,7 +20,7 @@ export function renderWorkspaceOnboarding({ app, onBack, supabase }) {
         <p class="description">Crie e consulte workspaces persistidos usando a sessão autenticada da aplicação.</p>
         <div class="workspace-warning" id="workspace-config-warning" role="status">
           <strong>AMBIENTE EXPERIMENTAL</strong>
-          <p>O backend exige as variáveis Supabase no servidor, a migração aplicada e testes de autorização concluídos. Não use dados reais antes da validação.</p>
+          <p>Este aviso é informativo, não indica por si só uma falha de configuração. Use dados fictícios durante a validação e confirme as permissões antes de operar com dados reais.</p>
         </div>
       </section>
       <section class="workspace-card">
