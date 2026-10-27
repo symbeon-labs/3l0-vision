@@ -248,6 +248,15 @@ export function renderWorkspaceOnboarding({ app, onBack }) {
     review.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  if (supabase) {
+    supabase.auth.onAuthStateChange((_event, nextSession) => {
+      session = nextSession;
+      updateAuthUI();
+      if (session) requestWorkspaceList();
+      else workspaceList.textContent = "Entre para consultar seus workspaces.";
+    });
+  }
+
   updateAuthUI();
   refreshSession();
 }
