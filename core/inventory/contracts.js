@@ -59,6 +59,9 @@ export function createStockMovement(input = {}) {
     throw new Error("quantity must be a finite number greater than zero");
   }
 
+  const state = input.state ?? "NEEDS_REVIEW";
+  assertEnum(state, INVENTORY_RECORD_STATES, "state");
+
   const direction = input.direction ?? (
     ["RECEIPT", "RETURN", "TRANSFER_IN", "OPENING_BALANCE"].includes(type) ? "IN" :
     ["ISSUE", "TRANSFER_OUT"].includes(type) ? "OUT" : null
@@ -68,6 +71,17 @@ export function createStockMovement(input = {}) {
   }
   if (type === "ADJUSTMENT" && direction !== "ADJUSTMENT") {
     throw new Error("ADJUSTMENT movement requires ADJUSTMENT direction");
+  }
+  const expectedDirection = {
+    OPENING_BALANCE: "IN",
+    RECEIPT: "IN",
+    ISSUE: "OUT",
+    RETURN: "IN",
+    TRANSFER_IN: "IN",
+    TRANSFER_OUT: "OUT"
+  }[type];
+  if (expectedDirection && direction !== expectedDirection) {
+    throw new Error(`${type} movement requires ${expectedDirection} direction`);
   }
 
   return {
@@ -82,7 +96,7 @@ export function createStockMovement(input = {}) {
     source: requiredString(input.source, "source"),
     sourceReference: optionalString(input.sourceReference),
     idempotencyKey: requiredString(input.idempotencyKey, "idempotencyKey"),
-    state: input.state ?? "NEEDS_REVIEW",
+    state,
     evidenceIds: normalizeStringArray(input.evidenceIds ?? [], "evidenceIds"),
     provenance: createProvenance(input.provenance),
     metadata: cloneRecord(input.metadata ?? {}, "metadata")

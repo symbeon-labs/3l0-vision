@@ -75,6 +75,8 @@ test("rejects unsupported movement types and invalid direction combinations", ()
   };
   assert.throws(() => createStockMovement({ ...base, type: "MAGIC" }), /type must be one of/);
   assert.throws(() => createStockMovement({ ...base, type: "ADJUSTMENT", direction: "IN" }), /ADJUSTMENT movement requires/);
+  assert.throws(() => createStockMovement({ ...base, type: "RECEIPT", direction: "OUT" }), /RECEIPT movement requires IN direction/);
+  assert.throws(() => createStockMovement({ ...base, type: "ISSUE", direction: "IN" }), /ISSUE movement requires OUT direction/);
 });
 
 test("creates evidence with traceable origin and content references", () => {
@@ -97,4 +99,12 @@ test("prevents cross-tenant records from being accepted by tenant-scoped callers
   const record = { tenantId: "tenant_a", productId: "p1" };
   assert.equal(assertSameTenant("tenant_a", record), record);
   assert.throws(() => assertSameTenant("tenant_b", record), /tenant_scope_mismatch/);
+});
+
+
+test("rejects unsupported stock movement states", () => {
+  assert.throws(() => createStockMovement({
+    tenantId: "t1", movementId: "m1", productId: "p1", type: "RECEIPT", quantity: 1,
+    occurredAt: "2026-10-22T11:00:00Z", source: "manual", idempotencyKey: "key-1", state: "MAGIC"
+  }), /state must be one of/);
 });
