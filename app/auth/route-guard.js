@@ -11,6 +11,7 @@ function normalizedPath() {
 export function createRouteGuard({ app, renderProtected, renderPublic }) {
   let user = null;
   let checking = false;
+  let renderSequence = 0;
 
   const go = (path) => {
     window.location.hash = path;
@@ -31,12 +32,14 @@ export function createRouteGuard({ app, renderProtected, renderPublic }) {
   }
 
   async function renderRoute() {
-    if (checking) return;
+    const sequence = ++renderSequence;
+    if (checking) { checking = false; }
     checking = true;
     const path = normalizedPath();
     try {
       if (PRIVATE_ROUTES.has(path)) {
         const authenticated = await requireUser();
+        if (sequence !== renderSequence) return;
         if (!authenticated) {
           renderAuth({
             app,
@@ -48,6 +51,7 @@ export function createRouteGuard({ app, renderProtected, renderPublic }) {
         renderProtected({ app, user, path, onLogout });
         return;
       }
+      if (sequence !== renderSequence) return;
       if (path === "/login" || path === "/signup") {
         renderAuth({
           app,
@@ -61,7 +65,7 @@ export function createRouteGuard({ app, renderProtected, renderPublic }) {
       }
       renderPublic?.({ app, onLogin: () => go("/login") });
     } finally {
-      checking = false;
+      if (sequence === renderSequence) checking = false;
     }
   }
 
