@@ -1,0 +1,122 @@
+import { randomUUID } from "node:crypto";
+import { ResolutionPipeline } from "../../core/pipeline/resolution-pipeline.js";
+import { OrcClient } from "../../core/orc/client.js";
+import { deterministicResolver } from "../../core/orc/deterministic-resolver.js";
+import { handleError, methodNotAllowed, requireUser, sendJson } from "../_lib/supabase.js";
+
+const MAX_CODE_LENGTH = 128;
+const demoEntities = [{
+  entity_id: "product_demo_001",
+  type: "product",
+  identifiers: [{ scheme: "ean", value: "789000000004" }],
+  attributes: { name: "Produto X", unit: "500 ml" }
+}];
+
+function createDemoRepository() {
+  return {
+    async findCandidates({ observation }) {
+      const identifiers = observation.identifiers || [];
+      return demoEntities.filter(entity => entity.identifiers.some(candidate =>
+        identifiers.some(observed =>
+          candidate.scheme === observed.scheme &&
+          String(candidate.value).trim() === String(observed.value).trim()
+        )
+      ));
+    },
+    async persistResolution() {
+      // The API intentionally does not claim durable persistence in Gate 1.
+      return { persisted: false, storage: "none" };
+    }
+  };
+}
+
+function parseBody(body) {
+  if (body && typeof body === "object" && !Buffer.isBuffer(body)) return body;
+  if (typeof body === "string") {
+    try { return JSON.parse(body); } catch {
+      const error = new Error("JSON inválido.");
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+  const error = new Error("Corpo JSON obrigatório.");
+  error.statusCode = 400;
+  throw error;
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") return methodNotAllowed(res, ["POST"]);
+  try {
+    const { client, user } = await requireUser(req);
+    const body = parseBody(req.body);
+    const code = typeof body.code === "string" ? body.code.trim() : "";
+    const workspaceId = typeof body.workspaceId === "string" ? body.workspaceId.trim() : "";
+    if (!code || code.length > MAX_CODE_LENGTH) {
+      return sendJson(res, 400, { error: "code_invalid", message: "Informe um identificador de até 128 caracteres." });
+    }
+    if (!workspaceId || workspaceId.length > 128) {
+      return sendJson(res, 400, { error: "workspace_required", message: "Selecione um workspace autorizado." });
+    }
+
+    const { data: membership, error: membershipError } = await client
+      .from("workspace_memberships")
+      .select("workspace_id,role,status")
+      .eq("workspace_id", workspaceId)
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
+    if (membershipError) throw membershipError;
+    if (!membership) {
+      const error = new Error("Workspace não encontrado ou sem acesso.");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const scheme = typeof body.scheme === "string" && body.scheme.trim()
+      ? body.scheme.trim().toLowerCase()
+      : (/^\d{8}$|^\d{12,14}$/.test(code) ? "ean" : "identifier");
+
+    const pipeline = new ResolutionPipeline({
+      captureAdapter: {
+        async capture(input) {
+          return {
+            source: "api-manual-entry",
+            modality: "identifier",
+            identifiers: [{ scheme: input.scheme, value: input.code }],
+            context: { capture_method: "api" }
+          };
+        }
+      },
+      entityRepository: createDemoRepository(),
+      orcClient: new OrcClient({ resolver: deterministicResolver })
+    });
+    const output = await pipeline.run({
+      input: { code, scheme, method: "api" },
+      context: {
+        operation: "identify_product",
+        interface: "3l0-vision-api",
+        request_id: randomUUID(),
+        user_id: user.id,
+        workspace_id: workspaceId,
+        workspace_role: membership.role
+      }
+    });
+    return sendJson(res, 200, {
+      apiVersion: "v1",
+      resolutionId: output.result.resolution_id,
+      status: output.result.status,
+      state: output.state,
+      observation: output.observation,
+      result: output.result,
+      persistence: { persisted: false, mode: "ephemeral-demo" },
+      limitations: [
+        "deterministic local matching only",
+        "synthetic in-memory catalog",
+        "no durable persistence or shared history",
+        "no external ORC, OCR, model provider, or ERP/WMS integration"
+      ]
+    });
+  } catch (error) {
+    return handleError(res, error);
+  }
+}
