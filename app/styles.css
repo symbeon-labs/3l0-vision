@@ -824,3 +824,27 @@ footer {
   .workspace-review-state { grid-template-columns: 1fr; gap: 7px; }
   .workspace-entry { padding: 16px; }
 }
+
+
+/* Authenticated workspace onboarding controls */
+.workspace-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.workspace-secondary {
+  min-height: 44px;
+  padding: 11px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: .03em;
+  cursor: pointer;
+}
+.workspace-secondary:hover { border-color: var(--cyan); }
+.workspace-secondary:disabled, .primary:disabled, .workspace-form button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.workspace-card input:disabled { opacity: .7; }
+.workspace-review-state + .workspace-review-state { margin-top: 12px; }
+.workspace-review-state p { overflow-wrap: anywhere; }
