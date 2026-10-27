@@ -54,43 +54,52 @@ alter table public.workspaces enable row level security;
 alter table public.workspace_memberships enable row level security;
 alter table public.workspace_invitations enable row level security;
 
+-- SECURITY DEFINER helpers avoid recursive RLS evaluation when policies inspect memberships.
+create or replace function public.is_active_workspace_member(p_workspace_id uuid)
+returns boolean language sql stable security definer set search_path = ''
+as $
+  select exists (select 1 from public.workspace_memberships m
+    where m.workspace_id = p_workspace_id and m.user_id = auth.uid() and m.status = 'active');
+$;
+
+create or replace function public.is_active_workspace_owner(p_workspace_id uuid)
+returns boolean language sql stable security definer set search_path = ''
+as $
+  select exists (select 1 from public.workspace_memberships m
+    where m.workspace_id = p_workspace_id and m.user_id = auth.uid()
+      and m.role = 'workspace_owner' and m.status = 'active');
+$;
+
+revoke all on function public.is_active_workspace_member(uuid) from public, anon;
+revoke all on function public.is_active_workspace_owner(uuid) from public, anon;
+grant execute on function public.is_active_workspace_member(uuid) to authenticated;
+grant execute on function public.is_active_workspace_owner(uuid) to authenticated;
+
 -- Membership is the tenant boundary. A user can only see rows belonging to a workspace
 -- where they have an active membership; never trust a workspace_id supplied by the browser.
 create policy "members read own organizations" on public.organizations
   for select to authenticated using (
-    exists (
-      select 1 from public.workspaces w
-      join public.workspace_memberships m on m.workspace_id = w.id
-      where w.organization_id = organizations.id and m.user_id = auth.uid() and m.status = 'active'
-    )
+    exists (select 1 from public.workspaces w where w.organization_id = organizations.id and public.is_active_workspace_member(w.id))
   );
 
 create policy "members read workspaces" on public.workspaces
   for select to authenticated using (
-    exists (select 1 from public.workspace_memberships m where m.workspace_id = workspaces.id and m.user_id = auth.uid() and m.status = 'active')
+    public.is_active_workspace_member(workspaces.id)
   );
 
 create policy "members read memberships" on public.workspace_memberships
   for select to authenticated using (
-    exists (select 1 from public.workspace_memberships mine where mine.workspace_id = workspace_memberships.workspace_id and mine.user_id = auth.uid() and mine.status = 'active')
+    public.is_active_workspace_member(workspace_memberships.workspace_id)
   );
 
 create policy "owners create invitations" on public.workspace_invitations
   for insert to authenticated with check (
-    invited_by = auth.uid() and exists (
-      select 1 from public.workspace_memberships m
-      where m.workspace_id = workspace_invitations.workspace_id
-        and m.user_id = auth.uid() and m.role = 'workspace_owner' and m.status = 'active'
-    )
+    invited_by = auth.uid() and public.is_active_workspace_owner(workspace_invitations.workspace_id)
   );
 
 create policy "owners read invitations" on public.workspace_invitations
   for select to authenticated using (
-    exists (
-      select 1 from public.workspace_memberships m
-      where m.workspace_id = workspace_invitations.workspace_id
-        and m.user_id = auth.uid() and m.role = 'workspace_owner' and m.status = 'active'
-    )
+    public.is_active_workspace_owner(workspace_invitations.workspace_id)
   );
 
 -- Atomic organization + workspace + owner membership creation. No service-role key required.
