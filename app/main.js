@@ -16,6 +16,18 @@ let resolutions = 0;
 let supabase = null;
 let authUser = null;
 let authTransition = false;
+let activeWorkspace = null;
+const WORKSPACE_STORAGE_KEY = "3l0.activeWorkspaceId";
+function getStoredWorkspaceId() {
+  try { return localStorage.getItem(WORKSPACE_STORAGE_KEY); } catch { return null; }
+}
+function setActiveWorkspace(workspace) {
+  activeWorkspace = workspace || null;
+  try {
+    if (activeWorkspace?.id) localStorage.setItem(WORKSPACE_STORAGE_KEY, activeWorkspace.id);
+    else localStorage.removeItem(WORKSPACE_STORAGE_KEY);
+  } catch { /* Server authorization remains authoritative. */ }
+}
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
