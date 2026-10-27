@@ -74,7 +74,7 @@ function renderAuth(message = "", mode = "signin") {
         return;
       }
       authUser = result.data.user;
-      bootApp();
+      renderHome();
     } catch (error) {
       target.textContent = error?.message || "Não foi possível autenticar. Tente novamente.";
       submit.disabled = false;
@@ -243,4 +243,4 @@ function stopCapture() { if (captureAdapter) captureAdapter.stop(); captureAdapt
 function inferScheme(code) { return /^\d{8}$|^\d{12,14}$/.test(code) ? "ean" : "identifier"; }
 function formatToScheme(format) { return format && format.indexOf("ean") === 0 ? "ean" : format === "qr_code" ? "qr" : format === "code_128" ? "code128" : "identifier"; }
 
-renderHome();
+bootApp();
