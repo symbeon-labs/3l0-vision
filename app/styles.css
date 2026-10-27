@@ -833,3 +833,27 @@ footer {
 .active-workspace-panel label { display: block; margin: 10px 0 8px; color: var(--text); font-size: 13px; font-weight: 600; }
 .workspace-selector { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid #33465f; border-radius: 8px; background: #0c1727; color: var(--text); font: inherit; }
 .workspace-selector:focus { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+
+/* Coordinated UX: visible keyboard focus, reduced motion, and readable status controls. */
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+:where(input, select, textarea) {
+  accent-color: var(--cyan);
+}
+
+[aria-live], [role="status"], [role="alert"] {
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
