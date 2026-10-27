@@ -75,6 +75,8 @@ test("rejects unsupported movement types and invalid direction combinations", ()
   };
   assert.throws(() => createStockMovement({ ...base, type: "MAGIC" }), /type must be one of/);
   assert.throws(() => createStockMovement({ ...base, type: "ADJUSTMENT", direction: "IN" }), /ADJUSTMENT movement requires/);
+  assert.throws(() => createStockMovement({ ...base, type: "RECEIPT", direction: "OUT" }), /RECEIPT movement requires IN direction/);
+  assert.throws(() => createStockMovement({ ...base, type: "ISSUE", direction: "IN" }), /ISSUE movement requires OUT direction/);
 });
 
 test("creates evidence with traceable origin and content references", () => {

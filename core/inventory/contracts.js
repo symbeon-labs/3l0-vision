@@ -72,6 +72,17 @@ export function createStockMovement(input = {}) {
   if (type === "ADJUSTMENT" && direction !== "ADJUSTMENT") {
     throw new Error("ADJUSTMENT movement requires ADJUSTMENT direction");
   }
+  const expectedDirection = {
+    OPENING_BALANCE: "IN",
+    RECEIPT: "IN",
+    ISSUE: "OUT",
+    RETURN: "IN",
+    TRANSFER_IN: "IN",
+    TRANSFER_OUT: "OUT"
+  }[type];
+  if (expectedDirection && direction !== expectedDirection) {
+    throw new Error(`${type} movement requires ${expectedDirection} direction`);
+  }
 
   return {
     tenantId,
