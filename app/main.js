@@ -1,9 +1,11 @@
+import { createClient } from "@supabase/supabase-js";
 import { OrcClient } from "../core/orc/client.js";
 import { deterministicResolver } from "../core/orc/deterministic-resolver.js";
 import { ResolutionPipeline } from "../core/pipeline/resolution-pipeline.js";
 import { BrowserCaptureAdapter } from "./capture/browser-capture.js";
 import { parseGlyphReference } from "../core/vision/glyph-reference.js";
 import { LocalCatalog } from "./catalog/local-catalog.js";
+import { renderWorkspaceOnboarding } from "./workspaces/workspace-onboarding.js";
 import "./styles.css";
 
 const app = document.querySelector("#app");
@@ -11,6 +13,133 @@ const catalog = new LocalCatalog();
 const client = new OrcClient({ resolver: deterministicResolver });
 let captureAdapter = null;
 let resolutions = 0;
+let supabase = null;
+let authUser = null;
+let authTransition = false;
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+function renderAuth(message = "", mode = "signin") {
+  stopCapture();
+  const signup = mode === "signup";
+  app.innerHTML = `
+    <main class="shell auth-shell">
+      <header class="topbar"><a class="brand-mark" href="/" aria-label="3L0 Vision">3L0<span class="brand-dot">.</span></a><div class="status">ACESSO <span>SEGURO</span></div></header>
+      <section class="auth-panel">
+        <p class="eyebrow">3L0 VISION · AMBIENTE EXPERIMENTAL</p>
+        <h1>${signup ? "Criar acesso." : "Bem-vindo<br /><strong>de volta.</strong>"}</h1>
+        <p class="description">${signup ? "Crie sua conta para acessar o ambiente de identificação operacional." : "Entre para continuar no ambiente de identificação operacional."}</p>
+        <form class="auth-form" id="auth-form">
+          ${signup ? '<label for="full-name">NOME</label><input id="full-name" name="fullName" autocomplete="name" maxlength="120" required />' : ""}
+          <label for="auth-email">E-MAIL</label>
+          <input id="auth-email" name="email" type="email" autocomplete="email" required />
+          <label for="auth-password">SENHA</label>
+          <input id="auth-password" name="password" type="password" autocomplete="${signup ? "new-password" : "current-password"}" minlength="8" required />
+          <p class="auth-message" id="auth-message" role="status" aria-live="polite">${message}</p>
+          <button class="primary auth-submit" type="submit">${signup ? "CRIAR CONTA" : "ENTRAR"}</button>
+        </form>
+        <button class="auth-switch" id="auth-switch" type="button">${signup ? "Já tem acesso? Entrar" : "Primeiro acesso? Criar conta"}</button>
+        ${!signup ? '<button class="auth-switch" id="auth-reset" type="button">Esqueci minha senha</button>' : ""}
+        <p class="auth-footnote">Acesso protegido por Supabase Auth. Os dados de cada espaço dependem das permissões verificadas no banco.</p>
+      </section>
+    </main>`;
+  document.querySelector("#auth-switch").addEventListener("click", () => renderAuth("", signup ? "signin" : "signup"));
+  const reset = document.querySelector("#auth-reset");
+  if (reset) reset.addEventListener("click", async () => {
+    const email = document.querySelector("#auth-email").value.trim();
+    const target = document.querySelector("#auth-message");
+    if (!email) { target.textContent = "Informe seu e-mail para receber o link de recuperação."; return; }
+    reset.disabled = true;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+    target.textContent = error ? error.message : "Se houver uma conta para esse e-mail, enviaremos as instruções de recuperação.";
+    reset.disabled = false;
+  });
+  document.querySelector("#auth-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("email") || "").trim();
+    const password = String(form.get("password") || "");
+    const target = document.querySelector("#auth-message");
+    const submit = document.querySelector(".auth-submit");
+    submit.disabled = true;
+    target.textContent = signup ? "Criando conta..." : "Validando acesso...";
+    try {
+      const result = signup
+        ? await supabase.auth.signUp({ email, password, options: { data: { full_name: String(form.get("fullName") || "").trim() } } })
+        : await supabase.auth.signInWithPassword({ email, password });
+      if (result.error) throw result.error;
+      if (signup && !result.data.session) {
+        target.textContent = "Conta criada. Confira seu e-mail para confirmar o cadastro antes de entrar.";
+        submit.disabled = false;
+        return;
+      }
+      authUser = result.data.user;
+      renderHome();
+    } catch (error) {
+      target.textContent = error?.message || "Não foi possível autenticar. Tente novamente.";
+      submit.disabled = false;
+    }
+  });
+}
+
+function mountSessionControl() {
+  const topbar = document.querySelector(".topbar");
+  if (!topbar || !authUser) return;
+  const control = document.createElement("button");
+  control.type = "button";
+  control.className = "session-control";
+  control.textContent = "SAIR";
+  control.setAttribute("aria-label", "Encerrar sessão");
+  control.addEventListener("click", async () => {
+    control.disabled = true;
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      control.disabled = false;
+      console.error("Sign out failed", error);
+    }
+  });
+  topbar.append(control);
+}
+
+async function bootApp() {
+  if (!supabaseUrl || !supabaseKey) {
+    renderAuth();
+    const form = document.querySelector("#auth-form");
+    if (form) form.hidden = true;
+    const sw = document.querySelector("#auth-switch");
+    if (sw) sw.hidden = true;
+    const reset = document.querySelector("#auth-reset");
+    if (reset) reset.hidden = true;
+
+    // Keep configuration diagnostics visible even when the form itself is hidden.
+    const notice = document.createElement("p");
+    notice.className = "auth-message auth-config-notice";
+    notice.setAttribute("role", "alert");
+    notice.textContent = "Configuração pendente: defina VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY nas variáveis de ambiente do Vercel para este Preview/ambiente e faça um novo deploy.";
+    const footnote = document.querySelector(".auth-footnote");
+    if (footnote) footnote.before(notice);
+    else document.querySelector(".auth-panel")?.append(notice);
+    console.error("[3L0 Auth] Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY.");
+    return;
+  }
+  supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  const { data, error } = await supabase.auth.getUser();
+  if (error && error.name !== "AuthSessionMissingError") console.warn("Auth session validation:", error.message);
+  authUser = data?.user ?? null;
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (authTransition) return;
+    authTransition = true;
+    authUser = session?.user ?? null;
+    if (event === "SIGNED_OUT") {
+      stopCapture();
+      renderAuth();
+    }
+    authTransition = false;
+  });
+  if (authUser) renderHome();
+  else renderAuth();
+}
 
 function renderHome() {
   stopCapture();
@@ -22,6 +151,7 @@ function renderHome() {
         <h1>O que vamos<br /><strong>resolver?</strong></h1>
         <p class="description">Conecte o que você observa no mundo físico à identidade operacional correta. Sem transformar uma leitura isolada em certeza.</p>
         <button class="capture-card" id="identify" type="button"><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Câmera, código de barras, QR ou entrada manual</small></span><span class="arrow">→</span></button>
+        <button class="workspace-entry" id="workspace-entry" type="button"><span><strong>GERENCIAR WORKSPACE</strong><small>Criar e consultar espaços de operação persistidos</small></span><span aria-hidden="true">→</span></button>
         <div class="demo-note"><span class="pulse-dot"></span> AMBIENTE EXPERIMENTAL <span>·</span> CATÁLOGO LOCAL DE DEMONSTRAÇÃO</div>
       </section>
       <section class="learning-section" aria-labelledby="how-title">
@@ -49,7 +179,9 @@ function renderHome() {
       <section class="activity"><div><span>SESSÃO ATUAL</span><strong>${resolutions} resolução${resolutions === 1 ? "" : "ões"} concluída${resolutions === 1 ? "" : "s"}</strong></div><p>Contagem temporária desta sessão; não é uma métrica de desempenho nem fica sincronizada entre dispositivos.</p></section>
       <footer><span>3L0 VISION</span><span>TORNAR O MUNDO FÍSICO COMPUTÁVEL.</span></footer>
     </main>`;
+  mountSessionControl();
   document.querySelector("#identify").addEventListener("click", renderCapture);
+  document.querySelector("#workspace-entry").addEventListener("click", () => renderWorkspaceOnboarding({ app, onBack: renderHome, supabase }));
   document.querySelector(".brand-mark").addEventListener("click", event => { event.preventDefault(); renderHome(); });
 }
 
@@ -124,4 +256,4 @@ function stopCapture() { if (captureAdapter) captureAdapter.stop(); captureAdapt
 function inferScheme(code) { return /^\d{8}$|^\d{12,14}$/.test(code) ? "ean" : "identifier"; }
 function formatToScheme(format) { return format && format.indexOf("ean") === 0 ? "ean" : format === "qr_code" ? "qr" : format === "code_128" ? "code128" : "identifier"; }
 
-renderHome();
+bootApp();
