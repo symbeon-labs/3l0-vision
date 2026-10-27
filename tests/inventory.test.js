@@ -98,3 +98,11 @@ test("prevents cross-tenant records from being accepted by tenant-scoped callers
   assert.equal(assertSameTenant("tenant_a", record), record);
   assert.throws(() => assertSameTenant("tenant_b", record), /tenant_scope_mismatch/);
 });
+
+
+test("rejects unsupported stock movement states", () => {
+  assert.throws(() => createStockMovement({
+    tenantId: "t1", movementId: "m1", productId: "p1", type: "RECEIPT", quantity: 1,
+    occurredAt: "2026-10-22T11:00:00Z", source: "manual", idempotencyKey: "key-1", state: "MAGIC"
+  }), /state must be one of/);
+});
