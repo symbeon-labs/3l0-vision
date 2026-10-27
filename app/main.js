@@ -218,8 +218,42 @@ function renderHome() {
   document.querySelector(".brand-mark").addEventListener("click", event => { event.preventDefault(); renderHome(); });
 }
 
+async function loadWorkspaceChoices(selector, identifyButton) {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
+    if (!token) throw new Error("Sessão expirada. Entre novamente.");
+    const response = await fetch("/api/workspaces", { headers: { Authorization: "Bearer " + token } });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Não foi possível carregar os workspaces.");
+    const workspaces = payload.workspaces || [];
+    selector.innerHTML = '<option value="">Selecione um workspace…</option>';
+    for (const workspace of workspaces) {
+      const option = document.createElement("option");
+      option.value = workspace.id;
+      option.textContent = workspace.name + " · " + workspace.status;
+      option.dataset.workspace = JSON.stringify(workspace);
+      selector.append(option);
+    }
+    const storedId = getStoredWorkspaceId();
+    const stored = workspaces.find((item) => item.id === storedId);
+    setActiveWorkspace(stored || null);
+    selector.value = stored?.id || "";
+    identifyButton.disabled = !stored;
+    identifyButton.querySelector("small").textContent = stored
+      ? "Contexto: " + stored.name + " · Câmera, códigos ou entrada manual"
+      : workspaces.length ? "Selecione um workspace para iniciar" : "Crie um workspace antes de iniciar";
+    if (!workspaces.length) selector.innerHTML = '<option value="">Nenhum workspace disponível — crie um primeiro</option>';
+  } catch (error) {
+    selector.innerHTML = '<option value="">Não foi possível carregar os workspaces</option>';
+    document.querySelector("#workspace-context-help").textContent = error.message;
+    identifyButton.disabled = true;
+  }
+}
+
 function renderCapture() {
-  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">CAPTURA <span>AO VIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
+  if (!activeWorkspace?.id) { renderHome(); return; }
+  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>' + activeWorkspace.name + '</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
   document.querySelector("#back").addEventListener("click", renderHome);
   captureAdapter = new BrowserCaptureAdapter({ videoElement: document.querySelector("#camera"), onStatus: handleCaptureStatus });
   document.querySelector("#manual-form").addEventListener("submit", async function (event) {
@@ -270,7 +304,11 @@ async function resolveInput(input) {
       orcClient: client,
       onStage: function (event) { updateProcessingStage(event.name); }
     });
-    const output = await pipeline.run({ input, context: { operation: "identify_product", interface: "web" } });
+    const output = await pipeline.run({ input, context: {
+      operation: "identify_product",
+      interface: "web",
+      workspace: activeWorkspace ? { id: activeWorkspace.id, name: activeWorkspace.name, organization_id: activeWorkspace.organization_id, status: activeWorkspace.status } : null
+    } });
     renderResult(output);
   } catch (error) { renderError(error); }
 }
