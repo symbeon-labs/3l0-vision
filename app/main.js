@@ -154,4 +154,33 @@ function stopCapture() { if (captureAdapter) captureAdapter.stop(); captureAdapt
 function inferScheme(code) { return /^\d{8}$|^\d{12,14}$/.test(code) ? "ean" : "identifier"; }
 function formatToScheme(format) { return format && format.indexOf("ean") === 0 ? "ean" : format === "qr_code" ? "qr" : format === "code_128" ? "code128" : "identifier"; }
 
-renderHome();
+
+const routeGuard = createRouteGuard({
+  app,
+  renderPublic: ({ onLogin }) => renderHome({ onLogin }),
+  renderProtected: ({ user, onLogout }) => renderWorkspace({ user, onLogout })
+});
+
+function renderWorkspace({ user, onLogout }) {
+  stopCapture();
+  const safeEmail = String(user?.email ?? "usuário autenticado").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[char]);
+  app.innerHTML = `
+    <main class="shell home-shell workspace-shell">
+      <header class="topbar"><a class="brand-mark" href="#/" aria-label="3L0 Vision início">3L0<span class="brand-dot">.</span></a><div class="topbar-actions"><span class="status">SESSÃO <span>ATIVA</span></span><button class="auth-link" id="logout" type="button">SAIR</button></div></header>
+      <section class="home-hero">
+        <p class="eyebrow">ÁREA AUTENTICADA · AMBIENTE DE TESTE</p>
+        <h1>Bem-vindo<br /><strong>ao 3L0.</strong></h1>
+        <p class="description">Sessão autenticada como <strong>${safeEmail}</strong>. A camada de dados operacionais multiusuário ainda está em preparação e não é simulada como se estivesse pronta.</p>
+        <button class="capture-card" id="identify" type="button"><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Executar o fluxo de captura e resolução local</small></span><span class="arrow">→</span></button>
+        <div class="demo-note"><span class="pulse-dot"></span> AUTENTICADO <span>·</span> CATÁLOGO LOCAL DO NAVEGADOR</div>
+      </section>
+      <section class="limits-panel"><p class="eyebrow">PRONTIDÃO DE TESTE</p><h2>Limites atuais</h2><div class="limits-grid"><p><strong>Configurado</strong><br />Login, sessão Auth e rota de interface protegida.</p><p><strong>Pendente</strong><br />Persistência de catálogo/evidências por workspace no banco e testes E2E de isolamento entre usuários.</p></div></section>
+    </main>`;
+  document.querySelector("#logout").addEventListener("click", () => { void onLogout(); });
+  document.querySelector("#identify").addEventListener("click", renderCapture);
+  document.querySelector(".brand-mark").addEventListener("click", (event) => { event.preventDefault(); window.location.hash = "/"; });
+}
+
+routeGuard.start();
