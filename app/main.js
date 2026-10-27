@@ -41,7 +41,7 @@ function renderAuth(message = "", mode = "signin") {
       <section class="auth-panel">
         <p class="eyebrow">3L0 VISION · AMBIENTE EXPERIMENTAL</p>
         <h1>${signup ? "Criar acesso." : "Bem-vindo<br /><strong>de volta.</strong>"}</h1>
-        <p class="description">${signup ? "Crie sua conta para acessar o ambiente de identificação operacional." : "Entre para continuar no ambiente de identificação operacional."}</p>
+        <p class="description">${signup ? "Crie sua conta para acessar o ambiente experimental de conferência e identificação." : "Entre para continuar sua conferência de mercadorias."}</p>
         <form class="auth-form" id="auth-form">
           ${signup ? '<label for="full-name">NOME</label><input id="full-name" name="fullName" autocomplete="name" maxlength="120" required />' : ""}
           <label for="auth-email">E-MAIL</label>
@@ -64,7 +64,7 @@ function renderAuth(message = "", mode = "signin") {
     if (!email) { target.textContent = "Informe seu e-mail para receber o link de recuperação."; return; }
     reset.disabled = true;
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
-    target.textContent = error ? error.message : "Se houver uma conta para esse e-mail, enviaremos as instruções de recuperação.";
+    target.textContent = error ? "Não foi possível solicitar a recuperação agora. Confira o e-mail e tente novamente." : "Se houver uma conta para esse e-mail, enviaremos as instruções de recuperação.";
     reset.disabled = false;
   });
   document.querySelector("#auth-form").addEventListener("submit", async event => {
@@ -75,7 +75,7 @@ function renderAuth(message = "", mode = "signin") {
     const target = document.querySelector("#auth-message");
     const submit = document.querySelector(".auth-submit");
     submit.disabled = true;
-    target.textContent = signup ? "Criando conta..." : "Validando acesso...";
+    target.textContent = signup ? "Criando sua conta…" : "Verificando seu acesso…";
     try {
       const result = signup
         ? await supabase.auth.signUp({ email, password, options: { data: { full_name: String(form.get("fullName") || "").trim() } } })
@@ -89,7 +89,7 @@ function renderAuth(message = "", mode = "signin") {
       authUser = result.data.user;
       renderHome();
     } catch (error) {
-      target.textContent = error?.message || "Não foi possível autenticar. Tente novamente.";
+      target.textContent = error?.message?.includes("Invalid login credentials") ? "E-mail ou senha não conferem. Verifique os dados e tente novamente." : error?.message?.includes("Email not confirmed") ? "Confirme seu e-mail antes de entrar." : "Não foi possível concluir o acesso. Confira os dados e tente novamente.";
       submit.disabled = false;
     }
   });
@@ -161,17 +161,17 @@ function renderHome() {
       <section class="home-hero">
         <p class="eyebrow">RESOLUÇÃO OPERACIONAL · 01</p>
         <h1>O que vamos<br /><strong>resolver?</strong></h1>
-        <p class="description">Conecte o que você observa no mundo físico à identidade operacional correta. Sem transformar uma leitura isolada em certeza.</p>
+        <p class="description">Confira um produto relacionando códigos e informações disponíveis. O sistema apresenta correspondências e pontos que precisam de revisão; uma leitura isolada não confirma a identidade do item.</p>
         <section class="active-workspace-panel" aria-labelledby="active-workspace-title">
           <p class="eyebrow">CONTEXTO ATIVO</p>
-          <label for="workspace-selector" id="active-workspace-title">Workspace da operação</label>
+          <label for="workspace-selector" id="active-workspace-title">Espaço de trabalho da operação</label>
           <select id="workspace-selector" class="workspace-selector" aria-describedby="workspace-context-help">
             <option value="">Carregando seus workspaces…</option>
           </select>
-          <p id="workspace-context-help" class="workspace-help">A identificação usará o contexto selecionado. A seleção local não substitui a autorização do servidor.</p>
+          <p id="workspace-context-help" class="workspace-help">Escolha o espaço que define o contexto desta conferência. O servidor verifica suas permissões antes de autorizar a operação.</p>
         </section>
         <button class="capture-card" id="identify" type="button" disabled><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Selecione um workspace para iniciar</small></span><span class="arrow">→</span></button>
-        <button class="workspace-entry" id="workspace-entry" type="button"><span><strong>GERENCIAR WORKSPACE</strong><small>Criar e consultar espaços de operação persistidos</small></span><span aria-hidden="true">→</span></button>
+        <button class="workspace-entry" id="workspace-entry" type="button"><span><strong>GERENCIAR ESPAÇOS DE TRABALHO</strong><small>Criar um espaço ou consultar os espaços disponíveis</small></span><span aria-hidden="true">→</span></button>
         <div class="demo-note"><span class="pulse-dot"></span> AMBIENTE EXPERIMENTAL <span>·</span> CATÁLOGO LOCAL DE DEMONSTRAÇÃO</div>
       </section>
       <section class="learning-section" aria-labelledby="how-title">
@@ -231,7 +231,7 @@ async function loadWorkspaceChoices(selector, identifyButton) {
     for (const workspace of workspaces) {
       const option = document.createElement("option");
       option.value = workspace.id;
-      option.textContent = workspace.name + " · " + workspace.status;
+      option.textContent = workspace.name;
       option.dataset.workspace = JSON.stringify(workspace);
       selector.append(option);
     }
@@ -241,12 +241,16 @@ async function loadWorkspaceChoices(selector, identifyButton) {
     selector.value = stored?.id || "";
     identifyButton.disabled = !stored;
     identifyButton.querySelector("small").textContent = stored
-      ? "Contexto: " + stored.name + " · Câmera, códigos ou entrada manual"
-      : workspaces.length ? "Selecione um workspace para iniciar" : "Crie um workspace antes de iniciar";
-    if (!workspaces.length) selector.innerHTML = '<option value="">Nenhum workspace disponível — crie um primeiro</option>';
+      ? "Espaço ativo: " + stored.name + " · Câmera ou código manual"
+      : workspaces.length ? "Escolha um espaço de trabalho para iniciar" : "Crie um espaço de trabalho antes de iniciar";
+    if (!workspaces.length) {
+      selector.innerHTML = '<option value="">Nenhum espaço de trabalho disponível</option>';
+      document.querySelector("#workspace-context-help").textContent = "Você ainda não tem acesso a um espaço de trabalho. Use “Gerenciar espaços de trabalho” para criar um ou consulte a pessoa administradora.";
+    }
   } catch (error) {
-    selector.innerHTML = '<option value="">Não foi possível carregar os workspaces</option>';
-    document.querySelector("#workspace-context-help").textContent = error.message;
+    selector.innerHTML = '<option value="">Não foi possível carregar os espaços</option>';
+    document.querySelector("#workspace-context-help").textContent = "Não conseguimos consultar seus espaços agora. Verifique sua conexão e tente novamente. Se o problema continuar, entre em contato com a equipe responsável.";
+    console.error("[3L0 Workspaces] Failed to load workspace choices:", error);
     identifyButton.disabled = true;
   }
 }
