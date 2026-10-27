@@ -4,6 +4,8 @@ import { ResolutionPipeline } from "../core/pipeline/resolution-pipeline.js";
 import { BrowserCaptureAdapter } from "./capture/browser-capture.js";
 import { parseGlyphReference } from "../core/vision/glyph-reference.js";
 import { LocalCatalog } from "./catalog/local-catalog.js";
+import { parseFiscalXml } from "../core/evidence/fiscal-xml-parser.js";
+import { recommendContextSources } from "../core/evidence/source-catalog.js";
 import "./styles.css";
 
 const app = document.querySelector("#app");
@@ -54,10 +56,11 @@ function renderHome() {
 }
 
 function renderCapture() {
-  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">CAPTURA <span>AO VIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><div class="photo-capture"><button class="secondary" id="capture-photo" type="button">CAPTURAR IMAGEM</button><p class="capture-note">A imagem fica apenas nesta sessão do navegador. OCR e envio para análise ainda não estão conectados.</p><div id="photo-evidence" class="photo-evidence" hidden></div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
+  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">CAPTURA <span>AO VIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><div class="photo-capture"><button class="secondary" id="capture-photo" type="button">CAPTURAR IMAGEM</button><p class="capture-note">A imagem fica apenas nesta sessão do navegador. OCR e envio para análise ainda não estão conectados.</p><div id="photo-evidence" class="photo-evidence" hidden></div></div><section class="context-ingest"><p class="eyebrow">FONTES DE CONTEXTO</p><h2>Já tem a nota fiscal?</h2><p class="capture-note">Envie o XML original da NF-e/NFC-e para extrair campos estruturados localmente no navegador. O arquivo não é enviado a um servidor. PDF e OCR ainda não estão conectados.</p><label class="file-picker" for="fiscal-xml">SELECIONAR XML FISCAL</label><input id="fiscal-xml" type="file" accept=".xml,application/xml,text/xml" /><p id="xml-status" class="capture-note" role="status">Nenhum arquivo selecionado.</p><div id="xml-summary" hidden></div></section><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
   document.querySelector("#back").addEventListener("click", renderHome);
   captureAdapter = new BrowserCaptureAdapter({ videoElement: document.querySelector("#camera"), onStatus: handleCaptureStatus });
   document.querySelector("#capture-photo").addEventListener("click", capturePhoto);
+  document.querySelector("#fiscal-xml").addEventListener("change", handleFiscalXml);
   document.querySelector("#manual-form").addEventListener("submit", async function (event) {
     event.preventDefault();
     const code = new FormData(event.currentTarget).get("code")?.toString().trim();
