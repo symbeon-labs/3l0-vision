@@ -104,13 +104,23 @@ function mountSessionControl() {
 
 async function bootApp() {
   if (!supabaseUrl || !supabaseKey) {
-    renderAuth("Configuração pendente: adicione VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY nas variáveis de ambiente da Vercel.", "signin");
+    renderAuth();
     const form = document.querySelector("#auth-form");
     if (form) form.hidden = true;
     const sw = document.querySelector("#auth-switch");
     if (sw) sw.hidden = true;
     const reset = document.querySelector("#auth-reset");
     if (reset) reset.hidden = true;
+
+    // Keep configuration diagnostics visible even when the form itself is hidden.
+    const notice = document.createElement("p");
+    notice.className = "auth-message auth-config-notice";
+    notice.setAttribute("role", "alert");
+    notice.textContent = "Configuração pendente: defina VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY nas variáveis de ambiente do Vercel para este Preview/ambiente e faça um novo deploy.";
+    const footnote = document.querySelector(".auth-footnote");
+    if (footnote) footnote.before(notice);
+    else document.querySelector(".auth-panel")?.append(notice);
+    console.error("[3L0 Auth] Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY.");
     return;
   }
   supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
