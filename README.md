@@ -180,6 +180,10 @@ The initial foundation now includes the ORC integration contract, design-token s
 - [Design Tokens](docs/design-tokens.md)
 - [Application Foundation](docs/application-foundation.md)
 
+## Workspace onboarding and pilot
+
+- [Workspace onboarding and Case 01 pilot](docs/pilot/workspace-onboarding-case-01.md) — repository boundaries, business-profile onboarding, workspace/membership roles, security gates and pilot success criteria.
+
 ## Product vision
 
 - [Canonical Product Vision](docs/product-vision.md) — consolidated product thesis, operator experience, ORC boundary, current implementation status, validation criteria and public-surface rules.
