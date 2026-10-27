@@ -5,6 +5,8 @@ export class BrowserCaptureAdapter {
     this.onStatus = onStatus;
     this.stream = null;
     this.scanner = null;
+    this.scanFrame = null;
+    this.photoUrl = null;
   }
 
   async start() {
@@ -20,8 +22,41 @@ export class BrowserCaptureAdapter {
     this.video.srcObject = this.stream;
     await this.video.play();
     this.onStatus({ type: "camera_ready" });
-
     this.startBarcodeScanner();
+  }
+
+  async captureFrame() {
+    if (!this.stream || !this.video.videoWidth || !this.video.videoHeight) {
+      throw new Error("camera_frame_unavailable");
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = this.video.videoWidth;
+    canvas.height = this.video.videoHeight;
+    const context = canvas.getContext("2d", { alpha: false });
+    if (!context) throw new Error("camera_canvas_unavailable");
+    context.drawImage(this.video, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob((value) => {
+        if (value) resolve(value);
+        else reject(new Error("camera_frame_encoding_failed"));
+      }, "image/jpeg", 0.88);
+    });
+
+    if (this.photoUrl) URL.revokeObjectURL(this.photoUrl);
+    this.photoUrl = URL.createObjectURL(blob);
+
+    return {
+      blob,
+      previewUrl: this.photoUrl,
+      mimeType: blob.type || "image/jpeg",
+      sizeBytes: blob.size,
+      width: canvas.width,
+      height: canvas.height,
+      capturedAt: new Date().toISOString(),
+      source: "browser-camera"
+    };
   }
 
   startBarcodeScanner() {
@@ -52,10 +87,10 @@ export class BrowserCaptureAdapter {
         this.onStatus({ type: "barcode_scan_error" });
       }
 
-      requestAnimationFrame(scan);
+      if (this.stream) this.scanFrame = requestAnimationFrame(scan);
     };
 
-    requestAnimationFrame(scan);
+    this.scanFrame = requestAnimationFrame(scan);
   }
 
   async capture(input = {}) {
@@ -72,8 +107,12 @@ export class BrowserCaptureAdapter {
   }
 
   stop() {
+    if (this.scanFrame !== null) cancelAnimationFrame(this.scanFrame);
+    this.scanFrame = null;
     this.stream?.getTracks().forEach((track) => track.stop());
     this.stream = null;
     this.video.srcObject = null;
+    if (this.photoUrl) URL.revokeObjectURL(this.photoUrl);
+    this.photoUrl = null;
   }
 }
