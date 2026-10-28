@@ -1,0 +1,321 @@
+{
+  "schema_version": "3l0.case002.synthetic.v0.1",
+  "dataset_type": "synthetic",
+  "notice": "Synthetic test data only; not customer data and not evidence of field performance.",
+  "cases": [
+    {
+      "case_id": "SYN-001",
+      "document_line": {
+        "gtin": "TEST-GTIN-001",
+        "description": "Arroz Tipo 1 1kg",
+        "unit": "UN",
+        "quantity": 20
+      },
+      "physical_observation": {
+        "barcode": "TEST-GTIN-001",
+        "visible_text": "Arroz Tipo 1 1 kg",
+        "unit_observed": "UN",
+        "quantity_observed": 20
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-001",
+          "gtin": "TEST-GTIN-001",
+          "description": "Arroz Tipo 1 1 kg",
+          "unit": "UN",
+          "pack_size": 1
+        }
+      ],
+      "expected": "RESOLVED",
+      "expected_record_id": "CAT-001"
+    },
+    {
+      "case_id": "SYN-002",
+      "document_line": {
+        "gtin": "TEST-GTIN-002",
+        "description": "Detergente neutro 500 ml",
+        "unit": "UN",
+        "quantity": 12
+      },
+      "physical_observation": {
+        "barcode": "TEST-GTIN-002",
+        "visible_text": "Detergente Neutro 0,5L",
+        "unit_observed": "UN",
+        "quantity_observed": 12
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-002",
+          "gtin": "TEST-GTIN-002",
+          "description": "Detergente Neutro 500mL",
+          "unit": "UN",
+          "pack_size": 0.5
+        }
+      ],
+      "expected": "RESOLVED",
+      "expected_record_id": "CAT-002"
+    },
+    {
+      "case_id": "SYN-003",
+      "document_line": {
+        "gtin": "TEST-GTIN-003",
+        "description": "Café torrado 500g",
+        "unit": "UN",
+        "quantity": 10
+      },
+      "physical_observation": {
+        "barcode": "TEST-GTIN-099",
+        "visible_text": "Café Torrado 500 g",
+        "unit_observed": "UN",
+        "quantity_observed": 10
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-003",
+          "gtin": "TEST-GTIN-003",
+          "description": "Café torrado 500g",
+          "unit": "UN",
+          "pack_size": 0.5
+        },
+        {
+          "record_id": "CAT-099",
+          "gtin": "TEST-GTIN-099",
+          "description": "Café Torrado 500g embalagem alternativa",
+          "unit": "UN",
+          "pack_size": 0.5
+        }
+      ],
+      "expected": "CONFLICT"
+    },
+    {
+      "case_id": "SYN-004",
+      "document_line": {
+        "gtin": "TEST-GTIN-004",
+        "description": "Papel toalha 2 rolos",
+        "unit": "PCT",
+        "quantity": 8
+      },
+      "physical_observation": {
+        "barcode": null,
+        "visible_text": "Papel toalha 2 rolos",
+        "unit_observed": "PCT",
+        "quantity_observed": 8
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-004",
+          "gtin": "TEST-GTIN-004",
+          "description": "Papel toalha 2 rolos",
+          "unit": "PCT",
+          "pack_size": 2
+        }
+      ],
+      "expected": "REVIEW_REQUIRED"
+    },
+    {
+      "case_id": "SYN-005",
+      "document_line": {
+        "gtin": "TEST-GTIN-005",
+        "description": "Água mineral 1,5L",
+        "unit": "UN",
+        "quantity": 24
+      },
+      "physical_observation": {
+        "barcode": "TEST-GTIN-005",
+        "visible_text": "Água Mineral 1,5 L",
+        "unit_observed": "UN",
+        "quantity_observed": 22
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-005",
+          "gtin": "TEST-GTIN-005",
+          "description": "Água Mineral 1,5L",
+          "unit": "UN",
+          "pack_size": 1.5
+        }
+      ],
+      "expected": "CONFLICT"
+    },
+    {
+      "case_id": "SYN-006",
+      "document_line": {
+        "gtin": "TEST-GTIN-006",
+        "description": "Copo descartável 200 ml",
+        "unit": "CX",
+        "quantity": 4
+      },
+      "physical_observation": {
+        "barcode": "TEST-GTIN-006",
+        "visible_text": "Copo descartável 200ml",
+        "unit_observed": "PCT",
+        "quantity_observed": 4
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-006",
+          "gtin": "TEST-GTIN-006",
+          "description": "Copo descartável 200ml",
+          "unit": "CX",
+          "pack_size": 100
+        }
+      ],
+      "expected": "REVIEW_REQUIRED"
+    },
+    {
+      "case_id": "SYN-007",
+      "document_line": {
+        "gtin": "TEST-GTIN-007",
+        "description": "Sabonete líquido 250ml",
+        "unit": "UN",
+        "quantity": 6
+      },
+      "physical_observation": {
+        "barcode": "TEST-GTIN-007",
+        "visible_text": "Sabonete líquido 250 ml",
+        "unit_observed": "UN",
+        "quantity_observed": 6
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-007A",
+          "gtin": "TEST-GTIN-007",
+          "description": "Sabonete líquido 250ml",
+          "unit": "UN",
+          "pack_size": 0.25
+        },
+        {
+          "record_id": "CAT-007B",
+          "gtin": "TEST-GTIN-007",
+          "description": "Sabonete líquido 250ml",
+          "unit": "UN",
+          "pack_size": 0.25
+        }
+      ],
+      "expected": "CONFLICT"
+    },
+    {
+      "case_id": "SYN-008",
+      "document_line": {
+        "gtin": "TEST-GTIN-008",
+        "description": "Esponja multiuso 3 unidades",
+        "unit": "PCT",
+        "quantity": 15
+      },
+      "physical_observation": {
+        "barcode": "TEST-GTIN-008",
+        "visible_text": "Esponja Multiuso 3un",
+        "unit_observed": "PCT",
+        "quantity_observed": 15
+      },
+      "catalog_candidates": [],
+      "expected": "NOT_FOUND"
+    },
+    {
+      "case_id": "SYN-009",
+      "document_line": {
+        "gtin": "TEST-GTIN-009",
+        "description": "Amaciante 2L",
+        "unit": "UN",
+        "quantity": 6
+      },
+      "physical_observation": {
+        "barcode": "TEST-GTIN-009",
+        "visible_text": "Amaciante concentrado 1L",
+        "unit_observed": "UN",
+        "quantity_observed": 6
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-009",
+          "gtin": "TEST-GTIN-009",
+          "description": "Amaciante 2L",
+          "unit": "UN",
+          "pack_size": 2
+        }
+      ],
+      "expected": "CONFLICT"
+    },
+    {
+      "case_id": "SYN-010",
+      "document_line": {
+        "gtin": "TEST-GTIN-010",
+        "description": "Biscoito água e sal 350g",
+        "unit": "UN",
+        "quantity": 10
+      },
+      "physical_observation": {
+        "barcode": null,
+        "visible_text": "Biscoito água e sal 350 g",
+        "ocr_confidence": "low",
+        "unit_observed": "UN",
+        "quantity_observed": 10
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-010",
+          "gtin": "TEST-GTIN-010",
+          "description": "Biscoito água e sal 350g",
+          "unit": "UN",
+          "pack_size": 0.35
+        }
+      ],
+      "expected": "REVIEW_REQUIRED"
+    },
+    {
+      "case_id": "SYN-011",
+      "document_line": {
+        "gtin": "TEST-GTIN-011",
+        "description": "Limpador multiuso 500ml",
+        "unit": "UN",
+        "quantity": 5
+      },
+      "physical_observation": {
+        "capture_status": "FAILED",
+        "error_code": "CAMERA_PERMISSION_DENIED"
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-011",
+          "gtin": "TEST-GTIN-011",
+          "description": "Limpador multiuso 500ml",
+          "unit": "UN",
+          "pack_size": 0.5
+        }
+      ],
+      "expected": "TECHNICAL_ERROR"
+    },
+    {
+      "case_id": "SYN-012",
+      "document_line": {
+        "gtin": "TEST-GTIN-012",
+        "description": "Óleo vegetal 900ml",
+        "unit": "UN",
+        "quantity": 12
+      },
+      "physical_observation": {
+        "barcode": "TEST-GTIN-012",
+        "visible_text": "Óleo vegetal 900ml",
+        "unit_observed": "UN",
+        "quantity_observed": 12
+      },
+      "catalog_candidates": [
+        {
+          "record_id": "CAT-012A",
+          "gtin": "TEST-GTIN-012",
+          "description": "Óleo vegetal 900ml",
+          "unit": "UN",
+          "pack_size": 0.9
+        },
+        {
+          "record_id": "CAT-012B",
+          "gtin": "TEST-GTIN-012",
+          "description": "Óleo vegetal 5L",
+          "unit": "UN",
+          "pack_size": 5
+        }
+      ],
+      "expected": "CONFLICT"
+    }
+  ]
+}
