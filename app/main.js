@@ -304,23 +304,67 @@ async function loadResolutionHistory(workspaceId) {
 
 function renderCapture() {
   if (!activeWorkspace?.id) { renderHome(); return; }
-  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>ATIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
+  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>ATIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><img id="captured-image" class="captured-image" alt="Prévia da imagem capturada" hidden /><div class="scan-line" id="scan-line"></div><div class="camera-hint" id="camera-status" role="status" aria-live="polite">Solicitando câmera...</div></div><div class="capture-actions"><button class="primary" id="capture-photo" type="button" disabled>CAPTURAR FOTO</button><label class="upload-button" for="image-upload">ENVIAR IMAGEM</label><input id="image-upload" class="visually-hidden" type="file" accept="image/*" capture="environment" /></div><p id="image-status" class="image-status" role="status" aria-live="polite">Você pode fotografar um rótulo ou enviar uma imagem. A leitura de texto (OCR) ainda não está conectada nesta versão.</p><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO PARA O ORC</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">O leitor automático detecta códigos de barras/QR quando o navegador oferece suporte. O ORC compara identificadores com o catálogo local; não extrai texto de fotografias.</p></section></main>';
   document.querySelector("#back").addEventListener("click", renderHome);
-  captureAdapter = new BrowserCaptureAdapter({ videoElement: document.querySelector("#camera"), onStatus: handleCaptureStatus });
-  document.querySelector("#manual-form").addEventListener("submit", async function (event) {
-    event.preventDefault();
-    const code = new FormData(event.currentTarget).get("code")?.toString().trim();
-    if (code) await resolveInput({ code, scheme: inferScheme(code), method: "manual" });
+  const video = document.querySelector("#camera");
+  const captureButton = document.querySelector("#capture-photo");
+  const imageInput = document.querySelector("#image-upload");
+  const preview = document.querySelector("#captured-image");
+  captureButton.addEventListener("click", captureStillImage);
+  imageInput.addEventListener("change", () => {
+    const file = imageInput.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      document.querySelector("#image-status").textContent = "Arquivo inválido. Selecione uma imagem.";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      preview.src = String(reader.result);
+      preview.hidden = false;
+      video.hidden = true;
+      document.querySelector("#scan-line").hidden = true;
+      document.querySelector("#image-status").textContent = "Imagem carregada para inspeção visual. OCR não executado: informe o código manualmente ou use a câmera para leitura de código.";
+    };
+    reader.readAsDataURL(file);
   });
+  captureAdapter = new BrowserCaptureAdapter({ videoElement: video, onStatus: handleCaptureStatus });
   captureAdapter.start().catch(function (error) { handleCaptureStatus({ type: "camera_error", error }); });
+}
+
+
+function captureStillImage() {
+  const video = document.querySelector("#camera");
+  const preview = document.querySelector("#captured-image");
+  const status = document.querySelector("#image-status");
+  if (!video || !preview || !video.videoWidth || !video.videoHeight) {
+    status.textContent = "A câmera ainda não está pronta. Permita o acesso à câmera ou use ENVIAR IMAGEM.";
+    return;
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const context = canvas.getContext("2d");
+  if (!context) {
+    status.textContent = "Não foi possível capturar a imagem neste navegador.";
+    return;
+  }
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  preview.src = canvas.toDataURL("image/jpeg", 0.92);
+  preview.hidden = false;
+  video.hidden = true;
+  document.querySelector("#scan-line").hidden = true;
+  status.textContent = "Foto capturada e exibida. OCR ainda não está conectado; nenhum texto foi extraído da imagem.";
+  captureAdapter?.stop();
+  captureAdapter = null;
 }
 
 function handleCaptureStatus(status) {
   const target = document.querySelector("#camera-status");
   if (!target) return;
-  if (status.type === "camera_ready") target.textContent = "APONTE PARA O CÓDIGO";
+  if (status.type === "camera_ready") { target.textContent = "APONTE PARA O CÓDIGO"; const button = document.querySelector("#capture-photo"); if (button) button.disabled = false; }
   if (status.type === "barcode_unavailable") target.textContent = "LEITURA AUTOMÁTICA INDISPONÍVEL · USE A ENTRADA MANUAL";
-  if (status.type === "camera_error") target.textContent = "CÂMERA INDISPONÍVEL · USE A ENTRADA MANUAL";
+  if (status.type === "camera_error") { target.textContent = "CÂMERA INDISPONÍVEL · USE ENVIAR IMAGEM OU A ENTRADA MANUAL"; const button = document.querySelector("#capture-photo"); if (button) button.disabled = true; }
   if (status.type === "barcode_scan_error") target.textContent = "FALHA TÉCNICA NA LEITURA · TENTE NOVAMENTE OU INFORME O CÓDIGO";
   if (status.type === "barcode_detected") {
     try {
