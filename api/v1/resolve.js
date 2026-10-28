@@ -84,6 +84,16 @@ export default async function handler(req, res) {
     const receivingInput = body.receiving && typeof body.receiving === "object" && !Array.isArray(body.receiving)
       ? body.receiving
       : null;
+    const receivingDocumentLine = receivingInput?.document_line && typeof receivingInput.document_line === "object" && !Array.isArray(receivingInput.document_line)
+      ? receivingInput.document_line
+      : {};
+    const receivingPhysicalObservation = receivingInput?.physical_observation && typeof receivingInput.physical_observation === "object" && !Array.isArray(receivingInput.physical_observation)
+      ? receivingInput.physical_observation
+      : {};
+    const receivingIdentifiers = [receivingDocumentLine.gtin, receivingPhysicalObservation.barcode]
+      .filter(value => typeof value === "string")
+      .map(value => value.trim())
+      .filter(Boolean);
 
     const pipeline = new ResolutionPipeline({
       captureAdapter: {
@@ -110,14 +120,12 @@ export default async function handler(req, res) {
         workspace_role: membership.role,
         ...(operation === "receive_goods" && receivingInput ? {
           receiving: {
-            document_line: receivingInput.document_line && typeof receivingInput.document_line === "object" && !Array.isArray(receivingInput.document_line)
-              ? receivingInput.document_line
-              : {},
-            physical_observation: receivingInput.physical_observation && typeof receivingInput.physical_observation === "object" && !Array.isArray(receivingInput.physical_observation)
-              ? receivingInput.physical_observation
-              : {},
+            document_line: receivingDocumentLine,
+            physical_observation: receivingPhysicalObservation,
             // Candidate identities come from the server-side catalog, never the request body.
-            catalog_candidates: demoEntities
+            catalog_candidates: demoEntities.filter(entity =>
+              entity.identifiers.some(identifier => receivingIdentifiers.includes(String(identifier.value).trim()))
+            )
           }
         } : {})
       }
