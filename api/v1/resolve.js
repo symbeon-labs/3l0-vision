@@ -51,14 +51,35 @@ export default async function handler(req, res) {
   try {
     const { client, user } = await requireUser(req);
     const body = parseBody(req.body);
-    const code = typeof body.code === "string" ? body.code.trim() : "";
+    const operation = body.operation === undefined ? "identify_product" : body.operation;
+    if (!["identify_product", "receive_goods"].includes(operation)) {
+      return sendJson(res, 400, { error: "operation_invalid", message: "Operação não suportada." });
+    }
     const workspaceId = typeof body.workspaceId === "string" ? body.workspaceId.trim() : "";
+    const receivingInput = body.receiving && typeof body.receiving === "object" && !Array.isArray(body.receiving)
+      ? body.receiving
+      : null;
+    const receivingDocumentLine = receivingInput?.document_line && typeof receivingInput.document_line === "object" && !Array.isArray(receivingInput.document_line)
+      ? receivingInput.document_line
+      : {};
+    const receivingPhysicalObservation = receivingInput?.physical_observation && typeof receivingInput.physical_observation === "object" && !Array.isArray(receivingInput.physical_observation)
+      ? receivingInput.physical_observation
+      : {};
+    const suppliedCode = typeof body.code === "string" ? body.code.trim() : "";
+    const receivingCode = typeof receivingPhysicalObservation.barcode === "string"
+      ? receivingPhysicalObservation.barcode.trim()
+      : "";
+    const code = suppliedCode || (operation === "receive_goods" ? receivingCode : "");
     if (!code || code.length > MAX_CODE_LENGTH) {
       return sendJson(res, 400, { error: "code_invalid", message: "Informe um identificador de até 128 caracteres." });
     }
     if (!workspaceId || workspaceId.length > 128) {
       return sendJson(res, 400, { error: "workspace_required", message: "Selecione um workspace autorizado." });
     }
+    const receivingIdentifiers = [receivingDocumentLine.gtin, receivingPhysicalObservation.barcode]
+      .filter(value => typeof value === "string")
+      .map(value => value.trim())
+      .filter(Boolean);
 
     const { data: membership, error: membershipError } = await client
       .from("workspace_memberships")
@@ -77,24 +98,6 @@ export default async function handler(req, res) {
     const scheme = typeof body.scheme === "string" && body.scheme.trim()
       ? body.scheme.trim().toLowerCase()
       : (/^\d{8}$|^\d{12,14}$/.test(code) ? "ean" : "identifier");
-    const operation = body.operation === undefined ? "identify_product" : body.operation;
-    if (!["identify_product", "receive_goods"].includes(operation)) {
-      return sendJson(res, 400, { error: "operation_invalid", message: "Operação não suportada." });
-    }
-    const receivingInput = body.receiving && typeof body.receiving === "object" && !Array.isArray(body.receiving)
-      ? body.receiving
-      : null;
-    const receivingDocumentLine = receivingInput?.document_line && typeof receivingInput.document_line === "object" && !Array.isArray(receivingInput.document_line)
-      ? receivingInput.document_line
-      : {};
-    const receivingPhysicalObservation = receivingInput?.physical_observation && typeof receivingInput.physical_observation === "object" && !Array.isArray(receivingInput.physical_observation)
-      ? receivingInput.physical_observation
-      : {};
-    const receivingIdentifiers = [receivingDocumentLine.gtin, receivingPhysicalObservation.barcode]
-      .filter(value => typeof value === "string")
-      .map(value => value.trim())
-      .filter(Boolean);
-
     const pipeline = new ResolutionPipeline({
       captureAdapter: {
         async capture(input) {
