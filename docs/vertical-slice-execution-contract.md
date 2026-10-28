@@ -97,7 +97,7 @@ The following are repository-state observations, not blanket runtime acceptance:
 - PR #30 (resolution flow + workspace history/persistence), PR #31 (12 synthetic CASE-002 regression cases), PR #33 (persisted-status normalization), and PR #34 (reconstructed persistence integration) are merged.
 - PR #31 reports 63 automated tests passing and a successful Vite production build for its recorded commit. This does not establish that all later commits or external runtime paths have passed.
 - The Vision API currently uses a local deterministic resolver and a synthetic in-memory product catalog. The API code explicitly states that remote ORC, OCR, model-provider, and ERP/WMS integrations are not connected.
-- PR #20 (camera capture + local fiscal XML parsing + context-source guidance) remains Draft and reports merge conflicts. Its parser is syntactic only; it does not verify fiscal authorization, signature, cancellation, authenticity, or physical receipt.
+- The camera capture + local fiscal XML + context-source guidance are already present in current `main`; PR #36 was closed as superseded after direct comparison. Image capture creates a local preview only (no OCR/upload), and XML parsing is syntactic only; it does not verify fiscal authorization, signature, cancellation, authenticity, or physical receipt. PR #44 is the merged canonical execution plan.
 - The Agent repository documents a tested orchestration scaffold, not a connected runtime integration.
 - The Portal README states that a versioned page does not by itself prove public hosting is configured.
 
@@ -105,9 +105,9 @@ Re-check current branch heads and CI before relying on these observations; do no
 
 ## Updated execution order
 
-1. **Stabilize the current Vision mainline:** run current-main tests/build, inspect persisted status normalization, and execute authenticated POST/GET history checks against configured Supabase.
+1. **Stabilize the current Vision mainline (commit `f45d715`):** run current-main tests/build, inspect persisted status normalization, and execute authenticated POST/GET history checks against configured Supabase.
 2. **Prove tenant boundaries:** use two independent users in two workspaces; verify direct API and database-level cross-tenant reads/writes are denied, including inactive/revoked membership.
-3. **Reconcile PR #20 against current main:** resolve merge conflicts, run CI and XML positive/negative fixtures, then manually test camera capture on supported mobile browsers. Keep it Draft until its acceptance gates pass.
+3. **Validate Case 01 behavior on current main:** run current-SHA CI and XML positive/negative/hostile fixtures, then manually test camera capture on supported mobile browsers. Do not resurrect PR #36 wholesale; create a narrow current-main PR only for a verified gap.
 4. **Replace the synthetic catalog for the receiving workflow:** define the canonical product source, identifier normalization, provenance, and behavior for zero/one/multiple matches.
 5. **Stabilize the ORC contract:** version the observation/resolution schemas and test contract compatibility before connecting a remote ORC runtime. The current injected deterministic resolver is not a remote ORC integration.
 6. **Connect the Agent through a real adapter:** test a complete task from Vision observation through bounded orchestration, authorization, review and persisted outcome.
