@@ -29,7 +29,10 @@ test("maps legacy statuses to canonical persisted statuses", () => {
 });
 
 test("rejects unsupported status as a client validation error", () => {
-  assert.throws(() => normalizePersistedStatus("UNKNOWN"), (error) => error.statusCode === 400);
+  assert.throws(
+    () => normalizePersistedStatus("UNKNOWN"),
+    (error) => error.statusCode === 400 && error.message.includes("UNKNOWN")
+  );
 });
 
 test("trims valid inputs and returns normalized persistence fields", () => {
@@ -64,7 +67,7 @@ test("rejects blank and oversized input fields", () => {
 
 test("rejects unsupported input method and oversized resolution id", () => {
   assert.throws(() => validateResolutionPayload(validPayload({ input: { scheme: "GTIN", code: "x", method: "qr" } })), (error) => error.statusCode === 400);
-  assert.throws(() => validateResolutionPayload(validPayload({ output: { observation: {}, result: { status: "UNCERTAIN", resolutionId: "r".repeat(129) }, state: "ok" })), (error) => error.statusCode === 400);
+  assert.throws(() => validateResolutionPayload(validPayload({ output: { observation: {}, result: { status: "UNCERTAIN", resolutionId: "r".repeat(129) }, state: "ok" } })), (error) => error.statusCode === 400);
 });
 
 test("uses a generated ID when the caller supplies no resolution ID", () => {
