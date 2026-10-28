@@ -139,3 +139,38 @@ Não usar “disponível” como sinônimo de “há código”. Não usar “in
 - [Integração visual Portal → Vision](./portal-visual-integration.md)
 
 Este documento complementa essas fontes. Se houver conflito, as regras de identidade ficam em `brand.md`, os significados de tokens em `design-tokens.md`, os comportamentos em `docs/ux.md` e os limites funcionais em `docs/architecture.md`.
+
+
+## 11. Sistema visual Dark Signal — incorporação da PR #40
+
+A PR #40 não deve ser representada apenas como uma intenção abstrata de “interface escura”. Ela estabelece uma direção concreta para a camada visual do Vision: consolidar a cascata CSS, eliminar tokens concorrentes e tornar previsível a semântica de superfícies, texto, bordas e estados.
+
+### Paleta de referência
+
+- Fundo `--bg: #080a0c`
+- Superfície `--surface: #111519`
+- Superfície elevada `--surface-2: #171d22`
+- Texto principal `--text: #f4f7f8`
+- Texto secundário `--muted: #a0adb2`
+- Divisores `--line: #2b363b`
+- Captura/observação `--cyan: #78dce1`
+- Resolução sustentada `--green: #a9e6b5`
+- Atenção/revisão `--amber: #f2c879`
+- Conflito `--red: #ff777f`
+- Acento auxiliar `--blue: #9ab4ff`
+
+Inter e JetBrains Mono formam a dupla tipográfica. A importação de fontes fica no topo da folha; a paleta deve existir em um único bloco canônico de tokens, sem um segundo `:root` posterior redefinindo os mesmos nomes. A tabela completa e as ressalvas estão em [Design Tokens](./design-tokens.md).
+
+### Como a direção deve aparecer na interface
+
+1. **Estrutura antes de efeito:** fundo frio quase preto, superfícies em camadas, bordas discretas e agrupamento claro.
+2. **Sinal funcional:** cor chama atenção para estado e ação; não serve como decoração nem prova de sucesso.
+3. **Densidade controlada:** manter conteúdo operacional compacto, sem sacrificar leitura, contraste, alvos de toque ou hierarquia.
+4. **Estados explícitos:** captura, processamento, resolução, atenção, conflito e falha técnica precisam de texto/ícone além da cor.
+5. **Fluxos reais primeiro:** autenticação, workspace, captura, imagem, XML, processamento, resultado e erro usam a mesma gramática sem fingir que seus contratos funcionais são idênticos.
+6. **Responsividade como requisito:** avaliar 320, 375, 768, 1024 e 1440 px; não tratar a versão desktop como fonte única.
+7. **Acessibilidade integrada:** foco visível, teclado, regiões de status, movimento reduzido e contraste são parte do sistema, não um acabamento posterior.
+
+### Relação entre intenção e implementação
+
+A PR #40 iniciou a consolidação dos tokens; seu handoff/auditoria também identificou que a fase visual exige aplicação incremental por fluxo. A documentação registra a intenção e os critérios, mas não afirma que essa PR foi mesclada ou que a revisão visual ao vivo foi concluída. A continuidade visual está associada à PR #47. Os gates de teste do SHA atual, inspeção real do preview e revisão responsiva/acessível devem continuar explícitos até haver evidência.
