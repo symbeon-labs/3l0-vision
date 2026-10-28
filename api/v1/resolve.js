@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { ResolutionPipeline } from "../../core/pipeline/resolution-pipeline.js";
 import { OrcClient } from "../../core/orc/client.js";
 import { deterministicResolver } from "../../core/orc/deterministic-resolver.js";
+import { normalizePersistedStatus } from "../../core/persistence/resolution-run.js";
 import { handleError, methodNotAllowed, requireUser, sendJson } from "../_lib/supabase.js";
 
 const MAX_CODE_LENGTH = 128;
@@ -104,11 +105,12 @@ export default async function handler(req, res) {
     });
 
     const resolutionId = output.result.resolution_id;
+    const persistedStatus = normalizePersistedStatus(output.result.status);
     const { error: persistenceError } = await client.from("resolution_runs").insert({
       workspace_id: workspaceId,
       user_id: user.id,
       resolution_id: resolutionId,
-      status: output.result.status,
+      status: persistedStatus,
       state: output.state,
       input_scheme: scheme,
       input_code: code,
