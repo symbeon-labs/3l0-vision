@@ -23,7 +23,7 @@ PR #40 must not merge visual CSS changes into an unstable functional baseline. I
 | [#43](https://github.com/symbeon-labs/3l0-vision/pull/43) | Production checkpoint / camera-OCR gate | Merged; roadmap records deployment/test checkpoint and explicitly leaves real camera/OCR unverified | Keep the boundary explicit; deploy readiness and synthetic tests do not validate real camera/OCR. |
 
 | [#44](https://github.com/symbeon-labs/3l0-vision/pull/44) | Case 01 evidence execution plan | Merged; current-main documentation-only plan, CI passed | Canonical execution plan. Keep implementation status bounded to verified behavior. |
-| [#45](https://github.com/symbeon-labs/3l0-vision/pull/45) | Vertical-slice acceptance contract | Open Draft; rebased on current main, CI pending | Canonical candidate for acceptance gates; do not merge until current-SHA CI passes and review is complete. |
+| [#45](https://github.com/symbeon-labs/3l0-vision/pull/45) | Vertical-slice acceptance contract | Merged into main at `6260caa6c54ec644ac5257a74cdb36a817adde5a`; CI passed | Canonical acceptance contract. |
 
 ## Consolidation order
 
@@ -35,6 +35,8 @@ PR #40 must not merge visual CSS changes into an unstable functional baseline. I
 6. **Run baseline gates:** `npm test`, `npm run build`, relevant E2E tests, and checks against the exact candidate SHA. Separately test camera permission/fallback, image capture, valid/invalid/hostile XML, workspace authorization/history, and narrow/mobile layouts.
 7. **Reopen visual implementation as a focused PR:** one canonical token layer; one valid font import at the top; shared semantic states; no duplicated cascade; accessible status/error/form patterns; responsive checks at 320, 375, 768, 1024, and 1440 px.
 8. **Visual release gate:** inspect the actual preview in a browser and record evidence. CI success alone is not visual or device validation. If preview access/build quota blocks inspection, report that gate as pending.
+
+| [#46](https://github.com/symbeon-labs/3l0-vision/pull/46) | Inventory operational safety contract | Open Draft; documentation-only, CI was running at last check | Keep separate from visual implementation; no inventory API/migration is implied. |
 
 ## Merge policy
 
