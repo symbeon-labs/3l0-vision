@@ -89,14 +89,30 @@ Only an explicit operator confirmation may promote a review-required candidate t
 | Malformed or hostile XML | Safe rejection; no partial confirmed record |
 | Document quantity differs from physical count | Exception for human review; preserve both values |
 
-## PR integration order
+## Current implementation baseline (checked 2026-10-28)
 
-1. Reconcile PR #22 (Supabase Auth UI) with PR #19 (workspace backend and RLS foundation) in one integration branch; do not merge competing auth implementations independently.
-2. Treat PR #21 as overlapping until compared; close it only after the chosen implementation and all unique changes are accounted for.
-3. Review `SECURITY DEFINER` grants, RLS policies, and server-side membership checks; then run two-user/two-workspace negative tests against configured Supabase.
-4. Validate PR #20 XML ingestion with the fixture matrix and manual camera tests; parser success is not fiscal verification.
-5. Move inventory persistence behind authenticated, tenant-authorized server APIs with transactional idempotency.
-6. Demonstrate the full vertical slice against one synthetic operational case before starting a field pilot.
+The following are repository-state observations, not blanket runtime acceptance:
+
+- PR #24 (Supabase Auth + workspace backend foundation) is merged.
+- PR #30 (resolution flow + workspace history/persistence), PR #31 (12 synthetic CASE-002 regression cases), PR #33 (persisted-status normalization), and PR #34 (reconstructed persistence integration) are merged.
+- PR #31 reports 63 automated tests passing and a successful Vite production build for its recorded commit. This does not establish that all later commits or external runtime paths have passed.
+- The Vision API currently uses a local deterministic resolver and a synthetic in-memory product catalog. The API code explicitly states that remote ORC, OCR, model-provider, and ERP/WMS integrations are not connected.
+- PR #20 (camera capture + local fiscal XML parsing + context-source guidance) remains Draft and reports merge conflicts. Its parser is syntactic only; it does not verify fiscal authorization, signature, cancellation, authenticity, or physical receipt.
+- The Agent repository documents a tested orchestration scaffold, not a connected runtime integration.
+- The Portal README states that a versioned page does not by itself prove public hosting is configured.
+
+Re-check current branch heads and CI before relying on these observations; do not infer live runtime behavior from a green deployment check alone.
+
+## Updated execution order
+
+1. **Stabilize the current Vision mainline:** run current-main tests/build, inspect persisted status normalization, and execute authenticated POST/GET history checks against configured Supabase.
+2. **Prove tenant boundaries:** use two independent users in two workspaces; verify direct API and database-level cross-tenant reads/writes are denied, including inactive/revoked membership.
+3. **Reconcile PR #20 against current main:** resolve merge conflicts, run CI and XML positive/negative fixtures, then manually test camera capture on supported mobile browsers. Keep it Draft until its acceptance gates pass.
+4. **Replace the synthetic catalog for the receiving workflow:** define the canonical product source, identifier normalization, provenance, and behavior for zero/one/multiple matches.
+5. **Stabilize the ORC contract:** version the observation/resolution schemas and test contract compatibility before connecting a remote ORC runtime. The current injected deterministic resolver is not a remote ORC integration.
+6. **Connect the Agent through a real adapter:** test a complete task from Vision observation through bounded orchestration, authorization, review and persisted outcome.
+7. **Run the vertical slice:** `CAPTURE → OBSERVE → CANDIDATES → CONFIRM → SAVE → RECOGNIZE AGAIN`, including repeat submissions and no-duplicate guarantees.
+8. **Only then run a field pilot:** use authorized representative data, explicit operator consent, baseline metrics, failure logging and rollback procedures.
 
 ## Evidence labels
 
