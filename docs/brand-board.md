@@ -2,6 +2,10 @@
 
 ## Approved direction
 
+The board defines visual direction, not functional maturity. Any screen, state or mock shown on the board must be labeled as conceptual when it does not correspond to an implemented and verified workflow.
+
+For cross-surface alignment with the institutional Portal, see [Brand Evolution v1](./brand-evolution-v1.md).
+
 The current approved visual direction is a dark, high-contrast operational interface built around the 3L0 segmented zero and the resolution symbol.
 
 ## Board components
@@ -37,6 +41,13 @@ Recommended state progression:
 CAPTURAR → PROCESSAR → CONFERIR → RESOLVER → OPERAR
 
 Failure/uncertainty should remain visible rather than being disguised as a successful result.
+
+## Portal and Vision relationship
+
+- Portal compositions may be more editorial and explanatory.
+- Vision screens must prioritize the current task, evidence, certainty, discrepancy and permitted next action.
+- Both surfaces share logo rules, typography and semantic state colors, but must not become identical layouts.
+- The visual system must not imply that planned OCR, fiscal validation, connectors, persistence or production guarantees are already available.
 
 ## Implementation rule
 
