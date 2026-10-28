@@ -48,7 +48,7 @@ PR #40 must not merge visual CSS changes into an unstable functional baseline. I
 
 A inspeção posterior confirmou que a `main` atual **já contém** o parser fiscal, o catálogo de fontes, o comparador e a integração de interface de captura de imagem/XML. Portanto, a PR #36 não deve ser tratada como a única origem da funcionalidade nem mesclada em bloco. Os três módulos de evidência e seus testes já existem na main com os mesmos blobs que a antiga branch #36. As versões de `app/main.js`, `app/capture/browser-capture.js` e `app/styles.css` diferem, então comparar e portar apenas correções ainda ausentes, se houver, após testes.
 
-Também foi confirmado que `app/styles.css` na main tem **duas ocorrências de `@import`**; o problema da importação tipográfica permanece no código atual e deve ser corrigido somente na PR visual dedicada, após a linha funcional ser validada.
+A inspeção mais recente da `main` encontrou um único `@import` no topo, mas dois blocos `:root` concorrentes que redefinem a paleta. Na branch da PR #40, a primeira fatia visual já consolidou os tokens em um único `:root`, preservou a importação de fontes no topo e removeu o bloco concorrente. Isso corrige a cascata de tokens, mas ainda exige CI no SHA candidato e revisão visual real.
 
 O workflow `.github/workflows/test.yml` executa `npm test` e `npm run build` em push/PR. O check de Vercel observado para o commit-base da nova branch falha com link de `build-rate-limit`, que não prova falha de código, mas bloqueia a validação de preview. O resultado de CI do SHA candidato mais recente ainda precisa ser consultado; não inferir sucesso a partir de commits anteriores.
 
@@ -57,4 +57,4 @@ O workflow `.github/workflows/test.yml` executa `npm test` e `npm run build` em 
 1. Não copiar novamente os módulos de evidência: já estão na main.
 2. Auditar diferenças de #36 apenas nos três arquivos divergentes e nos comportamentos que a main ainda não cubra.
 3. Executar/verificar CI do SHA atual; registrar separadamente testes automatizados, preview e teste real da câmera.
-4. Corrigir a cascata e o `@import` apenas na PR visual focada, quando a base funcional estiver validada.
+4. Consolidar tokens e corrigir a cascata na PR visual focada; em seguida validar o SHA atual e revisar o preview quando o limite do Vercel permitir.
