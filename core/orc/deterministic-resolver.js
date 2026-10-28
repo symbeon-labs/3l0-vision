@@ -83,6 +83,16 @@ function evaluateReceivingConsistency(request) {
 
   const declaredGtin = normalize(documentLine.gtin);
   const observedBarcode = normalize(physical.barcode);
+  const capturedIdentifiers = request.observations.flatMap(
+    (observation) => observation.identifiers ?? []
+  ).map((identifier) => normalize(identifier.value)).filter(Boolean);
+
+  if (observedBarcode && capturedIdentifiers.length > 0 &&
+      !capturedIdentifiers.includes(observedBarcode)) {
+    return receivingResult(request, "CONFLICT", {
+      conflicts: [{ type: "capture_context_identifier_mismatch", observed: observedBarcode }]
+    });
+  }
 
   if (declaredGtin && !observedBarcode) {
     return receivingResult(request, "REVIEW_REQUIRED", {
