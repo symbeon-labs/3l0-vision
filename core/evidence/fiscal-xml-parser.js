@@ -18,6 +18,11 @@ function numberOrNull(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function firstUsableGtin(product) {
+  const candidates = [textOf(product, "cEAN"), textOf(product, "cEANTrib")];
+  return candidates.find((value) => value && !/^SEM GTIN$/i.test(value.trim())) || null;
+}
+
 /**
  * Parse a user-provided NF-e/NFC-e XML document in the browser.
  * This is extraction for human review, not fiscal validation or authenticity proof.
@@ -50,7 +55,7 @@ export function parseFiscalXml(xmlText) {
     return {
       lineNumber: numberOrNull(detail.getAttribute("nItem")),
       code: textOf(product, "cProd") || null,
-      gtin: textOf(product, "cEAN") || textOf(product, "cEANTrib") || null,
+      gtin: firstUsableGtin(product),
       description: textOf(product, "xProd") || null,
       ncm: textOf(product, "NCM") || null,
       cfop: textOf(product, "CFOP") || null,
