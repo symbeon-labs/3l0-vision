@@ -1,7 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import { OrcClient } from "../core/orc/client.js";
-import { deterministicResolver } from "../core/orc/deterministic-resolver.js";
-import { ResolutionPipeline } from "../core/pipeline/resolution-pipeline.js";
 import { BrowserCaptureAdapter } from "./capture/browser-capture.js";
 import { parseGlyphReference } from "../core/vision/glyph-reference.js";
 import { LocalCatalog } from "./catalog/local-catalog.js";
@@ -13,7 +10,6 @@ import "./styles.css";
 
 const app = document.querySelector("#app");
 const catalog = new LocalCatalog();
-const client = new OrcClient({ resolver: deterministicResolver });
 let captureAdapter = null;
 let resolutions = 0;
 let parsedInvoice = null;
@@ -493,62 +489,40 @@ async function resolveInput(input) {
   stopCapture();
   renderProcessing();
   try {
-    const pipeline = new ResolutionPipeline({
-      captureAdapter: {
-        async capture() {
-          return {
-            source: input.method === "barcode" ? "browser-camera" : "manual-entry",
-            modality: "identifier",
-            identifiers: [{ scheme: input.scheme, value: input.code }],
-            context: { capture_method: input.method, ...(input.glyphVersion ? { glyph: { version: input.glyphVersion, validation: "syntax-only" } } : {}) }
-          };
-        }
+    const { data, error: sessionError } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
+    if (sessionError || !token) throw new Error("Sessão expirada. Entre novamente para resolver o produto.");
+    if (!activeWorkspace?.id) throw new Error("Selecione um workspace autorizado antes de resolver o produto.");
+
+    updateProcessingStage("RESOLVING");
+    const response = await fetch("/api/v1/resolve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
       },
-      entityRepository: catalog,
-      orcClient: client,
-      onStage: function (event) { updateProcessingStage(event.name); }
+      body: JSON.stringify({
+        workspaceId: activeWorkspace.id,
+        code: input.code,
+        scheme: input.scheme,
+        operation: "identify_product"
+      })
     });
-    const output = await pipeline.run({ input, context: {
-      operation: "identify_product",
-      interface: "web",
-      workspace: activeWorkspace ? { id: activeWorkspace.id, name: activeWorkspace.name, organization_id: activeWorkspace.organization_id, status: activeWorkspace.status } : null
-    } });
-    let persistence;
-    try {
-      persistence = await persistResolutionRun({ input, output });
-    } catch (error) {
-      persistence = { saved: false, error: error?.message || "Não foi possível salvar a execução." };
-      console.error("[3L0 Persistence] Resolution was computed but not persisted:", error);
-    }
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.message || payload.error || "Falha na resolução no servidor.");
+
+    const output = {
+      observation: payload.observation,
+      result: payload.result,
+      state: payload.state
+    };
+    const persistence = payload.persistence?.persisted
+      ? { saved: true, id: payload.resolutionId }
+      : { saved: false, error: "O servidor não confirmou a persistência." };
     renderResult(output, persistence);
-  } catch (error) { renderError(error); }
-}
-
-async function persistResolutionRun({ input, output }) {
-  const { data, error: sessionError } = await supabase.auth.getSession();
-  const token = data?.session?.access_token;
-  if (sessionError || !token) throw new Error("Sessão expirada. Entre novamente para salvar a execução.");
-  if (!activeWorkspace?.id) throw new Error("Selecione um workspace autorizado antes de salvar a execução.");
-
-  const response = await fetch("/api/resolution-runs", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token
-    },
-    body: JSON.stringify({
-      workspaceId: activeWorkspace.id,
-      input: { scheme: input.scheme, code: input.code, method: input.method },
-      output: {
-        observation: output.observation,
-        result: output.result,
-        state: output.state
-      }
-    })
-  });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || "Falha ao persistir a execução.");
-  return { saved: true, id: payload.run?.id };
+  } catch (error) {
+    renderError(error);
+  }
 }
 
 function renderProcessing() { app.innerHTML = '<main class="shell"><section class="hero processing" aria-live="polite" aria-busy="true"><p class="eyebrow">PROCESSAMENTO</p><div class="result-icon processing-icon">◌</div><h1>Resolvendo<br /><strong>observação.</strong></h1><p class="description" id="stage">Capturando...</p></section></main>'; }
