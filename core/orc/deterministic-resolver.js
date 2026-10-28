@@ -1,6 +1,14 @@
 import { createResolutionResult } from "./contracts.js";
 
 export function deterministicResolver(request) {
+  const receivingRequired = request.context?.operation === "receive_goods" ||
+    request.context?.workflow === "receiving";
+  if (receivingRequired && !request.context?.receiving) {
+    return receivingResult(request, "REVIEW_REQUIRED", {
+      requiresVerification: [{ type: "missing_receiving_context" }]
+    });
+  }
+
   const guarded = evaluateReceivingConsistency(request);
   if (guarded) return guarded;
 
