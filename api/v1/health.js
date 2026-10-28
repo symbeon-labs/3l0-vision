@@ -12,7 +12,7 @@ export default function handler(req, res) {
     resolutionMode: "deterministic-local-demo",
     authentication: "required-for-resolve",
     workspaceAuthorization: "required-for-resolve",
-    persistence: "none",
+    persistence: "workspace-scoped-resolution-runs",
     externalOrc: false,
     productionReady: false
   });
