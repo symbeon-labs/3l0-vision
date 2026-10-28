@@ -16,7 +16,7 @@ export function normalizePersistedStatus(status) {
   if (status === "TECHNICAL_ERROR") return "ERROR";
   if (status === "INCOMPLETE" || status === "NOT_FOUND") return "INSUFFICIENT_EVIDENCE";
   if (PERSISTED_STATUSES.has(status)) return status;
-  throw invalid("Estado de resolução inválido.");
+  throw invalid("Unsupported resolution status: " + String(status));
 }
 
 export function validateResolutionPayload({ workspaceId, input, output }) {
