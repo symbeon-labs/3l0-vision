@@ -169,3 +169,11 @@ Do not present OCR coverage, fiscal validation, physical identity, ERP/WMS conne
 The approved direction is a dark, structured identity board containing the primary wordmark, application symbol, logo variations, segmented-zero studies, typography, state palette, system icons, and capture/processing/resolved/attention/conflict screens.
 
 The board is a visual reference for implementation; it does not replace the semantic product specifications.
+
+## Dark Signal — referência visual aplicada
+
+A direção visual concreta do Vision usa superfícies frias quase pretas, estrutura discreta e sinais cromáticos funcionais. A primeira consolidação proposta na PR #40 definiu os valores de referência: fundo `#080a0c`, superfícies `#111519`/`#171d22`, texto `#f4f7f8`, texto secundário `#a0adb2`, borda `#2b363b`, ciano `#78dce1`, verde `#a9e6b5`, âmbar `#f2c879` e vermelho `#ff777f`.
+
+A regra estrutural é tão importante quanto a paleta: **um único bloco canônico de tokens por folha CSS** e a importação tipográfica no topo. Não permitir camadas concorrentes que redefinam cores e tornem o estado efetivo imprevisível. Ver [Design Tokens](./design-tokens.md) para valores e limites completos.
+
+Esta é a direção registrada para implementação, não uma declaração de que a PR #40 foi mesclada ou de que a revisão visual final foi concluída.
