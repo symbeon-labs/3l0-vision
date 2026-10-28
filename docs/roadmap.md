@@ -2,6 +2,31 @@
 
 The roadmap is organized around evidence gates, not calendar promises.
 
+## Current checkpoint — 2026-10-28
+
+**Repository:** `symbeon-labs/3l0-vision`  
+**Production commit:** `be4ed3537c7fdc48172d2af9bfc3f696007f1fc6` — merge of PR #42  
+**Deployment:** Vercel production deployment reached `READY`. This confirms deployment status, not browser/device-level acceptance.
+
+### Verified in code and automated checks
+
+- [x] CSS font imports consolidated at the top of `app/styles.css`; duplicate import removed.
+- [x] `npm test`: 99 passed, 0 failed on the corrected branch before merge.
+- [x] `npm run build`: passed without the previous CSS import-order warning.
+- [x] Synthetic CASE-002 integration: all 12 scenarios pass through capture adapter → observation → candidate lookup → ORC → state → persistence gate.
+- [x] The synthetic integration test explicitly excludes camera hardware.
+
+### Current release gate — camera and OCR
+
+- [ ] Open the deployed app in a real browser/device and verify camera permission, capture, denial/recovery and file-upload fallback.
+- [ ] Verify that a captured/uploaded image reaches a real OCR/perception provider and returns extracted observations. The current automated test results do **not** establish this.
+- [ ] Trace the returned observation through ORC/resolution and verify resolved, attention, conflict and uncertain states.
+- [ ] Verify persistence and history behavior, including that uncertain/conflicting outcomes are not silently persisted as resolved identities.
+- [ ] Record representative real-image results, failure cases and runtime/browser evidence.
+
+**Status:** deployment is ready and the automated synthetic suite is green. The real camera → OCR → ORC → persistence path remains **unverified** until these release-gate checks are completed. Do not mark Phase 1 complete based on build success or synthetic tests alone.
+
+
 ## Phase 0 — Foundation
 
 - [x] product thesis
