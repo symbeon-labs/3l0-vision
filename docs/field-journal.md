@@ -83,7 +83,7 @@ O diário completo permanece preservado no vault privado, junto aos registros de
 
 - A interface principal agora chama `POST /api/v1/resolve`; o cálculo e a gravação da execução passam pelo backend autenticado, em vez de enviar ao backend um resultado calculado no navegador.
 - O endpoint de persistência genérica `POST /api/resolution-runs` foi desativado para impedir que resultados arbitrários fornecidos pelo cliente sejam registrados como decisões do motor. A leitura do histórico permanece disponível.
-- O resolvedor agora falha de forma fechada para operações `receive_goods` sem contexto de recebimento e exige revisão explícita.
+- O resolvedor agora falha de forma fechada para operações `receive_goods` sem contexto de recebimento e exige revisão explícita quando faltam identificador fiscal, identificador físico, quantidade ou unidade; conflitos de identidade e quantidade são explicitados.
 - A API versionada aceita a operação `receive_goods` e constrói a lista de candidatos a partir do catálogo de demonstração do servidor, ignorando listas de candidatos fornecidas pelo cliente.
 - Foram adicionados testes de regressão para ausência de contexto, divergência de identificador, quantidade, unidade, embalagem, falha técnica, ausência de candidatos e caminho de identificação comum.
 - Limitação mantida: o catálogo do endpoint continua sendo sintético e em memória. Isso melhora a integridade do fluxo, mas não prova integração com catálogo empresarial nem validação física/OCR ponta a ponta.
