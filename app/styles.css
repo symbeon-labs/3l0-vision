@@ -376,7 +376,6 @@ footer {
 
 
 /* Portal visual language integration — layered over the existing functional styles. */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 /* Tokens are defined once at the top of this file. */
 
@@ -878,4 +877,84 @@ footer {
   .photo-capture, .context-ingest { padding: 14px; }
   .xml-facts { grid-template-columns: 1fr; gap: 4px; }
   .xml-facts dd { margin-bottom: 8px; }
+}
+
+
+/* Incremental visual pass 1 — guided capture workspace.
+   Presentation only: existing capture, XML parsing and resolver handlers remain unchanged. */
+.capture-shell { width: min(100%, 1040px); padding-inline: clamp(16px, 3.5vw, 36px); }
+.capture-shell .topbar {
+  position: sticky; top: 0; z-index: 5;
+  margin-inline: calc(-1 * clamp(16px, 3.5vw, 36px));
+  padding: 14px clamp(16px, 3.5vw, 36px);
+  background: rgb(8 14 23 / 92%); border-bottom: 1px solid var(--line); backdrop-filter: blur(16px);
+}
+.capture-shell .back {
+  display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line);
+  border-radius: 10px; padding: 9px 12px; font: 500 10px "JetBrains Mono", monospace; letter-spacing: .04em;
+}
+.capture-workflow {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
+  margin: 28px 0 0; padding: 0; list-style: none;
+}
+.capture-workflow li {
+  min-width: 0; display: flex; align-items: center; gap: 10px; padding: 12px;
+  border: 1px solid var(--line); border-radius: 12px; background: rgb(17 28 46 / 58%);
+}
+.capture-workflow .workflow-number {
+  display: grid; flex: 0 0 30px; width: 30px; height: 30px; place-items: center;
+  border: 1px solid #315163; border-radius: 9px; color: var(--cyan); background: #122b3a;
+  font: 500 11px "JetBrains Mono", monospace;
+}
+.capture-workflow strong, .capture-workflow small { display: block; }
+.capture-workflow strong { font-size: 11px; letter-spacing: .03em; }
+.capture-workflow small { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.4; }
+.capture-stage {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  gap: 16px; align-items: start; padding-top: 30px;
+}
+.capture-stage > .eyebrow, .capture-stage > .camera-frame,
+.capture-stage > .capture-note, .capture-stage > .manual-form { grid-column: 1 / -1; }
+.capture-stage > .eyebrow { margin-bottom: 0; }
+.camera-frame { min-height: 250px; overflow: hidden; position: relative; }
+.camera-frame video { display: block; width: 100%; min-height: 250px; max-height: 420px; object-fit: cover; }
+.camera-hint { position: absolute; left: 12px; right: 12px; bottom: 12px; padding: 10px 12px; }
+.photo-capture, .context-ingest {
+  min-width: 0; margin-top: 0; padding: clamp(16px, 2.5vw, 22px); border-radius: 16px;
+}
+.photo-capture .capture-note { margin-bottom: 0; }
+.photo-capture .secondary, .context-ingest .file-picker {
+  width: 100%; min-height: 46px; text-align: center;
+}
+.photo-evidence { grid-template-columns: minmax(0, 1fr); }
+.photo-evidence img { max-height: 260px; object-fit: contain; background: #070d16; }
+.context-ingest > .eyebrow { margin-bottom: 12px; }
+.context-ingest h2 { line-height: 1.15; }
+.context-ingest input[type="file"] { min-height: 36px; }
+.manual-form {
+  padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: rgb(17 28 46 / 42%);
+}
+.manual-form > label { display: block; margin-bottom: 10px; font: 500 10px "JetBrains Mono", monospace; }
+.manual-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.manual-row input { min-width: 0; min-height: 48px; padding: 12px 14px; }
+.manual-row button { min-height: 48px; border-radius: 10px; }
+.capture-stage > .capture-note { margin: 0; }
+#xml-summary { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+#xml-summary h3 { font-size: 18px; line-height: 1.35; }
+#xml-summary h4 { font-size: 12px; letter-spacing: .04em; }
+#compare-invoice-catalog { width: 100%; white-space: normal; }
+@media (max-width: 720px) {
+  .capture-stage { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .capture-stage > .eyebrow, .capture-stage > .camera-frame,
+  .capture-stage > .capture-note, .capture-stage > .manual-form { grid-column: 1; }
+  .capture-workflow { gap: 6px; }
+  .capture-workflow li { align-items: flex-start; flex-direction: column; padding: 10px; }
+  .capture-workflow small { font-size: 10px; }
+}
+@media (max-width: 420px) {
+  .capture-workflow strong { font-size: 10px; }
+  .capture-workflow small { display: none; }
+  .camera-frame, .camera-frame video { min-height: 210px; }
+  .manual-row { grid-template-columns: 1fr; }
+  .manual-row button { width: 100%; }
 }
