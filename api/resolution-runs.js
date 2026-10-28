@@ -6,6 +6,12 @@ const isUuid = (value) => typeof value === "string" &&
 
 export default async function handler(req, res) {
   if (req.method !== "POST" && req.method !== "GET") return methodNotAllowed(res, ["GET", "POST"]);
+  if (req.method === "POST") {
+    return sendJson(res, 410, {
+      error: "client_supplied_results_not_accepted",
+      message: "O registro de resultados enviados pelo cliente foi desativado. Use POST /api/v1/resolve para calcular e persistir a resolução no servidor."
+    });
+  }
 
   try {
     const { client, user } = await requireUser(req);
