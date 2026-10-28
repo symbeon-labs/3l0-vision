@@ -61,6 +61,15 @@ test("identifier mismatch between document and physical observation is a conflic
   assert.ok(result.conflicts.some(item => item.type === "document_physical_identifier_mismatch"));
 });
 
+test("captured identifier must agree with receiving observation", () => {
+  const result = deterministicResolver(request({
+    code: "789000000099",
+    receiving: receiving()
+  }));
+  assert.equal(result.status, "CONFLICT");
+  assert.ok(result.conflicts.some(item => item.type === "capture_context_identifier_mismatch"));
+});
+
 test("quantity mismatch is a conflict", () => {
   const result = deterministicResolver(request({
     receiving: receiving({
