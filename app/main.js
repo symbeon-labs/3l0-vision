@@ -313,16 +313,59 @@ async function resolveInput(input) {
       interface: "web",
       workspace: activeWorkspace ? { id: activeWorkspace.id, name: activeWorkspace.name, organization_id: activeWorkspace.organization_id, status: activeWorkspace.status } : null
     } });
-    renderResult(output);
+    let persistence;
+    try {
+      persistence = await persistResolutionRun({ input, output });
+    } catch (error) {
+      persistence = { saved: false, error: error?.message || "Não foi possível salvar a execução." };
+      console.error("[3L0 Persistence] Resolution was computed but not persisted:", error);
+    }
+    renderResult(output, persistence);
   } catch (error) { renderError(error); }
+}
+
+async function persistResolutionRun({ input, output }) {
+  const { data, error: sessionError } = await supabase.auth.getSession();
+  const token = data?.session?.access_token;
+  if (sessionError || !token) throw new Error("Sessão expirada. Entre novamente para salvar a execução.");
+  if (!activeWorkspace?.id) throw new Error("Selecione um workspace autorizado antes de salvar a execução.");
+
+  const response = await fetch("/api/resolution-runs", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({
+      workspaceId: activeWorkspace.id,
+      input: { scheme: input.scheme, code: input.code, method: input.method },
+      output: {
+        observation: output.observation,
+        result: output.result,
+        state: output.state
+      }
+    })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || "Falha ao persistir a execução.");
+  return { saved: true, id: payload.run?.id };
 }
 
 function renderProcessing() { app.innerHTML = '<main class="shell"><section class="hero processing" aria-live="polite" aria-busy="true"><p class="eyebrow">PROCESSAMENTO</p><div class="result-icon processing-icon">◌</div><h1>Resolvendo<br /><strong>observação.</strong></h1><p class="description" id="stage">Capturando...</p></section></main>'; }
 function updateProcessingStage(stage) { const target = document.querySelector("#stage"); if (!target) return; const labels = { CAPTURING: "Capturando...", OBSERVING: "Representando observação...", NORMALIZING: "Normalizando evidências...", RESOLVING: "Consultando resolução...", RESOLVED: "Projetando estado operacional...", COMPLETED: "Concluído." }; target.textContent = labels[stage] || stage; }
 
-function renderResult(output) {
-  const result = output.result; const state = output.state; const resolved = result.status === "RESOLVED"; if (resolved) resolutions += 1;
-  app.innerHTML = '<main class="shell"><section class="hero" aria-live="polite"><p class="eyebrow">' + (resolved ? "CORRESPONDÊNCIA ENCONTRADA" : "REVISÃO NECESSÁRIA") + '</p><div class="result-icon ' + state.toLowerCase() + '">' + (resolved ? "✓" : "!") + '</div><h1>' + (resolved ? "Produto<br /><strong>identificado.</strong>" : "Precisamos<br /><strong>verificar.</strong>") + '</h1><div class="result-card"><div><span>RESULTADO</span><strong>' + (resolved ? "Correspondência encontrada" : state === "CONFLICT" ? "Informações em conflito" : state === "UNCERTAIN" ? "Informações insuficientes" : "Revisão necessária") + '</strong></div><div><span>CONTEXTO</span><strong>Catálogo local de demonstração</strong></div><div><span>ITEM CORRESPONDENTE</span><strong>' + (resolved ? result.entities[0] : "Ainda não identificado") + '</strong></div></div><p class="capture-note">Este resultado foi calculado com o catálogo local e as regras do protótipo. Não foi salvo como registro compartilhado e não confirma a autenticidade nem a identidade física do produto. Revise as informações antes de tomar uma decisão operacional.</p><button class="primary" id="again" type="button">VOLTAR AO GUIA</button></section></main>';
+function renderResult(output, persistence = { saved: false, error: "Persistência não confirmada." }) {
+  const result = output.result;
+  const state = output.state;
+  const resolved = result.status === "RESOLVED";
+  if (resolved && persistence.saved) resolutions += 1;
+  const persistenceLabel = persistence.saved
+    ? "Salvo no servidor · " + String(persistence.id || "").slice(0, 8)
+    : "NÃO SALVO · " + (persistence.error || "Falha de persistência");
+  const persistenceNotice = persistence.saved
+    ? "A execução foi registrada no servidor para este workspace. O resultado continua limitado às evidências e regras disponíveis."
+    : "ATENÇÃO: a resolução foi calculada, mas não foi confirmada a gravação no servidor. Não trate esta execução como registrada. " + (persistence.error || "");
+  app.innerHTML = '<main class="shell"><section class="hero" aria-live="polite"><p class="eyebrow">' + (resolved ? "CORRESPONDÊNCIA ENCONTRADA" : "REVISÃO NECESSÁRIA") + '</p><div class="result-icon ' + state.toLowerCase() + '">' + (resolved ? "✓" : "!") + '</div><h1>' + (resolved ? "Produto<br /><strong>identificado.</strong>" : "Precisamos<br /><strong>verificar.</strong>") + '</h1><div class="result-card"><div><span>RESULTADO</span><strong>' + (resolved ? "Correspondência encontrada" : state === "CONFLICT" ? "Informações em conflito" : state === "UNCERTAIN" ? "Informações insuficientes" : "Revisão necessária") + '</strong></div><div><span>CONTEXTO</span><strong>Catálogo local de demonstração</strong></div><div><span>ITEM CORRESPONDENTE</span><strong>' + (resolved ? result.entities[0] : "Ainda não identificado") + '</strong></div><div><span>PERSISTÊNCIA</span><strong>' + persistenceLabel + '</strong></div></div><p class="capture-note">' + persistenceNotice + ' O catálogo de produtos continua local nesta versão; persistir esta execução não significa que o catálogo foi sincronizado com o servidor nem confirma a identidade física do produto. Revise as informações antes de tomar uma decisão operacional.</p><button class="primary" id="again" type="button">VOLTAR AO GUIA</button></section></main>';
   document.querySelector("#again").addEventListener("click", renderHome);
 }
 
