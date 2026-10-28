@@ -870,3 +870,23 @@ footer {
   .xml-facts dt { padding-bottom: 2px; border-bottom: 0; }
   .xml-facts dd { padding-top: 2px; text-align: left; }
 }
+
+
+.catalog-match-button {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 16px;
+  border: 1px solid #456078;
+  border-radius: 11px;
+  background: #122b3a;
+  color: var(--cyan);
+  padding: 12px 14px;
+  font-family: Inter, sans-serif;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .035em;
+  cursor: pointer;
+}
+.catalog-match-button:hover { border-color: var(--cyan); background: #18384a; }
+.catalog-match-button:disabled { opacity: .65; cursor: wait; }
+#catalog-match-results[hidden] { display: none; }
