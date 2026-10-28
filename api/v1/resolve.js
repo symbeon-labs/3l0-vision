@@ -77,6 +77,13 @@ export default async function handler(req, res) {
     const scheme = typeof body.scheme === "string" && body.scheme.trim()
       ? body.scheme.trim().toLowerCase()
       : (/^\d{8}$|^\d{12,14}$/.test(code) ? "ean" : "identifier");
+    const operation = body.operation === undefined ? "identify_product" : body.operation;
+    if (!["identify_product", "receive_goods"].includes(operation)) {
+      return sendJson(res, 400, { error: "operation_invalid", message: "Operação não suportada." });
+    }
+    const receivingInput = body.receiving && typeof body.receiving === "object" && !Array.isArray(body.receiving)
+      ? body.receiving
+      : null;
 
     const pipeline = new ResolutionPipeline({
       captureAdapter: {
@@ -95,12 +102,24 @@ export default async function handler(req, res) {
     const output = await pipeline.run({
       input: { code, scheme, method: "api" },
       context: {
-        operation: "identify_product",
+        operation,
         interface: "3l0-vision-api",
         request_id: randomUUID(),
         user_id: user.id,
         workspace_id: workspaceId,
-        workspace_role: membership.role
+        workspace_role: membership.role,
+        ...(operation === "receive_goods" && receivingInput ? {
+          receiving: {
+            document_line: receivingInput.document_line && typeof receivingInput.document_line === "object" && !Array.isArray(receivingInput.document_line)
+              ? receivingInput.document_line
+              : {},
+            physical_observation: receivingInput.physical_observation && typeof receivingInput.physical_observation === "object" && !Array.isArray(receivingInput.physical_observation)
+              ? receivingInput.physical_observation
+              : {},
+            // Candidate identities come from the server-side catalog, never the request body.
+            catalog_candidates: demoEntities
+          }
+        } : {})
       }
     });
 
