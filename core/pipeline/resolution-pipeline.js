@@ -45,6 +45,10 @@ export class ResolutionPipeline {
 
     this.stage("OBSERVING", { captured });
 
+    // Context extracted by capture (OCR/barcode/document adapters) must reach
+    // candidate lookup and ORC, not only the observation metadata.
+    const effectiveContext = { ...context, ...(captured.context ?? {}) };
+
     const observation = this.observationFactory({
       observationId: this.idFactory("obs"),
       observedAt: new Date().toISOString(),
@@ -55,7 +59,7 @@ export class ResolutionPipeline {
       attributes: captured.attributes ?? {},
       metadata: captured.metadata ?? {},
       evidence: captured.evidence ?? [],
-      context: { ...context, ...(captured.context ?? {}) }
+      context: effectiveContext
     });
 
     this.stage("NORMALIZING", { observation });
@@ -67,7 +71,7 @@ export class ResolutionPipeline {
     const entities = await this.entityRepository.findCandidates({
       observation: normalized,
       question,
-      context
+      context: effectiveContext
     });
 
     const result = await this.orcClient.resolve({
@@ -75,7 +79,7 @@ export class ResolutionPipeline {
       question,
       entities,
       observations: [normalized],
-      context,
+      context: effectiveContext,
       ruleset
     });
 
@@ -88,7 +92,7 @@ export class ResolutionPipeline {
         entityId: result.entities[0],
         observation: normalized,
         result,
-        context
+        context: effectiveContext
       });
     }
 
