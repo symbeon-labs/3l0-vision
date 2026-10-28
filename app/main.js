@@ -6,6 +6,9 @@ import { BrowserCaptureAdapter } from "./capture/browser-capture.js";
 import { parseGlyphReference } from "../core/vision/glyph-reference.js";
 import { LocalCatalog } from "./catalog/local-catalog.js";
 import { renderWorkspaceOnboarding } from "./workspaces/workspace-onboarding.js";
+import { parseFiscalXml } from "../core/evidence/fiscal-xml-parser.js";
+import { recommendContextSources } from "../core/evidence/source-catalog.js";
+import { matchInvoiceItemsToCatalog } from "../core/evidence/invoice-catalog-matcher.js";
 import "./styles.css";
 
 const app = document.querySelector("#app");
@@ -13,6 +16,7 @@ const catalog = new LocalCatalog();
 const client = new OrcClient({ resolver: deterministicResolver });
 let captureAdapter = null;
 let resolutions = 0;
+let parsedInvoice = null;
 let supabase = null;
 let authUser = null;
 let authTransition = false;
@@ -304,15 +308,164 @@ async function loadResolutionHistory(workspaceId) {
 
 function renderCapture() {
   if (!activeWorkspace?.id) { renderHome(); return; }
-  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>ATIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
+  parsedInvoice = null;
+  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>ATIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><div class="photo-capture"><button class="secondary" id="capture-photo" type="button">CAPTURAR IMAGEM</button><p class="capture-note">A imagem permanece nesta sessão. OCR de imagem/PDF ainda não está conectado.</p><div id="photo-evidence" class="photo-evidence" hidden></div></div><section class="context-ingest"><p class="eyebrow">FONTES DE CONTEXTO</p><h2>Já tem a nota fiscal?</h2><p class="capture-note">Selecione o XML original da NF-e/NFC-e. A extração ocorre localmente no navegador; nenhum arquivo é enviado ao servidor. PDF e OCR ainda não estão conectados.</p><label class="file-picker" for="fiscal-xml">SELECIONAR XML FISCAL</label><input id="fiscal-xml" type="file" accept=".xml,application/xml,text/xml" /><p id="xml-status" class="capture-note" role="status">Nenhum arquivo selecionado.</p><div id="xml-summary" hidden></div></section><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
   document.querySelector("#back").addEventListener("click", renderHome);
   captureAdapter = new BrowserCaptureAdapter({ videoElement: document.querySelector("#camera"), onStatus: handleCaptureStatus });
+  document.querySelector("#capture-photo").addEventListener("click", capturePhoto);
+  document.querySelector("#fiscal-xml").addEventListener("change", handleFiscalXml);
   document.querySelector("#manual-form").addEventListener("submit", async function (event) {
     event.preventDefault();
     const code = new FormData(event.currentTarget).get("code")?.toString().trim();
     if (code) await resolveInput({ code, scheme: inferScheme(code), method: "manual" });
   });
   captureAdapter.start().catch(function (error) { handleCaptureStatus({ type: "camera_error", error }); });
+}
+
+async function capturePhoto() {
+  const button = document.querySelector("#capture-photo");
+  const target = document.querySelector("#photo-evidence");
+  if (!captureAdapter || !button || !target) return;
+  button.disabled = true;
+  button.textContent = "CAPTURANDO...";
+  try {
+    const photo = await captureAdapter.captureFrame();
+    target.replaceChildren();
+    const image = document.createElement("img");
+    image.alt = "Prévia da imagem capturada nesta sessão";
+    image.src = photo.previewUrl;
+    const meta = document.createElement("div");
+    meta.className = "photo-meta";
+    const heading = document.createElement("strong");
+    heading.textContent = "Imagem capturada";
+    const details = document.createElement("span");
+    details.textContent = `${photo.width} × ${photo.height} px · ${Math.ceil(photo.sizeBytes / 1024)} KB`;
+    const time = document.createElement("span");
+    time.textContent = new Date(photo.capturedAt).toLocaleTimeString();
+    const note = document.createElement("p");
+    note.textContent = "A imagem está somente nesta sessão. Nenhum upload foi realizado e o OCR não foi executado.";
+    meta.append(heading, details, time, note);
+    target.append(image, meta);
+    target.hidden = false;
+    button.textContent = "CAPTURAR NOVAMENTE";
+  } catch (error) {
+    const status = document.querySelector("#camera-status");
+    if (status) status.textContent = "NÃO FOI POSSÍVEL CAPTURAR A IMAGEM · VERIFIQUE A CÂMERA";
+    button.textContent = "TENTAR NOVAMENTE";
+    console.warn("Image capture failed", error);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function handleFiscalXml(event) {
+  const file = event.currentTarget.files?.[0];
+  const status = document.querySelector("#xml-status");
+  const summary = document.querySelector("#xml-summary");
+  if (!file || !status || !summary) return;
+  summary.replaceChildren();
+  summary.hidden = true;
+  parsedInvoice = null;
+  if (!file.name.toLowerCase().endsWith(".xml")) {
+    status.textContent = "Formato não suportado. Selecione um XML fiscal.";
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    status.textContent = "O arquivo excede o limite de 5 MB.";
+    return;
+  }
+  status.textContent = "Lendo XML localmente...";
+  try {
+    const invoice = parseFiscalXml(await file.text());
+    parsedInvoice = invoice;
+    const heading = document.createElement("h3");
+    heading.textContent = "Dados extraídos — revise antes de usar";
+    const disclaimer = document.createElement("p");
+    disclaimer.className = "capture-note";
+    disclaimer.textContent = "Extração sintática apenas. Não verifica assinatura digital, autorização, cancelamento ou autenticidade fiscal.";
+    summary.append(heading, disclaimer);
+    const facts = document.createElement("dl");
+    facts.className = "xml-facts";
+    const fields = [
+      ["Emitente", invoice.issuer?.name || invoice.issuer?.cnpj || "Não identificado"],
+      ["Documento", invoice.number || "Ausente"],
+      ["Série", invoice.series || "Ausente"],
+      ["Emissão", invoice.issueDate || "Ausente"],
+      ["Total", invoice.total === null ? "Ausente" : invoice.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })],
+      ["Itens", String(invoice.items.length)]
+    ];
+    for (const [label, value] of fields) {
+      const dt = document.createElement("dt"); dt.textContent = label;
+      const dd = document.createElement("dd"); dd.textContent = value;
+      facts.append(dt, dd);
+    }
+    summary.append(facts);
+    const listTitle = document.createElement("h4"); listTitle.textContent = "Itens extraídos";
+    summary.append(listTitle);
+    const list = document.createElement("ul"); list.className = "xml-items";
+    for (const item of invoice.items) {
+      const row = document.createElement("li");
+      row.textContent = [item.lineNumber ? "Item " + item.lineNumber : "Item", item.description || item.code || "Sem descrição", item.gtin ? "GTIN " + item.gtin : "sem GTIN", item.quantity === null ? "quantidade ausente" : "qtd. " + item.quantity, item.total === null ? "valor ausente" : "R$ " + item.total.toFixed(2)].join(" · ");
+      list.append(row);
+    }
+    summary.append(list);
+    const recommendations = recommendContextSources({ missingFields: invoice.missingFields, availableSources: ["invoice_xml"] });
+    const guidance = document.createElement("div");
+    guidance.className = "source-guidance";
+    const guideTitle = document.createElement("h4"); guideTitle.textContent = "Próximas fontes recomendadas";
+    guidance.append(guideTitle);
+    if (!recommendations.length) {
+      const complete = document.createElement("p"); complete.textContent = "O XML contém os campos básicos avaliados. Ainda é necessário revisar os dados e conferir a mercadoria física."; guidance.append(complete);
+    } else {
+      for (const recommendation of recommendations.slice(0, 3)) {
+        const row = document.createElement("p");
+        row.textContent = recommendation.label + " — pode ajudar com: " + recommendation.matchedFields.join(", ") + ". Estado: " + recommendation.status + ".";
+        guidance.append(row);
+      }
+    }
+    summary.append(guidance);
+    const compare = document.createElement("button");
+    compare.type = "button";
+    compare.className = "primary";
+    compare.id = "compare-invoice-catalog";
+    compare.textContent = "COMPARAR ITENS COM CATÁLOGO LOCAL";
+    compare.addEventListener("click", compareInvoiceWithCatalog);
+    summary.append(compare);
+    summary.hidden = false;
+    status.textContent = "XML lido localmente. Revise os dados extraídos.";
+  } catch (error) {
+    status.textContent = error?.message === "xml_doctype_not_allowed" ? "XML recusado: DOCTYPE/ENTITY não são permitidos." : error?.message === "xml_too_large" ? "O arquivo excede o limite de 5 MB." : "Não foi possível interpretar este XML como NF-e/NFC-e suportada.";
+    console.warn("Fiscal XML parsing failed", error);
+  }
+}
+
+async function compareInvoiceWithCatalog(event) {
+  const button = event.currentTarget;
+  button.disabled = true;
+  button.textContent = "COMPARANDO...";
+  try {
+    const report = await matchInvoiceItemsToCatalog(parsedInvoice, catalog);
+    let results = document.querySelector("#catalog-match-results");
+    if (!results) { results = document.createElement("section"); results.id = "catalog-match-results"; results.className = "catalog-match-results"; document.querySelector("#xml-summary").append(results); }
+    results.replaceChildren();
+    const heading = document.createElement("h4"); heading.textContent = "Comparação com catálogo local de demonstração";
+    const note = document.createElement("p"); note.className = "capture-note"; note.textContent = "Correspondência por identificador apenas. Não confirma autenticidade fiscal nem que a mercadoria física corresponde à nota. Nenhum item foi gravado no inventário.";
+    const counts = document.createElement("p"); counts.className = "capture-note"; counts.textContent = report.counts.candidates + " candidato(s) único(s) · " + report.counts.needsReview + " para revisão · " + report.counts.conflicts + " conflito(s).";
+    const list = document.createElement("ul"); list.className = "xml-items";
+    for (const item of report.items) {
+      const row = document.createElement("li");
+      row.textContent = [item.description, item.gtin ? "GTIN " + item.gtin : "sem GTIN", item.status, item.candidates.map(candidate => candidate.name || candidate.entityId || "candidato sem nome").join(", ")].filter(Boolean).join(" · ");
+      list.append(row);
+    }
+    results.append(heading, note, counts, list);
+  } catch (error) {
+    const results = document.querySelector("#catalog-match-results") || document.querySelector("#xml-summary");
+    results.textContent = "Não foi possível comparar com o catálogo local nesta sessão.";
+    console.warn("Invoice/catalog comparison failed", error);
+  } finally {
+    button.disabled = false;
+    button.textContent = "COMPARAR NOVAMENTE";
+  }
 }
 
 function handleCaptureStatus(status) {
