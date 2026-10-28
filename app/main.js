@@ -172,6 +172,12 @@ function renderHome() {
         </section>
         <button class="capture-card" id="identify" type="button" disabled><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Selecione um workspace para iniciar</small></span><span class="arrow">→</span></button>
         <button class="workspace-entry" id="workspace-entry" type="button"><span><strong>GERENCIAR ESPAÇOS DE TRABALHO</strong><small>Criar um espaço ou consultar os espaços disponíveis</small></span><span aria-hidden="true">→</span></button>
+        <section class="active-workspace-panel" aria-labelledby="resolution-history-title">
+          <p class="eyebrow">PERSISTÊNCIA NO SERVIDOR</p>
+          <label id="resolution-history-title">Últimas execuções deste workspace</label>
+          <div id="resolution-history" class="workspace-help" role="status">Selecione um workspace para consultar o histórico.</div>
+          <button class="workspace-entry" id="refresh-resolution-history" type="button">ATUALIZAR HISTÓRICO</button>
+        </section>
         <div class="demo-note"><span class="pulse-dot"></span> AMBIENTE EXPERIMENTAL <span>·</span> CATÁLOGO LOCAL DE DEMONSTRAÇÃO</div>
       </section>
       <section class="learning-section" aria-labelledby="how-title">
@@ -212,7 +218,9 @@ function renderHome() {
     identifyButton.querySelector("small").textContent = activeWorkspace
       ? "Contexto: " + activeWorkspace.name + " · Câmera, códigos ou entrada manual"
       : "Selecione um workspace para iniciar";
+    void loadResolutionHistory(activeWorkspace?.id);
   });
+  document.querySelector("#refresh-resolution-history").addEventListener("click", () => void loadResolutionHistory(activeWorkspace?.id));
   void loadWorkspaceChoices(workspaceSelector, identifyButton);
   document.querySelector("#workspace-entry").addEventListener("click", () => renderWorkspaceOnboarding({ app, onBack: renderHome, supabase }));
   document.querySelector(".brand-mark").addEventListener("click", event => { event.preventDefault(); renderHome(); });
@@ -247,11 +255,50 @@ async function loadWorkspaceChoices(selector, identifyButton) {
       selector.innerHTML = '<option value="">Nenhum espaço de trabalho disponível</option>';
       document.querySelector("#workspace-context-help").textContent = "Você ainda não tem acesso a um espaço de trabalho. Use “Gerenciar espaços de trabalho” para criar um ou consulte a pessoa administradora.";
     }
+    await loadResolutionHistory(stored?.id);
   } catch (error) {
     selector.innerHTML = '<option value="">Não foi possível carregar os espaços</option>';
     document.querySelector("#workspace-context-help").textContent = "Não conseguimos consultar seus espaços agora. Verifique sua conexão e tente novamente. Se o problema continuar, entre em contato com a equipe responsável.";
     console.error("[3L0 Workspaces] Failed to load workspace choices:", error);
     identifyButton.disabled = true;
+  }
+}
+
+async function loadResolutionHistory(workspaceId) {
+  const target = document.querySelector("#resolution-history");
+  if (!target) return;
+  if (!workspaceId) {
+    target.textContent = "Selecione um workspace autorizado para consultar o histórico.";
+    return;
+  }
+  target.textContent = "Carregando execuções registradas…";
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
+    if (error || !token) throw new Error("Sessão expirada. Entre novamente.");
+    const response = await fetch("/api/resolution-runs?workspaceId=" + encodeURIComponent(workspaceId), {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || "Não foi possível consultar o histórico.");
+    const runs = payload.runs || [];
+    if (!runs.length) {
+      target.textContent = "Nenhuma execução persistida neste workspace ainda.";
+      return;
+    }
+    target.replaceChildren();
+    for (const run of runs) {
+      const article = document.createElement("article");
+      article.className = "workspace-review-state";
+      const heading = document.createElement("strong");
+      heading.textContent = run.status + " · " + run.input_code;
+      const detail = document.createElement("p");
+      detail.textContent = new Date(run.created_at).toLocaleString("pt-BR") + " · " + run.input_scheme + " · ID " + run.id;
+      article.append(heading, detail);
+      target.append(article);
+    }
+  } catch (error) {
+    target.textContent = error?.message || "Falha ao carregar o histórico.";
   }
 }
 
