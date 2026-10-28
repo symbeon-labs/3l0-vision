@@ -6,6 +6,7 @@ import { parseGlyphReference } from "../core/vision/glyph-reference.js";
 import { LocalCatalog } from "./catalog/local-catalog.js";
 import { parseFiscalXml } from "../core/evidence/fiscal-xml-parser.js";
 import { recommendContextSources } from "../core/evidence/source-catalog.js";
+import { matchInvoiceItemsToCatalog } from "../core/evidence/invoice-catalog-matcher.js";
 import "./styles.css";
 
 const app = document.querySelector("#app");
@@ -13,6 +14,7 @@ const catalog = new LocalCatalog();
 const client = new OrcClient({ resolver: deterministicResolver });
 let captureAdapter = null;
 let resolutions = 0;
+let parsedInvoice = null;
 
 function renderHome() {
   stopCapture();
@@ -92,6 +94,57 @@ async function capturePhoto() {
 }
 
 
+async function compareInvoiceWithCatalog(event) {
+  const button = event.currentTarget;
+  const target = document.querySelector("#catalog-match-results");
+  if (!parsedInvoice || !target) return;
+
+  button.disabled = true;
+  button.textContent = "COMPARANDO...";
+  try {
+    const report = await matchInvoiceItemsToCatalog(parsedInvoice, catalog);
+    target.replaceChildren();
+    target.hidden = false;
+
+    const heading = document.createElement("h4");
+    heading.textContent = "Comparação com catálogo local de demonstração";
+    target.append(heading);
+
+    const disclaimer = document.createElement("p");
+    disclaimer.className = "capture-note";
+    disclaimer.textContent = "Correspondência por identificador apenas. Não confirma autenticidade fiscal nem que a mercadoria física corresponde à nota. Nenhum item foi gravado no inventário.";
+    target.append(disclaimer);
+
+    const counts = document.createElement("p");
+    counts.className = "capture-note";
+    counts.textContent = report.counts.candidates + " candidato(s) único(s) · " + report.counts.needsReview + " para revisão · " + report.counts.conflicts + " conflito(s).";
+    target.append(counts);
+
+    const list = document.createElement("ul");
+    list.className = "xml-items";
+    for (const item of report.items) {
+      const row = document.createElement("li");
+      const candidateNames = item.candidates.map((candidate) => candidate.name || candidate.entityId || "candidato sem nome").join(", ");
+      row.textContent = [
+        item.lineNumber ? "Item " + item.lineNumber : "Item",
+        item.description,
+        item.gtin ? "GTIN " + item.gtin : "sem GTIN",
+        item.status,
+        candidateNames
+      ].filter(Boolean).join(" · ");
+      list.append(row);
+    }
+    target.append(list);
+  } catch (error) {
+    target.hidden = false;
+    target.textContent = "Não foi possível comparar com o catálogo local nesta sessão.";
+    console.warn("Invoice/catalog comparison failed", error);
+  } finally {
+    button.disabled = false;
+    button.textContent = "COMPARAR ITENS NOVAMENTE";
+  }
+}
+
 async function handleFiscalXml(event) {
   const file = event.currentTarget.files?.[0];
   const status = document.querySelector("#xml-status");
@@ -100,6 +153,7 @@ async function handleFiscalXml(event) {
 
   summary.replaceChildren();
   summary.hidden = true;
+  parsedInvoice = null;
 
   if (!file.name.toLowerCase().endsWith(".xml")) {
     status.textContent = "Formato não suportado nesta etapa. Selecione um XML fiscal.";
@@ -114,6 +168,7 @@ async function handleFiscalXml(event) {
   try {
     const xmlText = await file.text();
     const invoice = parseFiscalXml(xmlText);
+    parsedInvoice = invoice;
     const heading = document.createElement("h3");
     heading.textContent = "Dados extraídos — revise antes de usar";
     summary.append(heading);
@@ -180,6 +235,21 @@ async function handleFiscalXml(event) {
       }
     }
     summary.append(recommendationList);
+
+    if (invoice.items.length) {
+      const matchButton = document.createElement("button");
+      matchButton.type = "button";
+      matchButton.className = "secondary catalog-match-button";
+      matchButton.textContent = "COMPARAR ITENS COM CATÁLOGO LOCAL";
+      matchButton.addEventListener("click", compareInvoiceWithCatalog);
+      summary.append(matchButton);
+
+      const matchResults = document.createElement("div");
+      matchResults.id = "catalog-match-results";
+      matchResults.hidden = true;
+      summary.append(matchResults);
+    }
+
     summary.hidden = false;
     status.textContent = "XML processado localmente: " + file.name + ". Nenhum upload foi realizado.";
   } catch (error) {
