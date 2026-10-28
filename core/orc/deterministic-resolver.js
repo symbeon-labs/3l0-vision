@@ -75,6 +75,17 @@ function evaluateReceivingConsistency(request) {
 
   const declaredGtin = normalize(documentLine.gtin);
   const observedBarcode = normalize(physical.barcode);
+
+  if (declaredGtin && !observedBarcode) {
+    return receivingResult(request, "REVIEW_REQUIRED", {
+      requiresVerification: [{
+        type: "physical_identifier_missing",
+        declared: declaredGtin,
+        ocr_confidence: physical.ocr_confidence ?? null
+      }]
+    });
+  }
+
   if (declaredGtin && observedBarcode && declaredGtin !== observedBarcode) {
     return receivingResult(request, "CONFLICT", {
       conflicts: [{ type: "document_physical_identifier_mismatch" }]
