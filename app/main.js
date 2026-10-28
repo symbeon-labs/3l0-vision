@@ -305,7 +305,7 @@ async function loadResolutionHistory(workspaceId) {
 function renderCapture() {
   if (!activeWorkspace?.id) { renderHome(); return; }
   parsedInvoice = null;
-  app.innerHTML = '<main class="shell capture-shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>ATIVO</span></div></header><ol class="capture-workflow" aria-label="Etapas da conferência"><li aria-current="step"><span class="workflow-number">01</span><span><strong>OBSERVAR</strong><small>Capturar evidências</small></span></li><li><span class="workflow-number">02</span><span><strong>RELACIONAR</strong><small>Comparar dados</small></span></li><li><span class="workflow-number">03</span><span><strong>VERIFICAR</strong><small>Revisar o resultado</small></span></li></ol><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame capture-camera-card"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><div class="photo-capture evidence-card"><button class="secondary" id="capture-photo" type="button">CAPTURAR IMAGEM</button><p class="capture-note">A imagem permanece nesta sessão. OCR de imagem/PDF ainda não está conectado.</p><div id="photo-evidence" class="photo-evidence" hidden></div></div><section class="context-ingest evidence-card"><p class="eyebrow">FONTE DE CONTEXTO</p><h2>Já tem a nota fiscal?</h2><p class="capture-note">Selecione o XML original da NF-e/NFC-e. A extração ocorre localmente no navegador; nenhum arquivo é enviado ao servidor. PDF e OCR ainda não estão conectados.</p><label class="file-picker" for="fiscal-xml">SELECIONAR XML FISCAL</label><input id="fiscal-xml" type="file" accept=".xml,application/xml,text/xml" /><p id="xml-status" class="capture-note" role="status">Nenhum arquivo selecionado.</p><div id="xml-summary" hidden></div></section><form class="manual-form evidence-card" id="manual-form"><p class="eyebrow">ALTERNATIVA MANUAL</p><label for="code">IDENTIFICADOR DO PRODUTO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note capture-disclaimer">A captura registra uma observação. A resolução compara os dados disponíveis; ela não confirma, sozinha, a identidade física nem a autenticidade fiscal.</p></section></main>';
+  app.innerHTML = '<main class="shell capture-shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>ATIVO</span></div></header><ol class="capture-workflow" aria-label="Mapa das etapas da conferência"><li><span class="workflow-number">01</span><span><strong>OBSERVAR</strong><small>Capturar evidências</small></span></li><li><span class="workflow-number">02</span><span><strong>RELACIONAR</strong><small>Comparar dados</small></span></li><li><span class="workflow-number">03</span><span><strong>VERIFICAR</strong><small>Revisar o resultado</small></span></li></ol><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame capture-camera-card"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><div class="photo-capture evidence-card"><button class="secondary" id="capture-photo" type="button">CAPTURAR IMAGEM</button><p class="capture-note">A imagem permanece nesta sessão. OCR de imagem/PDF ainda não está conectado.</p><div id="photo-evidence" class="photo-evidence" hidden></div></div><section class="context-ingest evidence-card"><p class="eyebrow">FONTE DE CONTEXTO</p><h2>Já tem a nota fiscal?</h2><p class="capture-note">Selecione o XML original da NF-e/NFC-e. A extração ocorre localmente no navegador; nenhum arquivo é enviado ao servidor. PDF e OCR ainda não estão conectados.</p><label class="file-input-label" for="fiscal-xml">Arquivo XML fiscal</label><input id="fiscal-xml" type="file" aria-label="Selecionar arquivo XML fiscal" accept=".xml,application/xml,text/xml" /><p id="xml-status" class="capture-note" role="status">Nenhum arquivo selecionado.</p><div id="xml-summary" hidden></div></section><form class="manual-form evidence-card" id="manual-form"><p class="eyebrow">ALTERNATIVA MANUAL</p><label for="code">IDENTIFICADOR DO PRODUTO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note capture-disclaimer">A captura registra uma observação. A resolução compara os dados disponíveis; ela não confirma, sozinha, a identidade física nem a autenticidade fiscal.</p></section></main>';
   document.querySelector("#back").addEventListener("click", renderHome);
   captureAdapter = new BrowserCaptureAdapter({ videoElement: document.querySelector("#camera"), onStatus: handleCaptureStatus });
   document.querySelector("#capture-photo").addEventListener("click", capturePhoto);
@@ -539,8 +539,49 @@ function renderResult(output, persistence = { saved: false, error: "Persistênci
   const persistenceNotice = persistence.saved
     ? "A execução foi registrada no servidor para este workspace. O resultado continua limitado às evidências e regras disponíveis."
     : "ATENÇÃO: a resolução foi calculada, mas não foi confirmada a gravação no servidor. Não trate esta execução como registrada. " + (persistence.error || "");
-  app.innerHTML = '<main class="shell"><section class="hero" aria-live="polite"><p class="eyebrow">' + (resolved ? "CORRESPONDÊNCIA ENCONTRADA" : "REVISÃO NECESSÁRIA") + '</p><div class="result-icon ' + state.toLowerCase() + '">' + (resolved ? "✓" : "!") + '</div><h1>' + (resolved ? "Produto<br /><strong>identificado.</strong>" : "Precisamos<br /><strong>verificar.</strong>") + '</h1><div class="result-card"><div><span>RESULTADO</span><strong>' + (resolved ? "Correspondência encontrada" : state === "CONFLICT" ? "Informações em conflito" : state === "UNCERTAIN" ? "Informações insuficientes" : "Revisão necessária") + '</strong></div><div><span>CONTEXTO</span><strong>Catálogo sintético no servidor</strong></div><div><span>ITEM CORRESPONDENTE</span><strong>' + (resolved ? result.entities[0] : "Ainda não identificado") + '</strong></div><div><span>PERSISTÊNCIA</span><strong>' + persistenceLabel + '</strong></div></div><p class="capture-note">' + persistenceNotice + ' O catálogo usado nesta resolução é sintético e mantido em memória no servidor; ele não representa um catálogo empresarial nem confirma a identidade física do produto. Revise as informações antes de tomar uma decisão operacional.</p><button class="primary" id="again" type="button">VOLTAR AO GUIA</button></section></main>';
-  document.querySelector("#again").addEventListener("click", renderHome);
+  const shell = document.createElement("main");
+  shell.className = "shell";
+  const hero = document.createElement("section");
+  hero.className = "hero";
+  hero.setAttribute("aria-live", "polite");
+  const eyebrow = document.createElement("p");
+  eyebrow.className = "eyebrow";
+  eyebrow.textContent = resolved ? "CORRESPONDÊNCIA ENCONTRADA" : "REVISÃO NECESSÁRIA";
+  const icon = document.createElement("div");
+  icon.className = "result-icon " + (["RESOLVED", "UNCERTAIN", "CONFLICT"].includes(state) ? state.toLowerCase() : "uncertain");
+  icon.textContent = resolved ? "✓" : "!";
+  const heading = document.createElement("h1");
+  heading.append(document.createTextNode(resolved ? "Produto " : "Precisamos "));
+  const emphasis = document.createElement("strong");
+  emphasis.textContent = resolved ? "identificado." : "verificar.";
+  heading.append(emphasis);
+  const card = document.createElement("div");
+  card.className = "result-card";
+  const addResultRow = (label, value) => {
+    const row = document.createElement("div");
+    const labelNode = document.createElement("span");
+    labelNode.textContent = label;
+    const valueNode = document.createElement("strong");
+    valueNode.textContent = String(value ?? "");
+    row.append(labelNode, valueNode);
+    card.append(row);
+  };
+  addResultRow("RESULTADO", resolved ? "Correspondência encontrada" : state === "CONFLICT" ? "Informações em conflito" : state === "UNCERTAIN" ? "Informações insuficientes" : "Revisão necessária");
+  addResultRow("CONTEXTO", "Catálogo sintético no servidor");
+  addResultRow("ITEM CORRESPONDENTE", resolved ? (Array.isArray(result.entities) ? result.entities.join(", ") : result.entities) : "Ainda não identificado");
+  addResultRow("PERSISTÊNCIA", persistenceLabel);
+  const note = document.createElement("p");
+  note.className = "capture-note";
+  note.textContent = persistenceNotice + " O catálogo usado nesta resolução é sintético e mantido em memória no servidor; ele não representa um catálogo empresarial nem confirma a identidade física do produto. Revise as informações antes de tomar uma decisão operacional.";
+  const again = document.createElement("button");
+  again.className = "primary";
+  again.id = "again";
+  again.type = "button";
+  again.textContent = "VOLTAR AO GUIA";
+  again.addEventListener("click", renderHome);
+  hero.append(eyebrow, icon, heading, card, note, again);
+  shell.append(hero);
+  app.replaceChildren(shell);
 }
 
 function renderError(error) { app.innerHTML = '<main class="shell"><section class="hero"><p class="eyebrow">ERRO TÉCNICO</p><div class="result-icon conflict">!</div><h1>Não foi possível<br /><strong>processar.</strong></h1><p class="description">A operação falhou antes de produzir um resultado. Isso não significa que o produto esteja incorreto ou que exista uma divergência. Tente novamente.</p><button class="primary" id="retry" type="button">TENTAR NOVAMENTE</button></section></main>'; document.querySelector("#retry").addEventListener("click", renderCapture); console.error(error); }
