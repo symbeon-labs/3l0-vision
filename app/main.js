@@ -1,10 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
+import { OrcClient } from "../core/orc/client.js";
+import { deterministicResolver } from "../core/orc/deterministic-resolver.js";
+import { ResolutionPipeline } from "../core/pipeline/resolution-pipeline.js";
 import { BrowserCaptureAdapter } from "./capture/browser-capture.js";
 import { parseGlyphReference } from "../core/vision/glyph-reference.js";
+import { LocalCatalog } from "./catalog/local-catalog.js";
 import { renderWorkspaceOnboarding } from "./workspaces/workspace-onboarding.js";
 import "./styles.css";
 
 const app = document.querySelector("#app");
+const catalog = new LocalCatalog();
+const client = new OrcClient({ resolver: deterministicResolver });
 let captureAdapter = null;
 let resolutions = 0;
 let supabase = null;
@@ -166,13 +172,19 @@ function renderHome() {
         </section>
         <button class="capture-card" id="identify" type="button" disabled><span class="capture-icon">⌾</span><span><strong>COMEÇAR IDENTIFICAÇÃO</strong><small>Selecione um workspace para iniciar</small></span><span class="arrow">→</span></button>
         <button class="workspace-entry" id="workspace-entry" type="button"><span><strong>GERENCIAR ESPAÇOS DE TRABALHO</strong><small>Criar um espaço ou consultar os espaços disponíveis</small></span><span aria-hidden="true">→</span></button>
+        <section class="active-workspace-panel" aria-labelledby="resolution-history-title">
+          <p class="eyebrow">PERSISTÊNCIA NO SERVIDOR</p>
+          <label id="resolution-history-title">Últimas execuções deste workspace</label>
+          <div id="resolution-history" class="workspace-help" role="status">Selecione um workspace para consultar o histórico.</div>
+          <button class="workspace-entry" id="refresh-resolution-history" type="button">ATUALIZAR HISTÓRICO</button>
+        </section>
         <div class="demo-note"><span class="pulse-dot"></span> AMBIENTE EXPERIMENTAL <span>·</span> CATÁLOGO LOCAL DE DEMONSTRAÇÃO</div>
       </section>
       <section class="learning-section" aria-labelledby="how-title">
         <div class="section-heading"><p class="eyebrow">COMO USAR</p><h2 id="how-title">Da observação<br />ao estado.</h2></div>
         <div class="steps-grid">
           <article class="step-card"><span class="step-number">01</span><h3>Observe</h3><p>Leia um código pela câmera ou digite o identificador manualmente. A captura registra um sinal, não uma identidade definitiva.</p></article>
-          <article class="step-card"><span class="step-number">02</span><h3>Relacione</h3><p>A API autenticada compara o identificador com o catálogo experimental e registra o resultado no histórico do espaço de trabalho.</p></article>
+          <article class="step-card"><span class="step-number">02</span><h3>Relacione</h3><p>O protótipo compara o identificador com o catálogo local disponível e encaminha a observação para o fluxo de resolução.</p></article>
           <article class="step-card"><span class="step-number">03</span><h3>Verifique</h3><p>Confira o resultado. Se não houver evidência suficiente, não trate a correspondência como confirmada.</p></article>
         </div>
       </section>
@@ -187,10 +199,10 @@ function renderHome() {
       <section class="limits-panel">
         <p class="eyebrow">IMPORTANTE SOBRE ESTA DEMO</p>
         <h2>O que ela faz — e o que ainda não faz.</h2>
-        <div class="limits-grid"><p><strong>Disponível agora</strong><br />Captura de códigos compatíveis, entrada manual, resolução determinística no backend e registro persistente do resultado no espaço de trabalho.</p><p><strong>Ainda não disponível</strong><br />OCR operacional completo, catálogo multiusuário persistente, integração real com ERP/WMS, emissão/consulta de registro Glyph e validação em campo.</p></div>
+        <div class="limits-grid"><p><strong>Disponível agora</strong><br />Captura de códigos compatíveis, entrada manual, normalização da observação e resolução determinística com catálogo local de demonstração.</p><p><strong>Ainda não disponível</strong><br />OCR operacional completo, catálogo multiusuário persistente, integração real com ERP/WMS, emissão/consulta de registro Glyph e validação em campo.</p></div>
         <p class="limits-footnote">QR Glyph valida apenas o formato sintático da referência. Isso não prova autenticidade da etiqueta nem identidade física do produto.</p>
       </section>
-      <section class="activity"><div><span>SESSÃO ATUAL</span><strong>${resolutions} resolução${resolutions === 1 ? "" : "ões"} concluída${resolutions === 1 ? "" : "s"}</strong></div><p>Contagem temporária desta sessão.</p><button class="primary" id="open-history" type="button" ${activeWorkspace ? "" : "disabled"}>CONSULTAR HISTÓRICO DO WORKSPACE</button></section>
+      <section class="activity"><div><span>SESSÃO ATUAL</span><strong>${resolutions} resolução${resolutions === 1 ? "" : "ões"} concluída${resolutions === 1 ? "" : "s"}</strong></div><p>Contagem temporária desta sessão; não é uma métrica de desempenho nem fica sincronizada entre dispositivos.</p></section>
       <footer><span>3L0 VISION</span><span>TORNAR O MUNDO FÍSICO COMPUTÁVEL.</span></footer>
     </main>`;
   mountSessionControl();
@@ -206,9 +218,10 @@ function renderHome() {
     identifyButton.querySelector("small").textContent = activeWorkspace
       ? "Contexto: " + activeWorkspace.name + " · Câmera, códigos ou entrada manual"
       : "Selecione um workspace para iniciar";
+    void loadResolutionHistory(activeWorkspace?.id);
   });
+  document.querySelector("#refresh-resolution-history").addEventListener("click", () => void loadResolutionHistory(activeWorkspace?.id));
   void loadWorkspaceChoices(workspaceSelector, identifyButton);
-  document.querySelector("#open-history").addEventListener("click", () => { if (activeWorkspace?.id) void renderHistory(); });
   document.querySelector("#workspace-entry").addEventListener("click", () => renderWorkspaceOnboarding({ app, onBack: renderHome, supabase }));
   document.querySelector(".brand-mark").addEventListener("click", event => { event.preventDefault(); renderHome(); });
 }
@@ -242,6 +255,7 @@ async function loadWorkspaceChoices(selector, identifyButton) {
       selector.innerHTML = '<option value="">Nenhum espaço de trabalho disponível</option>';
       document.querySelector("#workspace-context-help").textContent = "Você ainda não tem acesso a um espaço de trabalho. Use “Gerenciar espaços de trabalho” para criar um ou consulte a pessoa administradora.";
     }
+    await loadResolutionHistory(stored?.id);
   } catch (error) {
     selector.innerHTML = '<option value="">Não foi possível carregar os espaços</option>';
     document.querySelector("#workspace-context-help").textContent = "Não conseguimos consultar seus espaços agora. Verifique sua conexão e tente novamente. Se o problema continuar, entre em contato com a equipe responsável.";
@@ -250,39 +264,47 @@ async function loadWorkspaceChoices(selector, identifyButton) {
   }
 }
 
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, character => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  })[character]);
-}
-
-async function renderHistory() {
-  stopCapture();
-  app.innerHTML = '<main class="shell"><section class="hero" aria-live="polite"><p class="eyebrow">HISTÓRICO OPERACIONAL</p><h1>Consultando<br /><strong>registros.</strong></h1><p class="description">Buscando registros persistidos deste espaço de trabalho.</p></section></main>';
+async function loadResolutionHistory(workspaceId) {
+  const target = document.querySelector("#resolution-history");
+  if (!target) return;
+  if (!workspaceId) {
+    target.textContent = "Selecione um workspace autorizado para consultar o histórico.";
+    return;
+  }
+  target.textContent = "Carregando execuções registradas…";
   try {
     const { data, error } = await supabase.auth.getSession();
-    if (error) throw error;
     const token = data?.session?.access_token;
-    if (!token) throw new Error("Sessão expirada. Entre novamente.");
-    const response = await fetch("/api/v1/resolution-runs?workspaceId=" + encodeURIComponent(activeWorkspace.id) + "&limit=50", {
+    if (error || !token) throw new Error("Sessão expirada. Entre novamente.");
+    const response = await fetch("/api/resolution-runs?workspaceId=" + encodeURIComponent(workspaceId), {
       headers: { Authorization: "Bearer " + token }
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(payload.message || payload.error || "Não foi possível carregar o histórico.");
-    const runs = Array.isArray(payload.runs) ? payload.runs : [];
-    app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="history-back" type="button">← VOLTAR</button><div class="status">HISTÓRICO <span>WORKSPACE</span></div></header><section class="hero"><p class="eyebrow">REGISTROS PERSISTIDOS</p><h1>Histórico<br /><strong>operacional.</strong></h1><p class="description">' + runs.length + ' registro(s) recuperado(s) para ' + escapeHtml(activeWorkspace.name) + '.</p><div class="history-list">' + (runs.length ? runs.map(run => '<article class="result-card"><div><span>DATA</span><strong>' + escapeHtml(new Date(run.created_at).toLocaleString("pt-BR")) + '</strong></div><div><span>ESTADO</span><strong>' + escapeHtml(run.status) + '</strong></div><div><span>CÓDIGO</span><strong>' + escapeHtml(run.input_code) + '</strong></div><div><span>RESOLUÇÃO</span><strong>' + escapeHtml(run.resolution_id) + '</strong></div></article>').join("") : '<p class="capture-note">Nenhum registro encontrado neste espaço de trabalho.</p>') + '</div><p class="capture-note">Os registros refletem o resolvedor experimental e o catálogo sintético atual. Não constituem confirmação de identidade física ou autenticidade.</p><button class="primary" id="history-home" type="button">VOLTAR AO GUIA</button></section></main>';
-    document.querySelector("#history-back").addEventListener("click", renderHome);
-    document.querySelector("#history-home").addEventListener("click", renderHome);
+    if (!response.ok) throw new Error(payload.error || "Não foi possível consultar o histórico.");
+    const runs = payload.runs || [];
+    if (!runs.length) {
+      target.textContent = "Nenhuma execução persistida neste workspace ainda.";
+      return;
+    }
+    target.replaceChildren();
+    for (const run of runs) {
+      const article = document.createElement("article");
+      article.className = "workspace-review-state";
+      const heading = document.createElement("strong");
+      heading.textContent = run.status + " · " + run.input_code;
+      const detail = document.createElement("p");
+      detail.textContent = new Date(run.created_at).toLocaleString("pt-BR") + " · " + run.input_scheme + " · ID " + run.id;
+      article.append(heading, detail);
+      target.append(article);
+    }
   } catch (error) {
-    app.innerHTML = '<main class="shell"><section class="hero"><p class="eyebrow">HISTÓRICO INDISPONÍVEL</p><h1>Não foi possível<br /><strong>consultar.</strong></h1><p class="description">' + escapeHtml(error.message || "Falha ao carregar histórico.") + '</p><button class="primary" id="history-retry" type="button">TENTAR NOVAMENTE</button><button class="back" id="history-home" type="button">VOLTAR AO GUIA</button></section></main>';
-    document.querySelector("#history-retry").addEventListener("click", () => void renderHistory());
-    document.querySelector("#history-home").addEventListener("click", renderHome);
+    target.textContent = error?.message || "Falha ao carregar o histórico.";
   }
 }
 
 function renderCapture() {
   if (!activeWorkspace?.id) { renderHome(); return; }
-  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>ATIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. A API registra e resolve o identificador no ambiente experimental. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
+  app.innerHTML = '<main class="shell"><header class="topbar"><button class="back" id="back" type="button">← VOLTAR AO GUIA</button><div class="status">WORKSPACE <span>ATIVO</span></div></header><section class="capture-stage"><p class="eyebrow">ETAPA 01 · OBSERVAÇÃO</p><div class="camera-frame"><video id="camera" playsinline muted></video><div class="scan-line"></div><div class="camera-hint" id="camera-status">Solicitando câmera...</div></div><form class="manual-form" id="manual-form"><label for="code">OU INFORME O CÓDIGO</label><div class="manual-row"><input id="code" name="code" autocomplete="off" placeholder="EAN / identificador" /><button type="submit">RESOLVER</button></div></form><p class="capture-note">A câmera observa. O ORC resolve. Se a câmera não estiver disponível, use a entrada manual.</p></section></main>';
   document.querySelector("#back").addEventListener("click", renderHome);
   captureAdapter = new BrowserCaptureAdapter({ videoElement: document.querySelector("#camera"), onStatus: handleCaptureStatus });
   document.querySelector("#manual-form").addEventListener("submit", async function (event) {
@@ -318,56 +340,79 @@ async function resolveInput(input) {
   stopCapture();
   renderProcessing();
   try {
-    updateProcessingStage("RESOLVING");
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) throw sessionError;
-    const token = sessionData?.session?.access_token;
-    if (!token) throw new Error("Sessão expirada. Entre novamente.");
-    if (!activeWorkspace?.id) throw new Error("Selecione um espaço de trabalho autorizado.");
-
-    const response = await fetch("/api/v1/resolve", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token
+    const pipeline = new ResolutionPipeline({
+      captureAdapter: {
+        async capture() {
+          return {
+            source: input.method === "barcode" ? "browser-camera" : "manual-entry",
+            modality: "identifier",
+            identifiers: [{ scheme: input.scheme, value: input.code }],
+            context: { capture_method: input.method, ...(input.glyphVersion ? { glyph: { version: input.glyphVersion, validation: "syntax-only" } } : {}) }
+          };
+        }
       },
-      body: JSON.stringify({
-        code: input.code,
-        scheme: input.scheme,
-        workspaceId: activeWorkspace.id,
-        captureMethod: input.method
-      })
+      entityRepository: catalog,
+      orcClient: client,
+      onStage: function (event) { updateProcessingStage(event.name); }
     });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      const message = response.status === 401 ? "Sua sessão expirou. Entre novamente."
-        : response.status === 403 ? "Você não tem acesso ativo a este espaço de trabalho."
-        : payload.message || payload.error || "Não foi possível resolver a observação.";
-      throw new Error(message);
+    const output = await pipeline.run({ input, context: {
+      operation: "identify_product",
+      interface: "web",
+      workspace: activeWorkspace ? { id: activeWorkspace.id, name: activeWorkspace.name, organization_id: activeWorkspace.organization_id, status: activeWorkspace.status } : null
+    } });
+    let persistence;
+    try {
+      persistence = await persistResolutionRun({ input, output });
+    } catch (error) {
+      persistence = { saved: false, error: error?.message || "Não foi possível salvar a execução." };
+      console.error("[3L0 Persistence] Resolution was computed but not persisted:", error);
     }
-    renderResult({
-      observation: payload.observation,
-      result: payload.result,
-      state: payload.state,
-      persistence: payload.persistence,
-      limitations: payload.limitations
-    });
+    renderResult(output, persistence);
   } catch (error) { renderError(error); }
+}
+
+async function persistResolutionRun({ input, output }) {
+  const { data, error: sessionError } = await supabase.auth.getSession();
+  const token = data?.session?.access_token;
+  if (sessionError || !token) throw new Error("Sessão expirada. Entre novamente para salvar a execução.");
+  if (!activeWorkspace?.id) throw new Error("Selecione um workspace autorizado antes de salvar a execução.");
+
+  const response = await fetch("/api/resolution-runs", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({
+      workspaceId: activeWorkspace.id,
+      input: { scheme: input.scheme, code: input.code, method: input.method },
+      output: {
+        observation: output.observation,
+        result: output.result,
+        state: output.state
+      }
+    })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || "Falha ao persistir a execução.");
+  return { saved: true, id: payload.run?.id };
 }
 
 function renderProcessing() { app.innerHTML = '<main class="shell"><section class="hero processing" aria-live="polite" aria-busy="true"><p class="eyebrow">PROCESSAMENTO</p><div class="result-icon processing-icon">◌</div><h1>Resolvendo<br /><strong>observação.</strong></h1><p class="description" id="stage">Capturando...</p></section></main>'; }
 function updateProcessingStage(stage) { const target = document.querySelector("#stage"); if (!target) return; const labels = { CAPTURING: "Capturando...", OBSERVING: "Representando observação...", NORMALIZING: "Normalizando evidências...", RESOLVING: "Consultando resolução...", RESOLVED: "Projetando estado operacional...", COMPLETED: "Concluído." }; target.textContent = labels[stage] || stage; }
 
-function renderResult(output) {
+function renderResult(output, persistence = { saved: false, error: "Persistência não confirmada." }) {
   const result = output.result;
-  const stateValue = typeof output.state === "string" ? output.state : (output.state?.state || output.state?.status || result.status);
-  const state = String(stateValue || "UNCERTAIN").toUpperCase();
+  const state = output.state;
   const resolved = result.status === "RESOLVED";
-  if (resolved) resolutions += 1;
-  const entity = resolved && Array.isArray(result.entities) ? result.entities[0] : null;
-  const persistenceText = output.persistence?.persisted ? "Registro salvo no histórico do espaço de trabalho" : "Registro não persistido";
-  const limitations = Array.isArray(output.limitations) ? output.limitations.join("; ") : "Ambiente experimental";
-  app.innerHTML = '<main class="shell"><section class="hero" aria-live="polite"><p class="eyebrow">' + (resolved ? "CORRESPONDÊNCIA ENCONTRADA" : "REVISÃO NECESSÁRIA") + '</p><div class="result-icon ' + state.toLowerCase() + '">' + (resolved ? "✓" : "!") + '</div><h1>' + (resolved ? "Produto<br /><strong>identificado.</strong>" : "Precisamos<br /><strong>verificar.</strong>") + '</h1><div class="result-card"><div><span>RESULTADO</span><strong>' + (resolved ? "Correspondência encontrada" : state === "CONFLICT" ? "Informações em conflito" : ["UNCERTAIN","INSUFFICIENT_EVIDENCE"].includes(state) ? "Informações insuficientes" : "Revisão necessária") + '</strong></div><div><span>PERSISTÊNCIA</span><strong>' + persistenceText + '</strong></div><div><span>ITEM CORRESPONDENTE</span><strong>' + (entity || "Ainda não identificado") + '</strong></div></div><p class="capture-note">Resultado experimental. O resolvedor atual usa um catálogo sintético e regras determinísticas; isso não confirma autenticidade nem identidade física. Limitações: ' + limitations + '. Revise antes de tomar uma decisão operacional.</p><button class="primary" id="again" type="button">VOLTAR AO GUIA</button></section></main>';
+  if (resolved && persistence.saved) resolutions += 1;
+  const persistenceLabel = persistence.saved
+    ? "Salvo no servidor · " + String(persistence.id || "").slice(0, 8)
+    : "NÃO SALVO · " + (persistence.error || "Falha de persistência");
+  const persistenceNotice = persistence.saved
+    ? "A execução foi registrada no servidor para este workspace. O resultado continua limitado às evidências e regras disponíveis."
+    : "ATENÇÃO: a resolução foi calculada, mas não foi confirmada a gravação no servidor. Não trate esta execução como registrada. " + (persistence.error || "");
+  app.innerHTML = '<main class="shell"><section class="hero" aria-live="polite"><p class="eyebrow">' + (resolved ? "CORRESPONDÊNCIA ENCONTRADA" : "REVISÃO NECESSÁRIA") + '</p><div class="result-icon ' + state.toLowerCase() + '">' + (resolved ? "✓" : "!") + '</div><h1>' + (resolved ? "Produto<br /><strong>identificado.</strong>" : "Precisamos<br /><strong>verificar.</strong>") + '</h1><div class="result-card"><div><span>RESULTADO</span><strong>' + (resolved ? "Correspondência encontrada" : state === "CONFLICT" ? "Informações em conflito" : state === "UNCERTAIN" ? "Informações insuficientes" : "Revisão necessária") + '</strong></div><div><span>CONTEXTO</span><strong>Catálogo local de demonstração</strong></div><div><span>ITEM CORRESPONDENTE</span><strong>' + (resolved ? result.entities[0] : "Ainda não identificado") + '</strong></div><div><span>PERSISTÊNCIA</span><strong>' + persistenceLabel + '</strong></div></div><p class="capture-note">' + persistenceNotice + ' O catálogo de produtos continua local nesta versão; persistir esta execução não significa que o catálogo foi sincronizado com o servidor nem confirma a identidade física do produto. Revise as informações antes de tomar uma decisão operacional.</p><button class="primary" id="again" type="button">VOLTAR AO GUIA</button></section></main>';
   document.querySelector("#again").addEventListener("click", renderHome);
 }
 
