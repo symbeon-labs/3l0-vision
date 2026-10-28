@@ -1,16 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+/* Font import is intentionally kept at the top of the stylesheet. */500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
+/* Canonical Dark Signal tokens: one source of truth for all screens. */
 :root {
-  --bg: #080808;
-  --surface: #111111;
-  --surface-2: #171717;
-  --text: #f4f4f4;
-  --muted: #8c8c8c;
-  --line: #292929;
-  --cyan: #2de2e6;
-  --green: #67e06f;
-  --amber: #f2b84b;
-  --red: #ef5b5b;
+  color-scheme: dark;
+  --bg: #080a0c;
+  --surface: #111519;
+  --surface-2: #171d22;
+  --surface-glass: rgb(17 21 25 / 92%);
+  --text: #f4f7f8;
+  --muted: #a0adb2;
+  --line: #2b363b;
+  --cyan: #78dce1;
+  --green: #a9e6b5;
+  --amber: #f2c879;
+  --red: #ff777f;
+  --blue: #9ab4ff;
+  --signal: #a9e6b5;
+  --focus-ring: 0 0 0 3px rgb(120 220 225 / 24%);
 }
 
 * { box-sizing: border-box; }
@@ -372,21 +378,7 @@ footer {
 /* Portal visual language integration — layered over the existing functional styles. */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
-:root {
-  --bg: #0b1220;
-  --surface: #111c2e;
-  --surface-2: #15243a;
-  --text: #f2f6fc;
-  --muted: #a8b6c9;
-  --line: #293950;
-  --cyan: #6be2e8;
-  --green: #b5e6bf;
-  --amber: #f0c98a;
-  --red: #ff777f;
-  --blue: #86a9ff;
-  --surface-glass: rgb(17 28 46 / 88%);
-  --focus-ring: 0 0 0 3px rgb(107 226 232 / 22%);
-}
+/* Tokens are defined once at the top of this file. */
 
 html {
   scroll-behavior: smooth;
