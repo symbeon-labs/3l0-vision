@@ -16,13 +16,14 @@ PR #40 must not merge visual CSS changes into an unstable functional baseline. I
 | [#14](https://github.com/symbeon-labs/3l0-vision/pull/14), [#15](https://github.com/symbeon-labs/3l0-vision/pull/15) | Inventory contracts and repository | Merged; repository and tests are present on main | Foundation exists, but it is local-storage-compatible domain code, not server-authorized multi-tenant inventory. |
 | [#16](https://github.com/symbeon-labs/3l0-vision/pull/16) | Inventory operational UI | Open Draft; based on `feat/inventory-repository-balances`, not current `main`; fixed `local-demo` and browser localStorage | Do not merge as-is. Audit found mixed-unit total, no product-review gate, no negative-stock guard, and no server authorization/audit. Rebuild narrowly on current main only if inventory is in scope. |
 | [#17](https://github.com/symbeon-labs/3l0-vision/pull/17) | Workspace onboarding / Case 01 activation | Merged; README + documentation | No longer a merge blocker. Verify wording only if implementation boundaries change. |
-| [#35](https://github.com/symbeon-labs/3l0-vision/pull/35) | Vertical-slice acceptance contract | Open Draft; useful gates, but current baseline/order needs updating | Keep as acceptance reference; update current PR references and link each gate to executable tests/evidence. |
+| [#35](https://github.com/symbeon-labs/3l0-vision/pull/35) | Vertical-slice acceptance contract | Closed as superseded by #45 after base advanced | Use #45 for the current-main version of the acceptance contract. |
 | [#36](https://github.com/symbeon-labs/3l0-vision/pull/36) | Camera capture + local fiscal XML UI | Closed as superseded after direct comparison; functionality already present on main | Do not reopen wholesale. Create a narrow current-main PR only for a demonstrated missing behavior. No OCR/upload/fiscal-authenticity claims. |
 | [#41](https://github.com/symbeon-labs/3l0-vision/pull/41) | Case 01 evidence execution plan | Closed as superseded by #44 | Use merged #44 as the canonical plan. |
 | [#40](https://github.com/symbeon-labs/3l0-vision/pull/40) | Visual system + handoff/audit | Open Draft; current visual implementation is intentionally frozen | Keep this PR documentation/gating only. Reconcile functional baseline first, then make a narrow visual implementation PR. |
 | [#43](https://github.com/symbeon-labs/3l0-vision/pull/43) | Production checkpoint / camera-OCR gate | Merged; roadmap records deployment/test checkpoint and explicitly leaves real camera/OCR unverified | Keep the boundary explicit; deploy readiness and synthetic tests do not validate real camera/OCR. |
 
 | [#44](https://github.com/symbeon-labs/3l0-vision/pull/44) | Case 01 evidence execution plan | Merged; current-main documentation-only plan, CI passed | Canonical execution plan. Keep implementation status bounded to verified behavior. |
+| [#45](https://github.com/symbeon-labs/3l0-vision/pull/45) | Vertical-slice acceptance contract | Open Draft; rebased on current main, CI pending | Canonical candidate for acceptance gates; do not merge until current-SHA CI passes and review is complete. |
 
 ## Consolidation order
 
