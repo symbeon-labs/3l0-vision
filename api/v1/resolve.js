@@ -24,8 +24,9 @@ function createDemoRepository() {
       ));
     },
     async persistResolution() {
-      // The API intentionally does not claim durable persistence in Gate 1.
-      return { persisted: false, storage: "none" };
+      // The durable operation record is written once the pipeline has returned,
+      // so unresolved/conflicting outcomes are also retained for review.
+      return { persisted: false, storage: "deferred-to-api" };
     }
   };
 }
@@ -101,18 +102,32 @@ export default async function handler(req, res) {
         workspace_role: membership.role
       }
     });
+
+    const resolutionId = output.result.resolution_id;
+    const { error: persistenceError } = await client.from("resolution_runs").insert({
+      workspace_id: workspaceId,
+      user_id: user.id,
+      resolution_id: resolutionId,
+      status: output.result.status,
+      state: output.state,
+      input_scheme: scheme,
+      input_code: code,
+      observation: output.observation,
+      result: output.result
+    });
+    if (persistenceError) throw persistenceError;
+
     return sendJson(res, 200, {
       apiVersion: "v1",
-      resolutionId: output.result.resolution_id,
+      resolutionId,
       status: output.result.status,
       state: output.state,
       observation: output.observation,
       result: output.result,
-      persistence: { persisted: false, mode: "ephemeral-demo" },
+      persistence: { persisted: true, mode: "supabase-resolution-runs" },
       limitations: [
         "deterministic local matching only",
         "synthetic in-memory catalog",
-        "no durable persistence or shared history",
         "no external ORC, OCR, model provider, or ERP/WMS integration"
       ]
     });
