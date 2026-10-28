@@ -109,6 +109,34 @@ test("capture failure remains a technical error", () => {
   assert.equal(result.status, "TECHNICAL_ERROR");
 });
 
+test("missing document identifier requires review", () => {
+  const result = deterministicResolver(request({
+    receiving: receiving({ document_line: { ...receiving().document_line, gtin: null } })
+  }));
+  assert.equal(result.status, "REVIEW_REQUIRED");
+  assert.ok(result.requires_verification.some(item => item.type === "document_identifier_missing"));
+});
+
+test("missing quantity evidence requires review", () => {
+  const result = deterministicResolver(request({
+    receiving: receiving({
+      document_line: { ...receiving().document_line, quantity: null }
+    })
+  }));
+  assert.equal(result.status, "REVIEW_REQUIRED");
+  assert.ok(result.requires_verification.some(item => item.type === "quantity_evidence_missing"));
+});
+
+test("missing unit evidence requires review", () => {
+  const result = deterministicResolver(request({
+    receiving: receiving({
+      physical_observation: { ...receiving().physical_observation, unit_observed: null }
+    })
+  }));
+  assert.equal(result.status, "REVIEW_REQUIRED");
+  assert.ok(result.requires_verification.some(item => item.type === "unit_evidence_missing"));
+});
+
 test("empty server catalog candidates return not found", () => {
   const result = deterministicResolver(request({
     receiving: receiving({ catalog_candidates: [] })
