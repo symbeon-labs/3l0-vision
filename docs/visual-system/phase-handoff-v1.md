@@ -2,7 +2,7 @@
 
 **Documento de continuidade:** PR #40  
 **Branch de referência:** `ui/3l0-visual-system-v1`  
-**Estado:** handoff para execução; não representa aprovação de merge nem validação de runtime.  
+**Estado:** implementação visual incremental em andamento; não representa aprovação de merge nem validação de runtime.  
 **Produto:** 3L0 Vision — identidade visual aplicada à experiência operacional existente.
 
 ## 1. Objetivo da nova fase
@@ -20,12 +20,13 @@ A meta não é copiar literalmente um mockup. É traduzir a direção visual par
 
 ## 2. O que a PR #40 já entrega
 
-A PR #40 aplica uma primeira camada em `app/styles.css`:
-- tokens de fundo, superfícies, bordas, texto secundário e cor de sinal;
-- fundo com profundidade sutil;
-- refinamento de cartões, botões e estados de interação;
-- foco visível para teclado e campos de formulário;
-- suporte a `prefers-reduced-motion`.
+A PR #40 começou pela consolidação da base visual em `app/styles.css`:
+- importação de fontes mantida no topo da folha;
+- um único bloco canônico `:root`, com tokens Dark Signal para fundo, superfícies, texto, borda, sinal e estados;
+- remoção do bloco `:root` concorrente que sobrescrevia a paleta inicial;
+- preservação das regras existentes de foco visível e `prefers-reduced-motion`.
+
+Essa é uma primeira fatia de implementação. A aplicação visual tela a tela, a inspeção em navegador real e a validação de acessibilidade/responsividade continuam pendentes.
 
 Essa alteração não modifica autenticação, workspaces, resolução, persistência, captura, parser XML ou contratos de domínio.
 
@@ -127,4 +128,4 @@ Quando houver conflito, prevalecem as fronteiras de domínio, segurança e evid�
 
 **Próxima unidade de trabalho:** uma PR de implementação visual incremental, baseada na auditoria da interface real e vinculada a este handoff. Manter a PR #40 como origem da direção visual; não incorporar refatorações de domínio ou integrações no mesmo escopo.
 
-**Status deste handoff:** planejamento pronto para execução. A auditoria visual completa, os testes e a revisão em dispositivos permanecem pendentes.
+**Status deste handoff:** primeira fatia de tokens consolidada na branch da PR #40. A auditoria visual completa, os testes do novo SHA e a revisão em dispositivos permanecem pendentes.
