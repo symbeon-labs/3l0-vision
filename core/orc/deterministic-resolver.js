@@ -75,19 +75,19 @@ function evaluateReceivingConsistency(request) {
     });
   }
 
-  if (candidates.length === 0) {
-    return receivingResult(request, "NOT_FOUND", {
-      uncertainties: [{ type: "catalog_item_not_found" }]
-    });
-  }
-
   const declaredGtin = normalize(documentLine.gtin);
   const observedBarcode = normalize(physical.barcode);
   const capturedIdentifiers = request.observations.flatMap(
     (observation) => observation.identifiers ?? []
   ).map((identifier) => normalize(identifier.value)).filter(Boolean);
 
-  if (declaredGtin && !observedBarcode) {
+  if (!declaredGtin) {
+    return receivingResult(request, "REVIEW_REQUIRED", {
+      requiresVerification: [{ type: "document_identifier_missing" }]
+    });
+  }
+
+  if (!observedBarcode) {
     return receivingResult(request, "REVIEW_REQUIRED", {
       requiresVerification: [{
         type: "physical_identifier_missing",
@@ -97,22 +97,25 @@ function evaluateReceivingConsistency(request) {
     });
   }
 
-  if (declaredGtin && observedBarcode && declaredGtin !== observedBarcode) {
+  if (declaredGtin !== observedBarcode) {
     return receivingResult(request, "CONFLICT", {
       conflicts: [{ type: "document_physical_identifier_mismatch" }]
     });
   }
 
-  if (observedBarcode && capturedIdentifiers.length > 0 &&
-      !capturedIdentifiers.includes(observedBarcode)) {
+  if (capturedIdentifiers.length > 0 && !capturedIdentifiers.includes(observedBarcode)) {
     return receivingResult(request, "CONFLICT", {
       conflicts: [{ type: "capture_context_identifier_mismatch", observed: observedBarcode }]
     });
   }
 
-  if (Number.isFinite(documentLine.quantity) &&
-      Number.isFinite(physical.quantity_observed) &&
-      documentLine.quantity !== physical.quantity_observed) {
+  if (!Number.isFinite(documentLine.quantity) || !Number.isFinite(physical.quantity_observed)) {
+    return receivingResult(request, "REVIEW_REQUIRED", {
+      requiresVerification: [{ type: "quantity_evidence_missing" }]
+    });
+  }
+
+  if (documentLine.quantity !== physical.quantity_observed) {
     return receivingResult(request, "CONFLICT", {
       conflicts: [{ type: "quantity_mismatch", declared: documentLine.quantity, observed: physical.quantity_observed }]
     });
@@ -120,7 +123,12 @@ function evaluateReceivingConsistency(request) {
 
   const declaredUnit = normalize(documentLine.unit);
   const observedUnit = normalize(physical.unit_observed);
-  if (declaredUnit && observedUnit && declaredUnit !== observedUnit) {
+  if (!declaredUnit || !observedUnit) {
+    return receivingResult(request, "REVIEW_REQUIRED", {
+      requiresVerification: [{ type: "unit_evidence_missing", declared: declaredUnit || null, observed: observedUnit || null }]
+    });
+  }
+  if (declaredUnit !== observedUnit) {
     return receivingResult(request, "REVIEW_REQUIRED", {
       requiresVerification: [{ type: "unit_mismatch", declared: declaredUnit, observed: observedUnit }]
     });
@@ -133,6 +141,12 @@ function evaluateReceivingConsistency(request) {
       declaredPack.amount !== observedPack.amount) {
     return receivingResult(request, "CONFLICT", {
       conflicts: [{ type: "pack_description_mismatch", declared: declaredPack, observed: observedPack }]
+    });
+  }
+
+  if (candidates.length === 0) {
+    return receivingResult(request, "NOT_FOUND", {
+      uncertainties: [{ type: "catalog_item_not_found" }]
     });
   }
 
