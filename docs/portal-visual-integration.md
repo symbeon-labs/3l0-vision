@@ -1,42 +1,68 @@
 # Integração visual — 3L0 Portal → 3L0 Vision
 
-**Data:** 21/10/2026  
-**Status:** mergeado em main pela PR #8 (commit 839a76d8f7b5c0348f7fae9e66345907096a600b). O preview Vercel foi reportado como Ready; o deploy de produção e a verificação visual pós-merge ainda precisam ser confirmados.
+**Estado do documento:** diretriz de alinhamento evolutiva.  
+**Escopo:** identidade e experiência pública; não altera contratos funcionais nem comprova publicação.
 
 ## Objetivo
 
-Alinhar a interface operacional do 3L0 Vision à linguagem institucional do 3L0 Portal sem transformar a aplicação em uma cópia da landing page e sem alterar os contratos funcionais do fluxo.
+Manter uma identidade reconhecível entre o Portal institucional e a aplicação Vision, preservando a função de cada superfície:
 
-## Fonte visual
+- **Portal:** apresenta a tese, o contexto operacional, os cenários de aplicação e o estado de maturidade.
+- **Vision:** conduz a tarefa operacional e mostra evidências, estados, incertezas e próximas ações.
+- **Repositórios:** preservam especificações, decisões, implementação e evidências de validação.
 
-A referência é a página pública do repositório `symbeon-labs/3l0-portal`, especialmente `index.html`. A integração preserva a identidade operacional documentada em `docs/brand.md`, `docs/brand-board.md` e `docs/design-tokens.md`.
+O Portal não deve virar uma cópia da aplicação; a aplicação não deve parecer uma landing page de marketing.
 
-## Elementos alinhados
+## Fontes de verdade
 
-- Fundo azul-marinho quase preto com gradientes discretos.
-- Superfícies em camadas, bordas estruturais finas e cartões arredondados.
-- Inter para interface e JetBrains Mono para códigos, estados e metadados.
-- Ciano para captura/observação; verde para resolução; âmbar para atenção; vermelho para conflito.
-- Botões, campos, estados de foco e cartões com contraste e hierarquia consistentes.
-- Layout responsivo para desktop e mobile, incluindo formulário de entrada, resultado e tela de câmera.
-- Respeito a `prefers-reduced-motion` e foco visível por teclado.
+- Identidade e voz: [`docs/brand.md`](./brand.md).
+- Direção visual: [`docs/brand-board.md`](./brand-board.md).
+- Semântica de tokens: [`docs/design-tokens.md`](./design-tokens.md).
+- Evolução conjunta da marca e do Portal: [`docs/brand-evolution-v1.md`](./brand-evolution-v1.md).
+- Implementação institucional: repositório `symbeon-labs/3l0-portal`, arquivo `index.html`.
+- Implementação visual operacional: `app/styles.css`.
 
-## Limites da mudança
+## Elementos compartilhados
 
-Esta é uma integração visual em CSS. Não altera o pipeline de resolução, os contratos de observação, o catálogo, a validação sintática Glyph nem a fronteira de integração ORC. A aparência não implica que funções experimentais tenham sido validadas em campo.
+- Fundo quase preto/azul-marinho, superfícies em camadas e divisores discretos.
+- Inter para texto de interface e JetBrains Mono para identificadores, códigos e metadados.
+- Ciano para observação/captura; verde para resolução confirmada; âmbar para atenção; vermelho para conflito não resolvido.
+- Contraste legível, hierarquia tipográfica clara, foco visível e controles com affordance explícita.
+- Layout responsivo, sem depender de hover para ações essenciais.
+- Movimento com função; respeitar `prefers-reduced-motion`.
+- Marca segmentada 3L0 usada com consistência, sem transformar o zero em ornamento sem significado.
 
-## Validação pós-merge e produção
+## Diferenças intencionais
 
-1. Executar os testes existentes do repositório.
-2. Verificar a página inicial, câmera, entrada manual, processamento, resultados `RESOLVED`, `UNCERTAIN` e `CONFLICT`.
-3. Conferir desktop e mobile, teclado/foco e preferência por movimento reduzido.
-4. Confirmar que a configuração de build/deploy da interface produz os artefatos esperados.
-5. Confirmar que a produção aponta para o commit mergeado, abrir a URL canônica publicada e validar os fluxos visualmente.
+| Portal institucional | Aplicação Vision |
+|---|---|
+| Explica a tese e o valor operacional | Prioriza a tarefa em andamento |
+| Mostra cenários possíveis com limites explícitos | Mostra apenas estados e ações existentes no fluxo |
+| Pode usar composições editoriais e demonstrações conceituais identificadas | Deve diferenciar dados reais, sintéticos, exemplos e resultados experimentais |
+| CTA leva ao ambiente experimental, sem prometer acesso | A interface deve comunicar autenticação, disponibilidade e erros reais |
+| Linguagem orientada a contexto e compreensão | Linguagem curta, operacional e acionável |
 
-## Fonte e implementação
+## Regras editoriais e de produto
 
-- Referência institucional: `symbeon-labs/3l0-portal/index.html`.
-- Regras de marca: `docs/brand.md`.
-- Board de marca: `docs/brand-board.md`.
-- Semântica dos tokens: `docs/design-tokens.md`.
-- Implementação desta integração: `app/styles.css`.
+1. Não anunciar como disponível uma função que está apenas desenhada, planejada ou em integração.
+2. Não confundir extração de texto com validação fiscal, correspondência com identidade física ou build com segurança operacional.
+3. Não afirmar integração ERP/WMS, persistência compartilhada, precisão, economia ou uso em campo sem evidência específica.
+4. Quando uma demonstração for conceitual ou usar dados sintéticos, identificá-la de modo visível.
+5. Explicitar incerteza e conflito; nunca colorir um resultado como resolvido sem base no estado real.
+6. Não publicar detalhes proprietários, segredos, dados sensíveis ou conteúdo privado de pesquisa no Portal.
+
+## Checklist de validação
+
+- [ ] Logotipo, símbolo, tipografia e cores seguem as fontes de verdade.
+- [ ] A hierarquia funciona em desktop e dispositivos móveis.
+- [ ] Links, navegação por teclado e foco visível funcionam.
+- [ ] Contraste e legibilidade foram conferidos.
+- [ ] Movimento reduzido é respeitado.
+- [ ] A demonstração está rotulada como conceitual quando não executa processamento real.
+- [ ] Alegações públicas correspondem ao estado comprovado do produto.
+- [ ] Testes visuais foram executados e registrados; se não foram, permanecem explicitamente pendentes.
+- [ ] Deploy publicado foi confirmado separadamente da revisão de código.
+
+## Limites
+
+Este documento orienta a coerência visual e editorial. Não altera pipeline de resolução, contratos de observação, catálogo, validação Glyph, fronteira de integração ORC, autenticação ou autorização. Aparência consistente não comprova que capacidades experimentais foram validadas em campo.

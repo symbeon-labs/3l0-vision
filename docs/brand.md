@@ -128,8 +128,52 @@ over: anthropomorphic or vague failure language.
 
 Its visual identity belongs to **operational resolution**.
 
+## Public narrative and product maturity
+
+The public-facing narrative follows the same principle as the interface: make the operational process understandable without implying certainty that the system has not earned.
+
+### Institutional layer — Portal
+
+The Portal explains the product thesis, operational context, possible use cases and current maturity. It is not the operational application and must not suggest that its illustrations execute real processing.
+
+Preferred framing:
+- **Core thesis:** make the physical world computable.
+- **Operational expression:** connect observations, digital evidence and information systems.
+- **Product value:** organize evidence, surface discrepancies and support a traceable next step.
+- **Human role:** keep review and authorization visible wherever evidence is incomplete or conflicting.
+
+### Application layer — Vision
+
+The Vision is the experimental operational surface. It should prioritize task, evidence, state, uncertainty and next action over marketing copy. A link to the application does not guarantee access, availability or production readiness.
+
+### Maturity language
+
+Every public claim must fit one of these categories:
+- **Available and verified:** directly accessible and checked in the referenced environment.
+- **Experimental:** available for bounded testing, with limitations disclosed.
+- **In development / validation:** being implemented or tested; not a production guarantee.
+- **Planned:** an intended direction, not a current capability.
+
+Do not present OCR coverage, fiscal validation, physical identity, ERP/WMS connectivity, shared persistence, security guarantees, performance gains or field results as proven without specific evidence for the relevant environment and workflow.
+
+### Cross-surface consistency
+
+- The Portal can explain the vision; the Vision must show the actual state of the workflow.
+- Use the same terms for capture, evidence, comparison, discrepancy, review and resolution.
+- Visual polish is not evidence of functional maturity.
+- State colors must reflect actual state, not be used as promotional emphasis.
+- Keep product claims calm, bounded and verifiable.
+
 ## Brand-board reference
 
 The approved direction is a dark, structured identity board containing the primary wordmark, application symbol, logo variations, segmented-zero studies, typography, state palette, system icons, and capture/processing/resolved/attention/conflict screens.
 
 The board is a visual reference for implementation; it does not replace the semantic product specifications.
+
+## Dark Signal — referência visual aplicada
+
+A direção visual concreta do Vision usa superfícies frias quase pretas, estrutura discreta e sinais cromáticos funcionais. A primeira consolidação proposta na PR #40 definiu os valores de referência: fundo `#080a0c`, superfícies `#111519`/`#171d22`, texto `#f4f7f8`, texto secundário `#a0adb2`, borda `#2b363b`, ciano `#78dce1`, verde `#a9e6b5`, âmbar `#f2c879` e vermelho `#ff777f`.
+
+A regra estrutural é tão importante quanto a paleta: **um único bloco canônico de tokens por folha CSS** e a importação tipográfica no topo. Não permitir camadas concorrentes que redefinam cores e tornem o estado efetivo imprevisível. Ver [Design Tokens](./design-tokens.md) para valores e limites completos.
+
+Esta é a direção registrada para implementação, não uma declaração de que a PR #40 foi mesclada ou de que a revisão visual final foi concluída.
