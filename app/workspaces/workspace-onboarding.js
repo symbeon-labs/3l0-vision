@@ -28,6 +28,12 @@ export function renderWorkspaceOnboarding({ app, onBack, supabase }) {
         <h2 id="workspace-session-title">Validando sessão…</h2>
         <p id="workspace-session-status" class="workspace-help" role="status">A sessão é herdada da autenticação principal do 3L0 Vision.</p>
       </section>
+      <section class="workspace-card workspace-invitation-notice" role="status">
+        <p class="eyebrow">ACESSO CONTROLADO</p>
+        <h2>Workspace mediante convite.</h2>
+        <p>O cadastro operacional depende de um escopo de piloto previamente acordado e de um convite emitido pela equipe responsável. Não crie espaços com dados reais por autoatendimento.</p>
+        <p>Se você já possui convite, entre com a conta associada a ele. Para solicitar acesso, utilize o canal de contato institucional combinado com a equipe do piloto.</p>
+      </section>
       <form id="workspace-form" class="workspace-form" novalidate>
         <section class="workspace-card">
           <p class="eyebrow">01 · CONTEXTO</p>
@@ -65,6 +71,7 @@ export function renderWorkspaceOnboarding({ app, onBack, supabase }) {
 
   const $ = (selector) => app.querySelector(selector);
   const form = $("#workspace-form");
+  if (form) form.hidden = true;
   const errors = $("#workspace-errors");
   const list = $("#workspace-list");
   const submit = $("#workspace-submit");
@@ -120,7 +127,7 @@ export function renderWorkspaceOnboarding({ app, onBack, supabase }) {
     review.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  form.addEventListener("submit", async (event) => {
+  if (form) form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!session?.access_token) return showError("A sessão expirou. Entre novamente na aplicação.");
     const data = new FormData(form);
