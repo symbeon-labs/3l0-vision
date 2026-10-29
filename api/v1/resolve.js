@@ -32,6 +32,42 @@ function createDemoRepository() {
   };
 }
 
+
+export function buildResolutionContext({
+  operation,
+  receivingInput,
+  receivingDocumentLine = {},
+  receivingPhysicalObservation = {},
+  requestId,
+  userId,
+  workspaceId,
+  workspaceRole
+}) {
+  const context = {
+    operation,
+    interface: "3l0-vision-api",
+    request_id: requestId,
+    user_id: userId,
+    workspace_id: workspaceId,
+    workspace_role: workspaceRole
+  };
+  if (operation === "receive_goods" && receivingInput) {
+    const receivingIdentifiers = [receivingDocumentLine.gtin, receivingPhysicalObservation.barcode]
+      .filter(value => typeof value === "string")
+      .map(value => value.trim())
+      .filter(Boolean);
+    context.receiving = {
+      document_line: receivingDocumentLine,
+      physical_observation: receivingPhysicalObservation,
+      // Candidate identities come from the server-side catalog, never the request body.
+      catalog_candidates: demoEntities.filter(entity =>
+        entity.identifiers.some(identifier => receivingIdentifiers.includes(String(identifier.value).trim()))
+      )
+    };
+  }
+  return context;
+}
+
 function parseBody(body) {
   if (body && typeof body === "object" && !Buffer.isBuffer(body)) return body;
   if (typeof body === "string") {
@@ -114,24 +150,16 @@ export default async function handler(req, res) {
     });
     const output = await pipeline.run({
       input: { code, scheme, method: "api" },
-      context: {
+      context: buildResolutionContext({
         operation,
-        interface: "3l0-vision-api",
-        request_id: randomUUID(),
-        user_id: user.id,
-        workspace_id: workspaceId,
-        workspace_role: membership.role,
-        ...(operation === "receive_goods" && receivingInput ? {
-          receiving: {
-            document_line: receivingDocumentLine,
-            physical_observation: receivingPhysicalObservation,
-            // Candidate identities come from the server-side catalog, never the request body.
-            catalog_candidates: demoEntities.filter(entity =>
-              entity.identifiers.some(identifier => receivingIdentifiers.includes(String(identifier.value).trim()))
-            )
-          }
-        } : {})
-      }
+        receivingInput,
+        receivingDocumentLine,
+        receivingPhysicalObservation,
+        requestId: randomUUID(),
+        userId: user.id,
+        workspaceId,
+        workspaceRole: membership.role
+      })
     });
 
     const resolutionId = output.result.resolution_id;
