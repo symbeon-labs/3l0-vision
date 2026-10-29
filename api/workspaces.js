@@ -15,6 +15,13 @@ export default async function handler(req, res) {
       return sendJson(res, 200, { workspaces: (data || []).filter((row) => row.workspace).map((row) => ({ ...row.workspace, role: row.role })) });
     }
 
+    // Workspace creation is restricted to the contract/invitation workflow.
+    // Do not let any authenticated account self-provision an operational scope.
+    return sendJson(res, 403, {
+      error: "invitation_required",
+      message: "A criação de workspace exige convite e escopo de piloto previamente autorizado."
+    });
+
     const body = req.body && typeof req.body === "object" ? req.body : {};
     const clean = (value, max) => typeof value === "string" ? value.trim().slice(0, max) : "";
     const input = {
