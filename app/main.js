@@ -32,31 +32,27 @@ function setActiveWorkspace(workspace) {
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-function renderAuth(message = "", mode = "signin") {
+function renderAuth(message = "") {
   stopCapture();
-  const signup = mode === "signup";
   app.innerHTML = `
     <main class="shell auth-shell">
       <header class="topbar"><a class="brand-mark" href="/" aria-label="3L0 Vision">3L0<span class="brand-dot">.</span></a><div class="status">ACESSO <span>SEGURO</span></div></header>
       <section class="auth-panel">
         <p class="eyebrow">3L0 VISION · AMBIENTE EXPERIMENTAL</p>
-        <h1>${signup ? "Criar acesso." : "Bem-vindo<br /><strong>de volta.</strong>"}</h1>
-        <p class="description">${signup ? "Crie sua conta para acessar o ambiente experimental de conferência e identificação." : "Entre para continuar sua conferência de mercadorias."}</p>
+        <h1>Bem-vindo<br /><strong>de volta.</strong></h1>
+        <p class="description">Entre com a conta vinculada ao convite e ao escopo autorizado do piloto.</p>
         <form class="auth-form" id="auth-form">
-          ${signup ? '<label for="full-name">NOME</label><input id="full-name" name="fullName" autocomplete="name" maxlength="120" required />' : ""}
           <label for="auth-email">E-MAIL</label>
           <input id="auth-email" name="email" type="email" autocomplete="email" required />
           <label for="auth-password">SENHA</label>
-          <input id="auth-password" name="password" type="password" autocomplete="${signup ? "new-password" : "current-password"}" minlength="8" required />
+          <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="8" required />
           <p class="auth-message" id="auth-message" role="status" aria-live="polite">${message}</p>
-          <button class="primary auth-submit" type="submit">${signup ? "CRIAR CONTA" : "ENTRAR"}</button>
+          <button class="primary auth-submit" type="submit">ENTRAR</button>
         </form>
-        <button class="auth-switch" id="auth-switch" type="button">${signup ? "Já tem acesso? Entrar" : "Primeiro acesso? Criar conta"}</button>
         ${!signup ? '<button class="auth-switch" id="auth-reset" type="button">Esqueci minha senha</button>' : ""}
-        <p class="auth-footnote">Acesso protegido por Supabase Auth. Os dados de cada espaço dependem das permissões verificadas no banco.</p>
+        <p class="auth-footnote">Acesso por convite. A conta precisa ter associação ativa ao workspace autorizado; a autenticação sozinha não concede acesso aos dados.</p>
       </section>
     </main>`;
-  document.querySelector("#auth-switch").addEventListener("click", () => renderAuth("", signup ? "signin" : "signup"));
   const reset = document.querySelector("#auth-reset");
   if (reset) reset.addEventListener("click", async () => {
     const email = document.querySelector("#auth-email").value.trim();
@@ -77,15 +73,8 @@ function renderAuth(message = "", mode = "signin") {
     submit.disabled = true;
     target.textContent = signup ? "Criando sua conta…" : "Verificando seu acesso…";
     try {
-      const result = signup
-        ? await supabase.auth.signUp({ email, password, options: { data: { full_name: String(form.get("fullName") || "").trim() } } })
-        : await supabase.auth.signInWithPassword({ email, password });
+      const result = await supabase.auth.signInWithPassword({ email, password });
       if (result.error) throw result.error;
-      if (signup && !result.data.session) {
-        target.textContent = "Conta criada. Confira seu e-mail para confirmar o cadastro antes de entrar.";
-        submit.disabled = false;
-        return;
-      }
       authUser = result.data.user;
       renderHome();
     } catch (error) {
