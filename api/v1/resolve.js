@@ -112,11 +112,6 @@ export default async function handler(req, res) {
     if (!workspaceId || workspaceId.length > 128) {
       return sendJson(res, 400, { error: "workspace_required", message: "Selecione um workspace autorizado." });
     }
-    const receivingIdentifiers = [receivingDocumentLine.gtin, receivingPhysicalObservation.barcode]
-      .filter(value => typeof value === "string")
-      .map(value => value.trim())
-      .filter(Boolean);
-
     const { data: membership, error: membershipError } = await client
       .from("workspace_memberships")
       .select("workspace_id,role,status")
