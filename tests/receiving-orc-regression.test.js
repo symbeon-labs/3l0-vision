@@ -123,3 +123,49 @@ test("adaptador de captura não pode sobrescrever o marcador nem o contexto de r
   assert.equal(output.observation.context.capture_method, "test-adapter");
   assert.deepEqual(output.observation.context.receiving, fixture.receiving);
 });
+
+import { buildResolutionContext } from "../api/v1/resolve.js";
+
+test("adaptador real da API preserva documento, observação física e operação no contexto ORC", () => {
+  const documentLine = { gtin: "789000000004", quantity: 1, unit: "UN", description: "Produto X 500 ml" };
+  const physicalObservation = { barcode: "789000000004", quantity_observed: 1, unit_observed: "UN", visible_text: "Produto X 500 ml" };
+  const context = buildResolutionContext({
+    operation: "receive_goods",
+    receivingInput: { document_line: documentLine, physical_observation: physicalObservation },
+    receivingDocumentLine: documentLine,
+    receivingPhysicalObservation: physicalObservation,
+    requestId: "req-test",
+    userId: "user-test",
+    workspaceId: "workspace-test",
+    workspaceRole: "operator"
+  });
+
+  assert.equal(context.operation, "receive_goods");
+  assert.deepEqual(context.receiving.document_line, documentLine);
+  assert.deepEqual(context.receiving.physical_observation, physicalObservation);
+  assert.ok(Array.isArray(context.receiving.catalog_candidates));
+  assert.ok(context.receiving.catalog_candidates.some((candidate) => candidate.entity_id === "product_demo_001"));
+});
+
+test("adaptador real não inventa contexto de recebimento ausente; resolver deve abster-se", async () => {
+  const context = buildResolutionContext({
+    operation: "receive_goods",
+    receivingInput: null,
+    requestId: "req-missing",
+    userId: "user-test",
+    workspaceId: "workspace-test",
+    workspaceRole: "operator"
+  });
+  assert.equal(context.operation, "receive_goods");
+  assert.equal("receiving" in context, false);
+
+  const request = createResolutionRequest({
+    resolutionId: "res-missing-context",
+    question: "receiving",
+    entities: [{ entity_id: "product_demo_001", identifiers: [{ scheme: "ean", value: "789000000004" }] }],
+    observations: [{ identifiers: [{ scheme: "ean", value: "789000000004" }] }],
+    context
+  });
+  const result = deterministicResolver(request);
+  assert.equal(result.status, "REVIEW_REQUIRED");
+});
