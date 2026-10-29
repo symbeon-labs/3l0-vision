@@ -183,6 +183,7 @@ The initial foundation now includes the ORC integration contract, design-token s
 ## Workspace onboarding and pilot
 
 - [Workspace onboarding and Case 01 pilot](docs/pilot/workspace-onboarding-case-01.md) — repository boundaries, business-profile onboarding, workspace/membership roles, security gates and pilot success criteria.
+- [Invite-only access](docs/invite-only-access.md) — contract-scoped access policy, required Supabase controls, and release acceptance tests. Self-service registration/workspace creation must remain disabled until the invitation lifecycle is implemented and verified.
 
 ## Product vision
 
